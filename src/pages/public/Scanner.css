@@ -1,0 +1,234 @@
+.public-scanner-page {
+  min-height: 100vh;
+  padding: 70px 7% 90px;
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(37, 99, 235, 0.1),
+      transparent 35%
+    ),
+    #f8fafc;
+}
+
+.public-scanner-hero {
+  max-width: 850px;
+  margin: 0 auto 45px;
+  text-align: center;
+}
+
+.public-scanner-badge {
+  display: inline-flex;
+  padding: 9px 15px;
+  border-radius: 999px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.public-scanner-hero h1 {
+  margin: 20px 0 14px;
+  color: #0f172a;
+  font-size: clamp(38px, 6vw, 64px);
+  line-height: 1.05;
+}
+
+.public-scanner-hero p {
+  max-width: 700px;
+  margin: 0 auto;
+  color: #64748b;
+  font-size: 19px;
+  line-height: 1.7;
+}
+
+.public-scanner-toolbar {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  max-width: 900px;
+  margin: 0 auto 35px;
+}
+
+.public-scanner-toolbar input,
+.public-scanner-toolbar select {
+  padding: 14px 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 13px;
+  background: #ffffff;
+  color: #0f172a;
+  font: inherit;
+  outline: none;
+}
+
+.public-scanner-toolbar input {
+  width: min(100%, 430px);
+}
+
+.public-scanner-toolbar select {
+  min-width: 190px;
+}
+
+.public-scanner-toolbar input:focus,
+.public-scanner-toolbar select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.public-scanner-grid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(290px, 1fr)
+  );
+  gap: 24px;
+  max-width: 1250px;
+  margin: 0 auto;
+}
+
+.public-scanner-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 310px;
+  padding: 28px;
+  border: 1px solid #dbe3ee;
+  border-radius: 22px;
+  background: #ffffff;
+  box-shadow: 0 14px 35px rgba(15, 23, 42, 0.07);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.public-scanner-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 22px 45px rgba(15, 23, 42, 0.12);
+}
+
+.public-scanner-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.public-scanner-icon {
+  width: 50px;
+  height: 50px;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+  background: #eff6ff;
+  font-size: 24px;
+}
+
+.public-scanner-featured {
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.public-scanner-card h2 {
+  margin: 22px 0 13px;
+  color: #0f172a;
+  font-size: 25px;
+}
+
+.public-scanner-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.public-scanner-meta span {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #4338ca;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.public-scanner-description {
+  flex: 1;
+  margin: 20px 0 24px;
+  color: #64748b;
+  line-height: 1.7;
+}
+
+.public-scanner-open-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  padding: 14px 18px;
+  border: 0;
+  border-radius: 13px;
+  background: #2563eb;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.public-scanner-open-button:hover {
+  background: #1d4ed8;
+}
+
+.public-scanner-button-disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+}
+
+.public-scanner-empty {
+  max-width: 750px;
+  margin: 70px auto;
+  padding: 55px 30px;
+  border: 1px solid #e2e8f0;
+  border-radius: 24px;
+  background: #ffffff;
+  text-align: center;
+  box-shadow: 0 15px 35px rgba(15, 23, 42, 0.06);
+}
+
+.public-scanner-empty-icon {
+  font-size: 52px;
+}
+
+.public-scanner-empty h1,
+.public-scanner-empty h2 {
+  margin: 18px 0 10px;
+  color: #0f172a;
+}
+
+.public-scanner-empty p {
+  color: #64748b;
+  line-height: 1.7;
+}
+
+.public-scanner-loading {
+  min-height: 70vh;
+  display: grid;
+  place-items: center;
+  padding: 40px;
+  color: #475569;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+@media (max-width: 700px) {
+  .public-scanner-page {
+    padding: 50px 18px 70px;
+  }
+
+  .public-scanner-toolbar {
+    flex-direction: column;
+  }
+
+  .public-scanner-toolbar input,
+  .public-scanner-toolbar select {
+    width: 100%;
+  }
+}

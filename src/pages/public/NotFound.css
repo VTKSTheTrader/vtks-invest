@@ -1,0 +1,138 @@
+.notfound-page {
+  min-height: calc(100vh - 88px);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  padding: 40px 20px;
+
+  background:
+    radial-gradient(circle at top right,
+      rgba(37,99,235,.08),
+      transparent 35%),
+    #f8fafc;
+}
+
+.notfound-card {
+  width: min(650px,100%);
+  padding: 60px 40px;
+
+  text-align: center;
+
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 28px;
+
+  box-shadow: 0 24px 60px rgba(15,23,42,.08);
+}
+
+.notfound-badge {
+  display: inline-block;
+
+  padding: 9px 18px;
+  margin-bottom: 22px;
+
+  border-radius: 999px;
+
+  background: #dbeafe;
+  color: #2563eb;
+
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.notfound-card h1 {
+  margin: 0;
+
+  color: #2563eb;
+
+  font-size: 110px;
+  line-height: 1;
+  font-weight: 900;
+}
+
+.notfound-card h2 {
+  margin: 20px 0 16px;
+
+  color: #0f172a;
+
+  font-size: 40px;
+}
+
+.notfound-card p {
+  max-width: 500px;
+  margin: auto;
+
+  color: #64748b;
+
+  font-size: 17px;
+  line-height: 1.8;
+}
+
+.notfound-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+
+  margin-top: 40px;
+}
+
+.primary-btn,
+.secondary-btn {
+  padding: 15px 28px;
+
+  border-radius: 14px;
+
+  text-decoration: none;
+  font-weight: 800;
+
+  transition: .25s;
+}
+
+.primary-btn {
+  background: #2563eb;
+  color: #fff;
+}
+
+.primary-btn:hover {
+  background: #1d4ed8;
+  transform: translateY(-2px);
+}
+
+.secondary-btn {
+  background: #fff;
+  color: #2563eb;
+
+  border: 1px solid #2563eb;
+}
+
+.secondary-btn:hover {
+  background: #eff6ff;
+  transform: translateY(-2px);
+}
+
+@media (max-width:768px){
+
+.notfound-card{
+padding:40px 24px;
+}
+
+.notfound-card h1{
+font-size:80px;
+}
+
+.notfound-card h2{
+font-size:30px;
+}
+
+.notfound-buttons{
+flex-direction:column;
+}
+
+.primary-btn,
+.secondary-btn{
+width:100%;
+}
+
+}

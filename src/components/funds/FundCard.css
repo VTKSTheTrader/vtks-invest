@@ -1,0 +1,205 @@
+.fund-card {
+  width: 100%;
+  height: 500px;
+  min-height: 500px;
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  padding: 28px;
+  background: #ffffff;
+  border: 1px solid #dbe3ee;
+  border-radius: 22px;
+  box-shadow: 0 14px 35px rgba(15, 23, 42, 0.06);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.fund-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.1);
+}
+
+.fund-card-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.fund-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.fund-title-area {
+  min-width: 0;
+}
+
+.fund-title-area h2 {
+  margin: 0 0 4px;
+  color: #0f172a;
+  font-size: 28px;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+.fund-title-area p {
+  margin: 0;
+  color: #64748b;
+  font-size: 16px;
+}
+
+.fund-status {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 8px 14px;
+  border-radius: 999px;
+
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.status-active {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.status-target {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.status-booked {
+  background: #ccfbf1;
+  color: #0f766e;
+}
+
+.status-loss {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.status-cancelled {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.fund-values-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px 30px;
+}
+
+.fund-value {
+  min-width: 0;
+}
+
+.fund-value span {
+  display: block;
+  margin-bottom: 4px;
+  color: #64748b;
+  font-size: 15px;
+}
+
+.fund-value strong {
+  display: block;
+  color: #0f172a;
+  font-size: 21px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.fund-value .fund-profit {
+  color: #16a34a;
+}
+
+.fund-value .fund-loss {
+  color: #dc2626;
+}
+
+.fund-resources {
+  min-height: 58px;
+  margin-top: 28px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.fund-resource-available {
+  color: #2563eb;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.fund-resource-placeholder {
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.fund-details-button {
+  width: fit-content;
+  min-width: 145px;
+  box-sizing: border-box;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-top: 24px;
+  padding: 14px 19px;
+
+  background: #2563eb;
+  color: #ffffff;
+  text-decoration: none;
+
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 800;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.fund-details-button:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 600px) {
+  .fund-card {
+    height: auto;
+    min-height: 500px;
+    padding: 22px;
+  }
+
+  .fund-card-header {
+    flex-direction: column;
+  }
+
+  .fund-values-grid {
+    gap: 20px;
+  }
+
+  .fund-title-area h2 {
+    font-size: 24px;
+  }
+
+  .fund-value strong {
+    font-size: 19px;
+  }
+}

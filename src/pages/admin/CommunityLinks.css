@@ -1,0 +1,60 @@
+.community-links-page { width: 100%; }
+.community-stats-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 16px; margin: 20px 0; }
+.community-stat-card { display:flex; align-items:center; gap:14px; min-height:110px; padding:20px; border:1px solid var(--border-color,#e5e7eb); border-radius:14px; background:var(--card-bg,#fff); box-shadow:0 6px 18px rgba(15,23,42,.05); }
+.community-stat-icon { display:grid; width:46px; height:46px; place-items:center; border-radius:12px; background:rgba(37,99,235,.1); font-size:22px; }
+.community-stat-card p,.community-stat-card h3 { margin:0; }
+.community-stat-card p { color:var(--muted-text,#64748b); font-size:14px; }
+.community-stat-card h3 { margin-top:5px; font-size:26px; }
+.admin-card { border:1px solid var(--border-color,#e5e7eb); border-radius:14px; background:var(--card-bg,#fff); box-shadow:0 6px 18px rgba(15,23,42,.05); }
+.community-toolbar-card { margin-bottom:20px; padding:22px; }
+.community-toolbar-top { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:20px; }
+.community-toolbar-top h2,.community-toolbar-top p { margin:0; }
+.community-toolbar-top p { margin-top:5px; color:var(--muted-text,#64748b); }
+.community-add-btn,.community-clear-btn,.community-action-btn,.community-status-btn,.community-pagination button { border:0; border-radius:9px; font:inherit; cursor:pointer; transition:.2s ease; }
+.community-add-btn { padding:11px 16px; background:#2563eb; color:#fff; font-weight:700; }
+.community-add-btn:hover { transform:translateY(-1px); background:#1d4ed8; }
+.community-filters { display:grid; grid-template-columns:minmax(220px,2fr) repeat(3,minmax(140px,1fr)) auto; gap:12px; align-items:end; }
+.community-search-box,.community-filter-field { display:flex; flex-direction:column; gap:7px; }
+.community-search-box label,.community-filter-field label { font-size:13px; font-weight:700; }
+.community-search-box input,.community-filter-field select { width:100%; min-height:42px; padding:9px 11px; border:1px solid var(--border-color,#dbe1ea); border-radius:9px; background:var(--input-bg,#fff); color:inherit; outline:none; }
+.community-search-box input:focus,.community-filter-field select:focus { border-color:#2563eb; box-shadow:0 0 0 3px rgba(37,99,235,.12); }
+.community-clear-btn { min-height:42px; padding:10px 14px; background:#eef2f7; color:#334155; font-weight:700; }
+.community-table-card { overflow:hidden; }
+.community-table-wrap { overflow-x:auto; }
+.community-table { width:100%; border-collapse:collapse; min-width:980px; }
+.community-table th,.community-table td { padding:15px 16px; border-bottom:1px solid var(--border-color,#e5e7eb); text-align:left; vertical-align:middle; }
+.community-table th { background:rgba(148,163,184,.08); color:var(--muted-text,#64748b); font-size:12px; letter-spacing:.04em; text-transform:uppercase; }
+.community-title-cell { display:flex; align-items:flex-start; gap:11px; min-width:250px; }
+.community-platform-icon { display:grid; width:38px; height:38px; flex:0 0 38px; place-items:center; border-radius:10px; background:rgba(37,99,235,.1); }
+.community-title-line { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.community-title-cell p { max-width:340px; margin:5px 0 0; color:var(--muted-text,#64748b); font-size:13px; line-height:1.45; }
+.community-featured,.community-platform-badge,.community-access-badge { display:inline-flex; align-items:center; border-radius:999px; padding:5px 9px; font-size:12px; font-weight:700; white-space:nowrap; }
+.community-featured { background:#fff7d6; color:#9a6700; }
+.community-platform-badge { background:#eaf2ff; color:#1d4ed8; }
+.community-access-badge { background:#eef2f7; color:#334155; }
+.community-access-badge.access-public { background:#e8f7ed; color:#176b35; }
+.community-access-badge.access-subscriber,.community-access-badge.access-community { background:#ede9fe; color:#6d28d9; }
+.community-access-badge.access-private { background:#feecec; color:#b42318; }
+.community-status-btn { min-width:90px; padding:7px 10px; font-size:12px; font-weight:800; }
+.community-status-btn.is-active { background:#e8f7ed; color:#176b35; }
+.community-status-btn.is-inactive { background:#eef2f7; color:#64748b; }
+.community-status-btn:disabled,.community-action-btn:disabled,.community-pagination button:disabled { cursor:not-allowed; opacity:.55; }
+.community-open-link { color:#2563eb; font-weight:700; text-decoration:none; }
+.community-open-link:hover { text-decoration:underline; }
+.community-actions { display:flex; gap:8px; }
+.community-action-btn { padding:7px 11px; font-size:13px; font-weight:700; }
+.community-action-btn.edit { background:#eaf2ff; color:#1d4ed8; }
+.community-action-btn.delete { background:#feecec; color:#b42318; }
+.community-state { display:grid; min-height:290px; place-items:center; align-content:center; gap:10px; padding:35px; text-align:center; }
+.community-state h3,.community-state p { margin:0; }
+.community-state p { color:var(--muted-text,#64748b); }
+.community-empty-icon { font-size:38px; }
+.community-spinner { width:36px; height:36px; border:4px solid #dbeafe; border-top-color:#2563eb; border-radius:50%; animation:community-spin .8s linear infinite; }
+@keyframes community-spin { to { transform:rotate(360deg); } }
+.community-pagination { display:flex; align-items:center; justify-content:space-between; gap:15px; padding:16px; }
+.community-pagination p { margin:0; color:var(--muted-text,#64748b); font-size:14px; }
+.community-pagination-buttons { display:flex; flex-wrap:wrap; gap:7px; }
+.community-pagination button { min-width:38px; min-height:36px; padding:7px 11px; background:#eef2f7; color:#334155; font-weight:700; }
+.community-pagination button.active { background:#2563eb; color:#fff; }
+@media (max-width:1100px) { .community-stats-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .community-filters { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media (max-width:700px) { .community-stats-grid { grid-template-columns:1fr; } .community-toolbar-top,.community-pagination { align-items:stretch; flex-direction:column; } .community-filters { grid-template-columns:1fr; } .community-add-btn,.community-clear-btn { width:100%; } .community-pagination-buttons { justify-content:center; } }

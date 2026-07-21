@@ -1,0 +1,53 @@
+.accuracy-showcase{
+    padding:90px 8%;
+    background:#f8fafc;
+}
+
+.accuracy-container{
+    max-width:1200px;
+    margin:auto;
+    text-align:center;
+}
+
+.accuracy-showcase h2{
+    font-size:46px;
+    margin:20px 0;
+    color:#0f172a;
+}
+
+.accuracy-showcase p{
+    max-width:720px;
+    margin:0 auto;
+    color:#64748b;
+    line-height:1.8;
+}
+
+.accuracy-grid{
+    margin-top:60px;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+    gap:25px;
+}
+
+.accuracy-card{
+    background:white;
+    border-radius:20px;
+    border:1px solid #e2e8f0;
+    padding:35px;
+    box-shadow:0 10px 30px rgba(0,0,0,.05);
+    transition:.3s;
+}
+
+.accuracy-card:hover{
+    transform:translateY(-8px);
+    box-shadow:0 20px 40px rgba(0,0,0,.08);
+}
+
+.accuracy-card h3{
+    color:#2563eb;
+    margin-bottom:15px;
+}
+
+.accuracy-card p{
+    font-size:15px;
+}

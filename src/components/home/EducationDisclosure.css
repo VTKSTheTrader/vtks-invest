@@ -1,0 +1,332 @@
+.education-disclosure-section {
+  padding: 38px 7% 55px;
+  background: #f8fafc;
+}
+
+.education-disclosure-container {
+  max-width: 1380px;
+  margin: 0 auto;
+  padding: 42px 48px;
+
+  border: 1px solid #dbe3ee;
+  border-radius: 28px;
+
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(37, 99, 235, 0.1),
+      transparent 36%
+    ),
+    linear-gradient(135deg, #ffffff, #f8fafc);
+
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.07);
+}
+
+.education-disclosure-header {
+  max-width: 930px;
+  margin: 0 auto 30px;
+  text-align: center;
+}
+
+.education-disclosure-badge {
+  display: inline-flex;
+  align-items: center;
+
+  margin-bottom: 14px;
+  padding: 9px 16px;
+
+  border-radius: 999px;
+  background: #dbeafe;
+  color: #1d4ed8;
+
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.education-disclosure-header h2 {
+  margin: 0 0 13px;
+
+  color: #0f172a;
+  font-size: clamp(34px, 4vw, 50px);
+  line-height: 1.12;
+  letter-spacing: -1px;
+}
+
+.education-disclosure-header p {
+  max-width: 880px;
+  margin: 0 auto;
+
+  color: #64748b;
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+.education-disclosure-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.education-disclosure-card {
+  position: relative;
+  overflow: hidden;
+
+  padding: 28px;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 22px;
+  background: #ffffff;
+
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.05);
+}
+
+.education-disclosure-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+}
+
+.positive-card::before {
+  background: #16a34a;
+}
+
+.warning-card::before {
+  background: #dc2626;
+}
+
+.education-disclosure-icon {
+  width: 46px;
+  height: 46px;
+
+  display: grid;
+  place-items: center;
+
+  margin-bottom: 14px;
+
+  border-radius: 14px;
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.positive-card .education-disclosure-icon {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.warning-card .education-disclosure-icon {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.education-disclosure-card h3 {
+  margin: 0 0 16px;
+
+  color: #0f172a;
+  font-size: 24px;
+}
+
+.education-disclosure-card ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.education-disclosure-card li {
+  position: relative;
+
+  margin-bottom: 10px;
+  padding-left: 27px;
+
+  color: #475569;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.education-disclosure-card li:last-child {
+  margin-bottom: 0;
+}
+
+.positive-card li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+
+  color: #16a34a;
+  font-weight: 900;
+}
+
+.warning-card li::before {
+  content: "×";
+  position: absolute;
+  left: 2px;
+
+  color: #dc2626;
+  font-size: 19px;
+  font-weight: 900;
+}
+
+.education-disclosure-footer {
+  margin-top: 22px;
+  padding: 25px 30px;
+
+  border-radius: 20px;
+  background: linear-gradient(135deg, #0f172a, #1e3a8a);
+  color: #ffffff;
+
+  text-align: center;
+}
+
+.education-disclosure-footer h3 {
+  margin: 0 0 10px;
+  font-size: 25px;
+}
+
+.education-disclosure-footer p {
+  max-width: 980px;
+  margin: 0 auto 13px;
+
+  color: #dbeafe;
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.education-disclosure-footer strong {
+  color: #ffffff;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.education-disclosure-note {
+  max-width: 1080px;
+  margin: 17px auto 0;
+
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.65;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .education-disclosure-section {
+    padding: 35px 22px 50px;
+  }
+
+  .education-disclosure-container {
+    padding: 34px 25px;
+  }
+
+  .education-disclosure-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .education-disclosure-section {
+    padding: 28px 16px 42px;
+  }
+
+  .education-disclosure-container {
+    padding: 29px 20px;
+    border-radius: 22px;
+  }
+
+  .education-disclosure-header {
+    margin-bottom: 24px;
+    text-align: left;
+  }
+
+  .education-disclosure-header h2 {
+    font-size: 34px;
+  }
+
+  .education-disclosure-header p {
+    font-size: 16px;
+  }
+
+  .education-disclosure-card {
+    padding: 24px 21px;
+  }
+
+  .education-disclosure-footer {
+    padding: 24px 21px;
+    text-align: left;
+  }
+
+  .education-disclosure-note {
+    text-align: left;
+  }
+}
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
+@media (max-width: 430px) {
+
+  .education-disclosure-section {
+    padding: 24px 12px 36px;
+  }
+
+  .education-disclosure-container {
+    padding: 24px 16px;
+    border-radius: 18px;
+  }
+
+  .education-disclosure-badge {
+    padding: 7px 12px;
+    font-size: 12px;
+  }
+
+  .education-disclosure-header h2 {
+    font-size: 28px;
+    line-height: 1.2;
+  }
+
+  .education-disclosure-header p {
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .education-disclosure-card {
+    padding: 20px 16px;
+    border-radius: 18px;
+  }
+
+  .education-disclosure-card h3 {
+    font-size: 20px;
+  }
+
+  .education-disclosure-card li {
+    font-size: 14px;
+    line-height: 1.55;
+    padding-left: 24px;
+  }
+
+  .education-disclosure-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    margin-bottom: 12px;
+  }
+
+  .education-disclosure-footer {
+    padding: 20px 16px;
+    border-radius: 18px;
+  }
+
+  .education-disclosure-footer h3 {
+    font-size: 21px;
+  }
+
+  .education-disclosure-footer p,
+  .education-disclosure-footer strong {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .education-disclosure-note {
+    margin-top: 14px;
+    font-size: 11px;
+    line-height: 1.6;
+  }
+}

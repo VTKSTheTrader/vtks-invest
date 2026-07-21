@@ -1,0 +1,24 @@
+.stat-card-admin{
+    background:#ffffff;
+    border-radius:18px;
+    padding:28px;
+    border:1px solid #e2e8f0;
+    box-shadow:0 10px 25px rgba(15,23,42,.05);
+    transition:.25s;
+}
+
+.stat-card-admin:hover{
+    transform:translateY(-5px);
+    box-shadow:0 18px 35px rgba(15,23,42,.08);
+}
+
+.stat-card-admin h2{
+    font-size:38px;
+    margin-bottom:10px;
+    font-weight:700;
+}
+
+.stat-card-admin p{
+    color:#64748b;
+    font-size:16px;
+}

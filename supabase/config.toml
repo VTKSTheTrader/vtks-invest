@@ -1,0 +1,2 @@
+[functions.refresh-cmp]
+verify_jwt = false

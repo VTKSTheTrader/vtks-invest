@@ -1,0 +1,13 @@
+.empty-state{
+    background:white;
+    border:1px dashed #cbd5e1;
+    border-radius:18px;
+    padding:50px;
+    text-align:center;
+    color:#64748b;
+}
+
+.empty-state h3{
+    color:#0f172a;
+    margin-bottom:10px;
+}

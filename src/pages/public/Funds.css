@@ -1,0 +1,184 @@
+/* ==========================================================
+   VTKS FUND PAGE
+========================================================== */
+
+.funds-page {
+  min-height: 100vh;
+  background: #f8fafc;
+  padding: 40px 24px 70px;
+}
+
+/* ==========================================================
+   COMMON CONTAINER
+========================================================== */
+
+.funds-hero,
+.funds-content {
+  width: 100%;
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+}
+
+/* ==========================================================
+   HERO
+========================================================== */
+
+.funds-hero {
+  margin-bottom: 36px;
+  padding: 60px;
+  border-radius: 32px;
+  background: linear-gradient(
+    135deg,
+    #111b35 0%,
+    #284596 100%
+  );
+  color: #fff;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.16);
+}
+
+.funds-hero-content {
+  max-width: 900px;
+}
+
+.funds-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  margin-bottom: 22px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.funds-hero h1 {
+  margin: 0;
+  font-size: 72px;
+  line-height: 1.05;
+  font-weight: 900;
+  letter-spacing: -2px;
+}
+
+.funds-hero p {
+  margin-top: 22px;
+  max-width: 900px;
+  color: #dbeafe;
+  font-size: 21px;
+  line-height: 1.8;
+}
+
+/* ==========================================================
+   CONTENT
+========================================================== */
+
+.funds-content {
+  overflow: visible;
+}
+
+.funds-content > * {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Images */
+
+.funds-content img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ==========================================================
+   TABLET
+========================================================== */
+
+@media (max-width: 1200px) {
+
+  .funds-page {
+    padding: 32px 20px 60px;
+  }
+
+  .funds-hero {
+    padding: 50px;
+  }
+
+  .funds-hero h1 {
+    font-size: 56px;
+  }
+
+  .funds-hero p {
+    font-size: 18px;
+  }
+
+}
+
+/* ==========================================================
+   MOBILE
+========================================================== */
+
+@media (max-width: 768px) {
+
+  .funds-page {
+    padding: 18px 14px 40px;
+  }
+
+  .funds-hero {
+    padding: 34px 24px;
+    border-radius: 22px;
+    margin-bottom: 24px;
+  }
+
+  .funds-hero-badge {
+    font-size: 13px;
+    padding: 8px 14px;
+  }
+
+  .funds-hero h1 {
+    font-size: 38px;
+    letter-spacing: -1px;
+  }
+
+  .funds-hero p {
+    font-size: 16px;
+    line-height: 1.65;
+  }
+
+  .funds-content {
+    overflow-x: auto;
+  }
+
+}
+
+/* ==========================================================
+   SMALL MOBILE
+========================================================== */
+
+@media (max-width: 480px) {
+
+  .funds-page {
+    padding: 14px 10px 30px;
+  }
+
+  .funds-hero {
+    padding: 24px 18px;
+    border-radius: 18px;
+  }
+
+  .funds-hero h1 {
+    font-size: 30px;
+  }
+
+  .funds-hero p {
+    font-size: 15px;
+  }
+
+  .funds-hero-badge {
+    font-size: 12px;
+    padding: 7px 12px;
+  }
+
+}

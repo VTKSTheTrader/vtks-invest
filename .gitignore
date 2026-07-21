@@ -10,6 +10,11 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+
+# Ignore environment files
+.env
+.env.local
+
 *.local
 
 # Editor directories and files
@@ -22,3 +27,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+.env.import
+data/*.csv
+.vercel
+.env*
