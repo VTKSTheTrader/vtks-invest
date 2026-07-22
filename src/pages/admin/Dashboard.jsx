@@ -8,6 +8,8 @@ import { getResources } from "../../services/libraryService";
 import { getScanners } from "../../services/scannerService";
 import { getHoldings } from "../../services/holdingService";
 
+import "./Dashboard.css";
+
 export default function Dashboard() {
   const [stats, setStats] = useState({
     holdings: [],
@@ -26,12 +28,13 @@ export default function Dashboard() {
     try {
       setLoading(true);
 
-      const [holdings, members, resources, scanners] = await Promise.all([
-        getHoldings(),
-        getMembers(),
-        getResources(),
-        getScanners(),
-      ]);
+      const [holdings, members, resources, scanners] =
+        await Promise.all([
+          getHoldings(),
+          getMembers(),
+          getResources(),
+          getScanners(),
+        ]);
 
       setStats({
         holdings: holdings || [],
@@ -40,35 +43,31 @@ export default function Dashboard() {
         scanners: scanners || [],
       });
     } catch (error) {
-      console.error("Dashboard Error:", error);
-      alert("Failed to load admin dashboard");
+      console.error(error);
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) {
-    return (
-      <PageHeader
-        title="VTKS Admin Dashboard"
-        subtitle="Loading dashboard..."
-      />
-    );
-  }
-
   return (
-    <>
+    <section className="admin-dashboard-page">
       <PageHeader
         title="VTKS Admin Dashboard"
-        subtitle="Welcome back VTKS 👋"
+        subtitle={
+          loading
+            ? "Loading dashboard..."
+            : "Welcome back, VTKS 👋"
+        }
       />
 
-      <DashboardStats
-        holdings={stats.holdings}
-        members={stats.members}
-        resources={stats.resources}
-        scanners={stats.scanners}
-      />
-    </>
+      {!loading && (
+        <DashboardStats
+          holdings={stats.holdings}
+          members={stats.members}
+          resources={stats.resources}
+          scanners={stats.scanners}
+        />
+      )}
+    </section>
   );
 }

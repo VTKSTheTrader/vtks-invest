@@ -1,0 +1,6 @@
+.admin-dashboard-page{
+display:flex;
+flex-direction:column;
+gap:28px;
+min-width:0;
+}

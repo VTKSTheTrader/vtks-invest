@@ -6,6 +6,8 @@ import DataTable from "../../components/admin/DataTable";
 import MemberModal from "../../components/admin/modals/MemberModal";
 import Pagination from "../../components/common/Pagination";
 
+import "./Members.css";
+
 import {
   getMembers,
   addMember,
@@ -713,33 +715,17 @@ export default function Members() {
     },
   ];
 
-  const filterStyle = {
-    minHeight: "48px",
-    padding: "11px 13px",
-    border: "1px solid #cbd5e1",
-    borderRadius: "10px",
-    background: "#ffffff",
-    boxSizing: "border-box",
-  };
-
   const clearFilters = () => {
     setSearch("");
     setPlanFilter("All");
     setStatusFilter("All");
-
-    setFromDate(
-      currentMonthRange.from
-    );
-
-    setToDate(
-      currentMonthRange.to
-    );
-
+    setFromDate(currentMonthRange.from);
+    setToDate(currentMonthRange.to);
     setCurrentPage(1);
   };
 
   return (
-    <>
+    <section className="members-page">
       <PageHeader
         title="VTKS Members"
         subtitle="Manage subscribers, payments and membership access from one dashboard."
@@ -756,250 +742,135 @@ export default function Members() {
       />
 
       {loading ? (
-        <p>Loading members...</p>
+        <div className="members-loading">Loading members...</div>
       ) : (
         <>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns:
-                "repeat(auto-fit, minmax(190px, 1fr))",
-              gap: "20px",
-              marginBottom: "30px",
-            }}
-          >
-            <div className="admin-card">
-              <h2>{members.length}</h2>
-              <p>Total Members</p>
-            </div>
+          <div className="members-stats-grid">
+            <article className="members-stat-card">
+              <strong>{members.length}</strong>
+              <span>Total Members</span>
+            </article>
 
-            <div className="admin-card">
-              <h2>{totalActive}</h2>
-              <p>Active Members</p>
-            </div>
+            <article className="members-stat-card">
+              <strong>{totalActive}</strong>
+              <span>Active Members</span>
+            </article>
 
-            <div className="admin-card">
-              <h2>
-                {totalExpiringSoon}
-              </h2>
-              <p>Expiring Soon</p>
-            </div>
+            <article className="members-stat-card">
+              <strong>{totalExpiringSoon}</strong>
+              <span>Expiring Soon</span>
+            </article>
 
-            <div className="admin-card">
-              <h2>{totalExpired}</h2>
-              <p>Expired Members</p>
-            </div>
+            <article className="members-stat-card">
+              <strong>{totalExpired}</strong>
+              <span>Expired Members</span>
+            </article>
 
-            <div className="admin-card">
-              <h2>{totalAnnual}</h2>
-              <p>Annual Plans</p>
-            </div>
+            <article className="members-stat-card">
+              <strong>{totalAnnual}</strong>
+              <span>Annual Plans</span>
+            </article>
           </div>
 
-          <h2
-            style={{
-              marginBottom: "15px",
-            }}
-          >
-            Revenue Tracker
-          </h2>
+          <h2 className="members-section-title">Revenue Tracker</h2>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns:
-                "repeat(auto-fit, minmax(210px, 1fr))",
-              gap: "20px",
-              marginBottom: "25px",
-            }}
-          >
-            <div className="admin-card">
-              <h2>
-                ₹
-                {lifetimeRevenue.toLocaleString(
-                  "en-IN"
-                )}
-              </h2>
-              <p>Lifetime Revenue</p>
-            </div>
+          <div className="members-revenue-grid">
+            <article className="members-revenue-card">
+              <strong>₹{lifetimeRevenue.toLocaleString("en-IN")}</strong>
+              <span>Lifetime Revenue</span>
+            </article>
 
-            <div className="admin-card">
-              <h2>
-                ₹
-                {settledRevenue.toLocaleString(
-                  "en-IN"
-                )}
-              </h2>
-              <p>Settled Revenue</p>
-            </div>
+            <article className="members-revenue-card">
+              <strong>₹{settledRevenue.toLocaleString("en-IN")}</strong>
+              <span>Settled Revenue</span>
+            </article>
 
-            <div className="admin-card">
-              <h2>
-                ₹
-                {pendingRevenue.toLocaleString(
-                  "en-IN"
-                )}
-              </h2>
-              <p>Pending Revenue</p>
-            </div>
+            <article className="members-revenue-card">
+              <strong>₹{pendingRevenue.toLocaleString("en-IN")}</strong>
+              <span>Pending Revenue</span>
+            </article>
 
-            <div className="admin-card">
-              <h2>
-                ₹
-                {customRevenue.toLocaleString(
-                  "en-IN"
-                )}
-              </h2>
-              <p>Custom Date Revenue</p>
-            </div>
+            <article className="members-revenue-card">
+              <strong>₹{customRevenue.toLocaleString("en-IN")}</strong>
+              <span>Custom Date Revenue</span>
+            </article>
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              gap: "15px",
-              marginBottom: "25px",
-              flexWrap: "wrap",
-              alignItems: "center",
-            }}
-          >
+          <div className="members-filter-panel">
             <input
+              className="members-date-input"
               type="date"
               value={fromDate}
-              onChange={(event) =>
-                setFromDate(
-                  event.target.value
-                )
-              }
-              style={filterStyle}
+              onChange={(event) => setFromDate(event.target.value)}
+              aria-label="Revenue start date"
             />
 
             <input
+              className="members-date-input"
               type="date"
               value={toDate}
-              onChange={(event) =>
-                setToDate(
-                  event.target.value
-                )
-              }
-              style={filterStyle}
+              onChange={(event) => setToDate(event.target.value)}
+              aria-label="Revenue end date"
             />
 
             <input
+              className="members-search-input"
               type="search"
               placeholder="🔍 Search Name / Email / Mobile / TV ID..."
               value={search}
-              onChange={(event) =>
-                setSearch(
-                  event.target.value
-                )
-              }
-              style={{
-                ...filterStyle,
-                minWidth: "320px",
-                flex: "1 1 320px",
-              }}
+              onChange={(event) => setSearch(event.target.value)}
             />
 
             <select
+              className="members-filter-select"
               value={planFilter}
-              onChange={(event) =>
-                setPlanFilter(
-                  event.target.value
-                )
-              }
-              style={filterStyle}
+              onChange={(event) => setPlanFilter(event.target.value)}
             >
-              <option value="All">
-                💳 All Plans
-              </option>
-              <option value="Annual">
-                Annual
-              </option>
-              <option value="Quarterly">
-                Quarterly
-              </option>
-              <option value="Monthly">
-                Monthly
-              </option>
+              <option value="All">💳 All Plans</option>
+              <option value="Annual">Annual</option>
+              <option value="Quarterly">Quarterly</option>
+              <option value="Monthly">Monthly</option>
             </select>
 
             <select
+              className="members-filter-select"
               value={statusFilter}
-              onChange={(event) =>
-                setStatusFilter(
-                  event.target.value
-                )
-              }
-              style={filterStyle}
+              onChange={(event) => setStatusFilter(event.target.value)}
             >
-              <option value="All">
-                📌 All Status
-              </option>
-              <option value="Active">
-                Active
-              </option>
-              <option value="Expiring Soon">
-                Expiring Soon
-              </option>
-              <option value="Expired">
-                Expired
-              </option>
+              <option value="All">📌 All Status</option>
+              <option value="Active">Active</option>
+              <option value="Expiring Soon">Expiring Soon</option>
+              <option value="Expired">Expired</option>
             </select>
 
             <button
               type="button"
+              className="members-clear-button"
               onClick={clearFilters}
-              style={{
-                ...filterStyle,
-                cursor: "pointer",
-                color: "#475569",
-                fontWeight: 700,
-              }}
             >
               Clear Filters
             </button>
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              justifyContent:
-                "space-between",
-              alignItems: "center",
-              gap: "15px",
-              marginBottom: "12px",
-              color: "#64748b",
-              fontSize: "14px",
-              flexWrap: "wrap",
-            }}
-          >
+          <div className="members-results-bar">
             <span>
-              Showing{" "}
-              {firstVisibleRecord}–
-              {lastVisibleRecord} of{" "}
-              {filteredMembers.length}{" "}
-              members
+              Showing {firstVisibleRecord}–{lastVisibleRecord} of{" "}
+              {filteredMembers.length} members
             </span>
-
-            <span>
-              Page {currentPage} of{" "}
-              {totalPages}
-            </span>
+            <span>Page {currentPage} of {totalPages}</span>
           </div>
 
-          <DataTable
-            columns={columns}
-            data={paginatedMembers}
-          />
+          <div className="members-table-shell">
+            <DataTable columns={columns} data={paginatedMembers} />
+          </div>
 
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={
-              setCurrentPage
-            }
-          />
+          <div className="members-pagination-shell">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </div>
         </>
       )}
 
@@ -1010,11 +881,9 @@ export default function Members() {
             setEditingMember(null);
           }}
           onSave={handleSaveMember}
-          editingMember={
-            editingMember
-          }
+          editingMember={editingMember}
         />
       )}
-    </>
+    </section>
   );
 }
