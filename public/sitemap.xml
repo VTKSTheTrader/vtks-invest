@@ -3,42 +3,42 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
-<loc>https://YOURDOMAIN.com/</loc>
+<loc>https://vtks-hub.vercel.app/</loc>
 <priority>1.0</priority>
 </url>
 
 <url>
-<loc>https://YOURDOMAIN.com/funds</loc>
+<loc>https://vtks-hub.vercel.app/funds</loc>
 <priority>0.9</priority>
 </url>
 
 <url>
-<loc>https://YOURDOMAIN.com/indicators</loc>
+<loc>https://vtks-hub.vercel.app/indicators</loc>
 <priority>0.9</priority>
 </url>
 
 <url>
-<loc>https://YOURDOMAIN.com/pricing</loc>
+<loc>https://vtks-hub.vercel.app/pricing</loc>
 <priority>0.9</priority>
 </url>
 
 <url>
-<loc>https://YOURDOMAIN.com/resources</loc>
+<loc>https://vtks-hub.vercel.app/resources</loc>
 <priority>0.8</priority>
 </url>
 
 <url>
-<loc>https://YOURDOMAIN.com/accuracy</loc>
+<loc>https://vtks-hub.vercel.app/accuracy</loc>
 <priority>0.8</priority>
 </url>
 
 <url>
-<loc>https://YOURDOMAIN.com/about</loc>
+<loc>https://vtks-hub.vercel.app/about</loc>
 <priority>0.7</priority>
 </url>
 
 <url>
-<loc>https://YOURDOMAIN.com/contact</loc>
+<loc>https://vtks-hub.vercel.app/contact</loc>
 <priority>0.7</priority>
 </url>
 
