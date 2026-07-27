@@ -13,7 +13,12 @@ import {
 
 import Pagination from "../../components/common/Pagination";
 import "./Accuracy.css";
-
+import SEO from "../../components/common/SEO";
+<SEO
+  title="VTKS Performance | Accuracy "
+  description="Trade with Structure, Invest with Conviction ."
+  canonical="https://vtks-hub.vercel.app/accuracy"
+/>
 const ITEMS_PER_PAGE = 6;
 const AUTO_REFRESH_INTERVAL = 60 * 1000;
 

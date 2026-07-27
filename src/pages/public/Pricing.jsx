@@ -2,7 +2,13 @@ import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { loadSettings } from "../../services/settingsService";
 import "./Pricing.css";
+import SEO from "../../components/common/SEO";
 
+<SEO
+  title="VTKS Pricing | Membership Plans"
+  description="Choose the VTKS membership plan that fits your trading journey."
+  canonical="https://vtks-hub.vercel.app/pricing"
+/>
 const PLAN_FEATURES = {
   Monthly: [
     "VTKS indicator access",

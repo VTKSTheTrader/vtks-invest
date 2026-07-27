@@ -1,6 +1,11 @@
 import { Link } from "react-router-dom";
 import "./Contact.css";
+import SEO from "../../components/common/SEO";
+<>
+ 
 
+  {/* Existing page content */}
+</>
 const contactDetails = {
   email: "thetrader.ks@gmail.com",
   phone: "+91 8516884030",
@@ -10,6 +15,12 @@ const contactDetails = {
 };
 
 export default function Contact() {
+   <SEO
+    title="VTKS Hub | Contact US."
+    description="Professional stock market education platform focused on technical analysis, swing trading, investment research, and disciplined trading."
+    keywords="VTKS, Swing Trading, Technical Analysis, Stock Market, VTKS Contact"
+    canonical="https://vtks-hub.vercel.app/contact"
+  />
   const handleSubmit = (event) => {
     event.preventDefault();
 

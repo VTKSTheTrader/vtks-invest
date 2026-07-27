@@ -9,6 +9,7 @@ export default function Funds() {
         title="VTKS Public Fund | Stock Portfolio & Investment Ideas"
         description="Explore the VTKS Public Fund featuring structured investment ideas, portfolio tracking, trade performance, and disciplined stock market analysis."
         keywords="VTKS Fund, public portfolio, investment ideas, stock portfolio, swing trading, technical analysis, portfolio tracking, Indian stock market"
+         canonical="https://vtks-hub.vercel.app/funds"
       />
 
       <main className="funds-page">

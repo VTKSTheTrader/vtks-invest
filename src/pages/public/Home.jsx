@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
-import SEO from "../../components/common/SEO";
 import EducationDisclosure from "../../components/home/EducationDisclosure";
 
 import {
@@ -19,6 +18,7 @@ const normalize = (value) =>
     .toLowerCase();
 
 export default function Home() {
+  
   const [holdings, setHoldings] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -186,12 +186,6 @@ export default function Home() {
 
   return (
     <>
-      <SEO
-        title="VTKS Hub | Structured Trading & Investment Education"
-        description="VTKS Hub is a stock market education platform for structured trading, swing trading, technical analysis, market scanners, portfolio tracking and disciplined investing."
-        keywords="VTKS, stock market education, swing trading India, technical analysis, trading indicators, market scanners, portfolio tracking, investment education"
-      />
-
       <main className="home-page">
         <section className="hero-section">
           <span className="hero-badge">
@@ -328,6 +322,7 @@ export default function Home() {
         <EducationDisclosure />
 
         <section className="latest-section">
+          
           <div className="section-title">
             <span>📊 VTKS Fund Portfolio</span>
 
@@ -403,6 +398,7 @@ export default function Home() {
                       View Trade →
                     </div>
                   </Link>
+                  
                 );
               })}
             </div>

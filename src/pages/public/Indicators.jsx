@@ -1,4 +1,5 @@
 import "./Indicators.css";
+import SEO from "../../components/common/SEO";
 
 export default function Indicators() {
   const tools = [
@@ -75,7 +76,7 @@ export default function Indicators() {
       ],
     },
   ];
-
+ 
   const targetModels = [
     {
       name: "VTKS-1",
@@ -100,6 +101,7 @@ export default function Indicators() {
   ];
 
   return (
+    
     <main className="indicators-page">
       <section className="indicators-hero">
         <span className="indicator-badge">VTKS Indicator Suite</span>
