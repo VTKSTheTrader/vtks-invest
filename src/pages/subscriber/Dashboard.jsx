@@ -21,6 +21,10 @@ import {
   getSubscriberScanners,
 } from "../../services/subscriberService";
 
+import {
+  getSubscriberCommunityLinks,
+} from "../../services/communityService";
+
 import "./Dashboard.css";
 
 const PORTFOLIO_ITEMS_PER_PAGE = 4;
@@ -35,6 +39,7 @@ export default function Dashboard() {
   const [holdings, setHoldings] = useState([]);
   const [library, setLibrary] = useState([]);
   const [scanners, setScanners] = useState([]);
+  const [communityLinks, setCommunityLinks] = useState([]);
   const [portfolioPage, setPortfolioPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
@@ -53,12 +58,17 @@ export default function Dashboard() {
         profileData.email
       );
 
-      const [holdingRows, libraryRows, scannerRows] =
-        await Promise.all([
-          getHoldings(),
-          getSubscriberLibrary(),
-          getSubscriberScanners(),
-        ]);
+      const [
+        holdingRows,
+        libraryRows,
+        scannerRows,
+        communityRows,
+      ] = await Promise.all([
+        getHoldings(),
+        getSubscriberLibrary(),
+        getSubscriberScanners(),
+        getSubscriberCommunityLinks(),
+      ]);
 
       const visibleHoldings = (holdingRows || [])
         .map(mapHoldingFromDB)
@@ -81,6 +91,7 @@ export default function Dashboard() {
       setHoldings(visibleHoldings);
       setLibrary(libraryRows || []);
       setScanners(scannerRows || []);
+      setCommunityLinks(communityRows || []);
     } catch (error) {
       console.error("Subscriber dashboard error:", error);
       setLoadError(
@@ -234,6 +245,28 @@ export default function Dashboard() {
       })
       .slice(0, DASHBOARD_PREVIEW_ITEMS);
   }, [scanners]);
+
+  const latestCommunityLinks = useMemo(() => {
+    return [...communityLinks]
+      .sort((first, second) => {
+        if (first.featured && !second.featured) return -1;
+        if (!first.featured && second.featured) return 1;
+
+        const firstOrder = Number(
+          first.sortOrder ?? first.sort_order ?? 0
+        );
+        const secondOrder = Number(
+          second.sortOrder ?? second.sort_order ?? 0
+        );
+
+        if (firstOrder !== secondOrder) {
+          return firstOrder - secondOrder;
+        }
+
+        return Number(first.id || 0) - Number(second.id || 0);
+      })
+      .slice(0, DASHBOARD_PREVIEW_ITEMS);
+  }, [communityLinks]);
 
   const getResourceUrl = (item) =>
     item.video_url ||
@@ -515,6 +548,59 @@ export default function Dashboard() {
               }))}
             />
           </section>
+
+          <section className="subscriber-community-feedback-grid">
+            <FeatureCard
+              title="📢 Community Access"
+              subtitle="Join active VTKS Telegram groups and subscriber channels."
+              emptyMessage="No community links are currently available."
+              items={latestCommunityLinks.map((item) => ({
+                id: item.id,
+                title: item.title || "VTKS Community",
+                meta: `${item.platform || "Telegram"} • ${
+                  item.description || "Subscriber Access"
+                }`,
+                url: item.url || "",
+              }))}
+            />
+
+            <article className="subscriber-feature-card subscriber-feedback-card">
+              <div className="subscriber-feature-header">
+                <div>
+                  <h2>⭐ Share Your Experience</h2>
+                  <p>
+                    Help fellow traders by sharing your VTKS
+                    learning journey.
+                  </p>
+                </div>
+              </div>
+
+              <div className="subscriber-feedback-content">
+                <div
+                  className="subscriber-feedback-stars"
+                  aria-label="Five-star feedback"
+                >
+                  ⭐⭐⭐⭐⭐
+                </div>
+
+                <p className="subscriber-feedback-description">
+                  Your feedback helps improve VTKS and inspires
+                  other traders to learn with confidence.
+                </p>
+
+                <div className="subscriber-feedback-badge">
+                  ✔ Verified Members Only
+                </div>
+
+                <Link
+                  to="/subscriber/feedback"
+                  className="subscriber-feedback-button"
+                >
+                  Share Feedback →
+                </Link>
+              </div>
+            </article>
+          </section>
         </>
       )}
 
@@ -584,9 +670,11 @@ function FeatureCard({
           <p>{subtitle}</p>
         </div>
 
-        <Link to={link} className="subscriber-small-link">
-          View All →
-        </Link>
+        {link && (
+          <Link to={link} className="subscriber-small-link">
+            View All →
+          </Link>
+        )}
       </div>
 
       {items.length === 0 ? (
