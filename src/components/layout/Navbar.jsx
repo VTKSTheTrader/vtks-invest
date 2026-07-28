@@ -97,12 +97,20 @@ export default function Navbar({ settings }) {
           )}
 
           <NavLink
-            to="/about"
-            className={getNavClass}
-            onClick={closeMenu}
-          >
-            About
-          </NavLink>
+  to="/testimonials"
+  className={getNavClass}
+  onClick={closeMenu}
+>
+  Testimonials
+</NavLink>
+
+<NavLink
+  to="/about"
+  className={getNavClass}
+  onClick={closeMenu}
+>
+  About
+</NavLink>
 
           <NavLink
             to="/contact"

@@ -28,11 +28,11 @@ import AdminMembers from "./pages/admin/Members";
 import AdminScanner from "./pages/admin/Scanner";
 import AdminLibrary from "./pages/admin/Library";
 import AdminSettings from "./pages/admin/Settings";
-
+import Testimonials from "./pages/public/Testimonials";
 import SubscriberDashboard from "./pages/subscriber/Dashboard";
 import SubscriberLibrary from "./pages/subscriber/Library";
 import SubscriberScanner from "./pages/subscriber/Scanner";
-
+import Feedback from "./pages/subscriber/Feedback";
 function App() {
   return (
     <BrowserRouter>
@@ -48,6 +48,7 @@ function App() {
           <Route path="/resources" element={<Resources />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/testimonials" element={<Testimonials />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -97,6 +98,8 @@ function App() {
             </SubscriberRoute>
           }
         />
+        
+
 
         <Route
           path="/dashboard/scanner"
@@ -105,8 +108,19 @@ function App() {
               <SubscriberScanner />
             </SubscriberRoute>
           }
+          
         />
+        <Route
+    path="/subscriber/feedback"
+    element={
+      <SubscriberRoute>
+        <Feedback />
+      </SubscriberRoute>
+    }
+  />
+
       </Routes>
+      
     </BrowserRouter>
   );
 }

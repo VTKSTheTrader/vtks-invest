@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-
+import { getApprovedTestimonials } from "../../services/testimonialService";
 import EducationDisclosure from "../../components/home/EducationDisclosure";
 
 import {
@@ -21,9 +21,12 @@ export default function Home() {
   
   const [holdings, setHoldings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [testimonials, setTestimonials] = useState([]);
+  const [testimonialsLoading, setTestimonialsLoading] = useState(true);
 
   useEffect(() => {
     loadHoldings();
+    loadTestimonials();
   }, []);
 
   const loadHoldings = async () => {
@@ -42,6 +45,25 @@ export default function Home() {
       );
     } finally {
       setLoading(false);
+    }
+  };
+
+
+  const loadTestimonials = async () => {
+    try {
+      setTestimonialsLoading(true);
+
+      const rows = await getApprovedTestimonials();
+
+      setTestimonials((rows || []).slice(0, 3));
+    } catch (error) {
+      console.error(
+        "Failed to load testimonials:",
+        error
+      );
+      setTestimonials([]);
+    } finally {
+      setTestimonialsLoading(false);
     }
   };
 
@@ -321,6 +343,66 @@ export default function Home() {
 
         <EducationDisclosure />
 
+        <section className="home-testimonials-section">
+          <div className="section-title">
+            <span>⭐ Member Experiences</span>
+
+            <h2>What Our Members Say</h2>
+
+            <p>
+              Genuine feedback from VTKS members learning
+              structured trading, technical analysis and
+              disciplined investing.
+            </p>
+          </div>
+
+          {testimonialsLoading ? (
+            <p className="home-testimonial-message">
+              Loading testimonials...
+            </p>
+          ) : testimonials.length > 0 ? (
+            <div className="home-testimonials-grid">
+              {testimonials.map((testimonial) => (
+                <article
+                  key={testimonial.id}
+                  className="home-testimonial-card"
+                >
+                  <div className="home-testimonial-rating">
+                    {"★".repeat(
+                      Number(testimonial.rating || 0)
+                    )}
+                  </div>
+
+                  <p>“{testimonial.message}”</p>
+
+                  <div className="home-testimonial-footer">
+                    <strong>
+                      {testimonial.show_name === false
+                        ? "VTKS Member"
+                        : testimonial.name ||
+                          "VTKS Member"}
+                    </strong>
+
+                    {testimonial.verified_member && (
+                      <span>Verified Member</span>
+                    )}
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p className="home-testimonial-message">
+              No approved testimonials are available yet.
+            </p>
+          )}
+
+          <div className="center-btn">
+            <Link to="/testimonials">
+              View All Testimonials →
+            </Link>
+          </div>
+        </section>
+
         <section className="latest-section">
           
           <div className="section-title">
@@ -417,4 +499,4 @@ export default function Home() {
       </main>
     </>
   );
-}
+} 
