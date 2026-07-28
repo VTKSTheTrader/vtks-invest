@@ -556,6 +556,28 @@ export default function Settings() {
               )
             }
           />
+          <CheckboxRow
+  label="Show Testimonials Page"
+  checked={settings.website.showTestimonial}
+  onChange={(checked) =>
+    update(
+      "website",
+      "showTestimonial",
+      checked
+    )
+  }
+/>
+          <CheckboxRow
+  label="Show Testimonials Page"
+  checked={settings.website.showTestimonial}
+  onChange={(checked) =>
+    update(
+      "website",
+      "showTestimonial",
+      checked
+    )
+  }
+/>
 
           <CheckboxRow
             label="Maintenance Mode"

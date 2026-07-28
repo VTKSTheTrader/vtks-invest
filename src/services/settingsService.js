@@ -49,6 +49,7 @@ export const defaultSettings = {
     showFunds: true,
     showAccuracy: true,
     showScanner: true,
+    showTestimonial: true,
     maintenanceMode: false,
   },
 
@@ -272,6 +273,11 @@ const mapFromDatabase = (row) => {
         row.show_scanner,
         defaultSettings.website.showScanner
       ),
+      showTestimonial: toBoolean(
+  row.show_testimonial,
+  defaultSettings.website.showTestimonial
+),
+
 
       maintenanceMode: toBoolean(
         row.maintenance_mode,

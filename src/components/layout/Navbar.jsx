@@ -29,6 +29,7 @@ export default function Navbar({ settings }) {
           className="mobile-menu-button"
           onClick={() => setMenuOpen((prev) => !prev)}
           aria-label="Toggle navigation menu"
+          aria-expanded={menuOpen}
         >
           {menuOpen ? "✕" : "☰"}
         </button>
@@ -88,7 +89,7 @@ export default function Navbar({ settings }) {
 
           {website.showScanner && (
             <NavLink
-             to="/resources"
+              to="/resources"
               className={getNavClass}
               onClick={closeMenu}
             >
@@ -96,21 +97,23 @@ export default function Navbar({ settings }) {
             </NavLink>
           )}
 
-          <NavLink
-  to="/testimonials"
-  className={getNavClass}
-  onClick={closeMenu}
->
-  Testimonials
-</NavLink>
+          {website.showTestimonial && (
+            <NavLink
+              to="/testimonials"
+              className={getNavClass}
+              onClick={closeMenu}
+            >
+              Testimonials
+            </NavLink>
+          )}
 
-<NavLink
-  to="/about"
-  className={getNavClass}
-  onClick={closeMenu}
->
-  About
-</NavLink>
+          <NavLink
+            to="/about"
+            className={getNavClass}
+            onClick={closeMenu}
+          >
+            About
+          </NavLink>
 
           <NavLink
             to="/contact"
