@@ -1,12 +1,23 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-import { getApprovedTestimonials } from "../../services/testimonialService";
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import {
+  Link,
+  useOutletContext,
+} from "react-router-dom";
+
 import EducationDisclosure from "../../components/home/EducationDisclosure";
 
 import {
   getHoldings,
   mapHoldingFromDB,
 } from "../../services/holdingService";
+
+import {
+  getApprovedTestimonials,
+} from "../../services/testimonialService";
 
 import "./Home.css";
 
@@ -18,16 +29,35 @@ const normalize = (value) =>
     .toLowerCase();
 
 export default function Home() {
-  
+  const { settings } = useOutletContext();
+
+  const showTestimonials = Boolean(
+    settings?.website?.showTestimonial
+  );
+
   const [holdings, setHoldings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [testimonials, setTestimonials] = useState([]);
-  const [testimonialsLoading, setTestimonialsLoading] = useState(true);
+
+  const [testimonials, setTestimonials] =
+    useState([]);
+
+  const [
+    testimonialsLoading,
+    setTestimonialsLoading,
+  ] = useState(false);
 
   useEffect(() => {
     loadHoldings();
-    loadTestimonials();
   }, []);
+
+  useEffect(() => {
+    if (showTestimonials) {
+      loadTestimonials();
+    } else {
+      setTestimonials([]);
+      setTestimonialsLoading(false);
+    }
+  }, [showTestimonials]);
 
   const loadHoldings = async () => {
     try {
@@ -43,24 +73,29 @@ export default function Home() {
         "Failed to load holdings:",
         error
       );
+
+      setHoldings([]);
     } finally {
       setLoading(false);
     }
   };
 
-
   const loadTestimonials = async () => {
     try {
       setTestimonialsLoading(true);
 
-      const rows = await getApprovedTestimonials();
+      const rows =
+        await getApprovedTestimonials();
 
-      setTestimonials((rows || []).slice(0, 3));
+      setTestimonials(
+        (rows || []).slice(0, 3)
+      );
     } catch (error) {
       console.error(
         "Failed to load testimonials:",
         error
       );
+
       setTestimonials([]);
     } finally {
       setTestimonialsLoading(false);
@@ -81,20 +116,26 @@ export default function Home() {
       "Target 3 Hit",
     ];
 
-    if (fixedStatuses.includes(manualStatus)) {
+    if (
+      fixedStatuses.includes(manualStatus)
+    ) {
       return manualStatus;
     }
 
     const cmp = Number(holding.cmp || 0);
+
     const stopLoss = Number(
       holding.stopLoss || 0
     );
+
     const target1 = Number(
       holding.target1 || 0
     );
+
     const target2 = Number(
       holding.target2 || 0
     );
+
     const target3 = Number(
       holding.target3 || 0
     );
@@ -221,9 +262,10 @@ export default function Home() {
           </h1>
 
           <p>
-            VTKS HUB combines structured trading education,
-            portfolio tracking, rule-based indicators, market
-            scanners and performance analytics in one
+            VTKS HUB combines structured trading
+            education, portfolio tracking,
+            rule-based indicators, market scanners
+            and performance analytics in one
             professional platform.
           </p>
 
@@ -250,9 +292,11 @@ export default function Home() {
             </h2>
 
             <p>
-              One platform to understand structured setups,
-              analyse performance, manage risk, scan
-              opportunities and develop long-term conviction.
+              One platform to understand
+              structured setups, analyse
+              performance, manage risk, scan
+              opportunities and develop long-term
+              conviction.
             </p>
           </div>
 
@@ -262,11 +306,14 @@ export default function Home() {
                 📊
               </div>
 
-              <h3>Portfolio Management</h3>
+              <h3>
+                Portfolio Management
+              </h3>
 
               <p>
-                Track trades with entry, CMP, targets, stop
-                loss, ROI, status and performance.
+                Track trades with entry, CMP,
+                targets, stop loss, ROI, status
+                and performance.
               </p>
             </article>
 
@@ -280,8 +327,9 @@ export default function Home() {
               </h3>
 
               <p>
-                Learn rule-based indicators for swing,
-                positional and investment frameworks.
+                Learn rule-based indicators for
+                swing, positional and investment
+                frameworks.
               </p>
             </article>
 
@@ -293,8 +341,9 @@ export default function Home() {
               <h3>Market Scanners</h3>
 
               <p>
-                Identify structured market opportunities
-                using predefined VTKS conditions.
+                Identify structured market
+                opportunities using predefined
+                VTKS conditions.
               </p>
             </article>
 
@@ -306,8 +355,9 @@ export default function Home() {
               <h3>Knowledge Library</h3>
 
               <p>
-                Learn through structured videos, PDFs,
-                recorded sessions and case studies.
+                Learn through structured videos,
+                PDFs, recorded sessions and case
+                studies.
               </p>
             </article>
 
@@ -321,8 +371,9 @@ export default function Home() {
               </h3>
 
               <p>
-                Measure returns, win rate, best trades and
-                overall framework performance.
+                Measure returns, win rate, best
+                trades and overall framework
+                performance.
               </p>
             </article>
 
@@ -334,8 +385,9 @@ export default function Home() {
               <h3>Private Community</h3>
 
               <p>
-                Discuss markets, improve analysis and grow
-                with discipline and accountability.
+                Discuss markets, improve analysis
+                and grow with discipline and
+                accountability.
               </p>
             </article>
           </div>
@@ -343,79 +395,99 @@ export default function Home() {
 
         <EducationDisclosure />
 
-        <section className="home-testimonials-section">
-          <div className="section-title">
-            <span>⭐ Member Experiences</span>
+        {showTestimonials && (
+          <section className="home-testimonials-section">
+            <div className="section-title">
+              <span>
+                ⭐ Member Experiences
+              </span>
 
-            <h2>What Our Members Say</h2>
+              <h2>
+                What Our Members Say
+              </h2>
 
-            <p>
-              Genuine feedback from VTKS members learning
-              structured trading, technical analysis and
-              disciplined investing.
-            </p>
-          </div>
-
-          {testimonialsLoading ? (
-            <p className="home-testimonial-message">
-              Loading testimonials...
-            </p>
-          ) : testimonials.length > 0 ? (
-            <div className="home-testimonials-grid">
-              {testimonials.map((testimonial) => (
-                <article
-                  key={testimonial.id}
-                  className="home-testimonial-card"
-                >
-                  <div className="home-testimonial-rating">
-                    {"★".repeat(
-                      Number(testimonial.rating || 0)
-                    )}
-                  </div>
-
-                  <p>“{testimonial.message}”</p>
-
-                  <div className="home-testimonial-footer">
-                    <strong>
-                      {testimonial.show_name === false
-                        ? "VTKS Member"
-                        : testimonial.name ||
-                          "VTKS Member"}
-                    </strong>
-
-                    {testimonial.verified_member && (
-                      <span>Verified Member</span>
-                    )}
-                  </div>
-                </article>
-              ))}
+              <p>
+                Genuine feedback from VTKS
+                members learning structured
+                trading, technical analysis and
+                disciplined investing.
+              </p>
             </div>
-          ) : (
-            <p className="home-testimonial-message">
-              No approved testimonials are available yet.
-            </p>
-          )}
 
-          <div className="center-btn">
-            <Link to="/testimonials">
-              View All Testimonials →
-            </Link>
-          </div>
-        </section>
+            {testimonialsLoading ? (
+              <p className="home-testimonial-message">
+                Loading testimonials...
+              </p>
+            ) : testimonials.length > 0 ? (
+              <div className="home-testimonials-grid">
+                {testimonials.map(
+                  (testimonial) => (
+                    <article
+                      key={testimonial.id}
+                      className="home-testimonial-card"
+                    >
+                      <div className="home-testimonial-rating">
+                        {"★".repeat(
+                          Number(
+                            testimonial.rating ||
+                              0
+                          )
+                        )}
+                      </div>
+
+                      <p>
+                        “{testimonial.message}”
+                      </p>
+
+                      <div className="home-testimonial-footer">
+                        <strong>
+                          {testimonial.show_name ===
+                          false
+                            ? "VTKS Member"
+                            : testimonial.name ||
+                              "VTKS Member"}
+                        </strong>
+
+                        {testimonial.verified_member && (
+                          <span>
+                            Verified Member
+                          </span>
+                        )}
+                      </div>
+                    </article>
+                  )
+                )}
+              </div>
+            ) : (
+              <p className="home-testimonial-message">
+                No approved testimonials are
+                available yet.
+              </p>
+            )}
+
+            <div className="center-btn">
+              <Link to="/testimonials">
+                View All Testimonials →
+              </Link>
+            </div>
+          </section>
+        )}
 
         <section className="latest-section">
-          
           <div className="section-title">
-            <span>📊 VTKS Fund Portfolio</span>
+            <span>
+              📊 VTKS Fund Portfolio
+            </span>
 
             <h2>
               Latest Portfolio Trades
             </h2>
 
             <p>
-              Discover recently published and publicly
-              revealed VTKS trades backed by structured
-              analysis and disciplined portfolio management.
+              Discover recently published and
+              publicly revealed VTKS trades backed
+              by structured analysis and
+              disciplined portfolio management.
             </p>
           </div>
 
@@ -426,8 +498,11 @@ export default function Home() {
           ) : latestTrades.length > 0 ? (
             <div className="trade-grid">
               {latestTrades.map((holding) => {
-                const roi = getReturn(holding);
-                const status = getStatus(holding);
+                const roi =
+                  getReturn(holding);
+
+                const status =
+                  getStatus(holding);
 
                 return (
                   <Link
@@ -480,13 +555,13 @@ export default function Home() {
                       View Trade →
                     </div>
                   </Link>
-                  
                 );
               })}
             </div>
           ) : (
             <p className="home-trade-message">
-              No public trades are currently available.
+              No public trades are currently
+              available.
             </p>
           )}
 
@@ -499,4 +574,4 @@ export default function Home() {
       </main>
     </>
   );
-} 
+}

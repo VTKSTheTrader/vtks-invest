@@ -9,7 +9,9 @@ import { supabase } from "../../lib/supabase";
 export default function ProtectedRoute({ children }) {
   const [checkingAuth, setCheckingAuth] =
     useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
+
+  const [isAdmin, setIsAdmin] =
+    useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -20,17 +22,39 @@ export default function ProtectedRoute({ children }) {
 
         const {
           data: { user },
-          error,
+          error: userError,
         } = await supabase.auth.getUser();
 
-        if (error) {
-          throw error;
+        if (userError) {
+          throw userError;
         }
 
-        const role =
-          user?.app_metadata?.role ||
-          user?.app_metadata?.user_role ||
-          "";
+        if (!user) {
+          if (mounted) {
+            setIsAdmin(false);
+          }
+
+          return;
+        }
+
+        const {
+          data: profile,
+          error: profileError,
+        } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .single();
+
+        if (profileError) {
+          throw profileError;
+        }
+
+        const role = String(
+          profile?.role || ""
+        )
+          .trim()
+          .toLowerCase();
 
         if (mounted) {
           setIsAdmin(role === "admin");
@@ -56,16 +80,8 @@ export default function ProtectedRoute({ children }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        const role =
-          session?.user?.app_metadata?.role ||
-          session?.user?.app_metadata?.user_role ||
-          "";
-
-        if (mounted) {
-          setIsAdmin(role === "admin");
-          setCheckingAuth(false);
-        }
+      () => {
+        checkAdminAccess();
       }
     );
 

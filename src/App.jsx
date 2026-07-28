@@ -1,15 +1,11 @@
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-} from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import SubscriberRoute from "./components/auth/SubscriberRoute";
 
 import PublicLayout from "./layouts/PublicLayout";
 import AdminLayout from "./layouts/AdminLayout";
-
+import AdminTestimonials from "./pages/admin/Testimonials";
 import Home from "./pages/public/Home";
 import Funds from "./pages/public/Funds";
 import Indicators from "./pages/public/Indicators";
@@ -25,8 +21,6 @@ import ResetPassword from "./pages/public/ResetPassword";
 import TradeDetails from "./pages/public/TradeDetails";
 import Payment from "./pages/public/Payment";
 import NotFound from "./pages/public/NotFound";
-import PublicTestimonials from "./pages/public/Testimonials";
-
 import CommunityLinks from "./pages/admin/CommunityLinks";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminHoldings from "./pages/admin/Holdings";
@@ -34,13 +28,11 @@ import AdminMembers from "./pages/admin/Members";
 import AdminScanner from "./pages/admin/Scanner";
 import AdminLibrary from "./pages/admin/Library";
 import AdminSettings from "./pages/admin/Settings";
-import AdminTestimonials from "./pages/admin/Testimonials";
-
+import PublicTestimonials from "./pages/public/Testimonials";
 import SubscriberDashboard from "./pages/subscriber/Dashboard";
 import SubscriberLibrary from "./pages/subscriber/Library";
 import SubscriberScanner from "./pages/subscriber/Scanner";
 import Feedback from "./pages/subscriber/Feedback";
-
 function App() {
   return (
     <BrowserRouter>
@@ -49,46 +41,22 @@ function App() {
         <Route element={<PublicLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/funds" element={<Funds />} />
-          <Route
-            path="/indicators"
-            element={<Indicators />}
-          />
+          <Route path="/indicators" element={<Indicators />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/payment" element={<Payment />} />
-          <Route
-            path="/accuracy"
-            element={<Accuracy />}
-          />
-          <Route
-            path="/resources"
-            element={<Resources />}
-          />
+          <Route path="/accuracy" element={<Accuracy />} />
+          <Route path="/resources" element={<Resources />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
-
-          <Route
-            path="/testimonials"
-            element={<PublicTestimonials />}
-          />
-
+          <Route  path="/testimonials"  element={<PublicTestimonials />}
+/>
           <Route path="/login" element={<Login />} />
-          <Route
-            path="/register"
-            element={<Register />}
-          />
-          <Route
-            path="/forgot-password"
-            element={<ForgotPassword />}
-          />
-          <Route
-            path="/reset-password"
-            element={<ResetPassword />}
-          />
-          <Route
-            path="/trade/:id"
-            element={<TradeDetails />}
-          />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/trade/:id" element={<TradeDetails />} />
 
+          {/* Public 404 page */}
           <Route path="*" element={<NotFound />} />
         </Route>
 
@@ -102,34 +70,13 @@ function App() {
           }
         >
           <Route index element={<AdminDashboard />} />
-          <Route
-            path="holdings"
-            element={<AdminHoldings />}
-          />
-          <Route
-            path="members"
-            element={<AdminMembers />}
-          />
-          <Route
-            path="scanner"
-            element={<AdminScanner />}
-          />
-          <Route
-            path="library"
-            element={<AdminLibrary />}
-          />
-          <Route
-            path="community-links"
-            element={<CommunityLinks />}
-          />
-          <Route
-            path="testimonials"
-            element={<AdminTestimonials />}
-          />
-          <Route
-            path="settings"
-            element={<AdminSettings />}
-          />
+          <Route path="holdings" element={<AdminHoldings />} />
+          <Route path="members" element={<AdminMembers />} />
+          <Route path="scanner" element={<AdminScanner />} />
+          <Route path="library" element={<AdminLibrary />} />
+          <Route path="settings" element={<AdminSettings />} />
+          <Route  path="community-links"  element={<CommunityLinks />}/>
+          <Route  path="testimonials" element={<AdminTestimonials />}/>
         </Route>
 
         {/* Subscriber routes */}
@@ -150,6 +97,8 @@ function App() {
             </SubscriberRoute>
           }
         />
+        
+
 
         <Route
           path="/dashboard/scanner"
@@ -158,17 +107,19 @@ function App() {
               <SubscriberScanner />
             </SubscriberRoute>
           }
+          
         />
-
         <Route
-          path="/subscriber/feedback"
-          element={
-            <SubscriberRoute>
-              <Feedback />
-            </SubscriberRoute>
-          }
-        />
+    path="/subscriber/feedback"
+    element={
+      <SubscriberRoute>
+        <Feedback />
+      </SubscriberRoute>
+    }
+  />
+
       </Routes>
+      
     </BrowserRouter>
   );
 }

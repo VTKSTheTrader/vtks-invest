@@ -427,6 +427,11 @@ const mapToDatabase = (settings) => {
       mergedSettings.website.showScanner,
       true
     ),
+    show_testimonial: toBoolean(
+  mergedSettings.website.showTestimonial,
+  true
+),
+
 
     maintenance_mode: toBoolean(
       mergedSettings.website.maintenanceMode,

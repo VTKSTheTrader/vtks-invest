@@ -2,6 +2,7 @@ import { Helmet } from "react-helmet-async";
 import { useLocation } from "react-router-dom";
 
 const SITE_NAME = "VTKS Hub";
+
 const DEFAULT_DESCRIPTION =
   "VTKS Hub provides structured stock-market education, technical analysis tools, portfolio insights and disciplined trading resources.";
 
@@ -41,14 +42,24 @@ const seoConfig = {
       "VTKS accuracy, trading performance, portfolio returns, trade analytics, target performance",
     indexable: true,
   },
+
   "/resources": {
-  title: "VTKS Learning Resources | Videos, PDFs & Scanners",
-  description:
-    "Explore free VTKS learning resources including educational videos, trading PDFs, technical studies and public market scanners.",
-  keywords:
-    "VTKS resources, trading videos, stock market PDFs, technical analysis education, market scanners",
-  indexable: true,
-},
+    title: "VTKS Learning Resources | Videos, PDFs & Scanners",
+    description:
+      "Explore free VTKS learning resources including educational videos, trading PDFs, technical studies and public market scanners.",
+    keywords:
+      "VTKS resources, trading videos, stock market PDFs, technical analysis education, market scanners",
+    indexable: true,
+  },
+
+  "/testimonials": {
+    title: "Testimonials | VTKS Hub",
+    description:
+      "Read genuine VTKS member experiences in structured trading, technical analysis, risk management and disciplined investing.",
+    keywords:
+      "VTKS testimonials, VTKS member reviews, trading education feedback, stock market learning experiences",
+    indexable: true,
+  },
 
   "/pricing": {
     title: "VTKS Membership Plans | Education & Resources",
@@ -75,6 +86,14 @@ const seoConfig = {
     keywords:
       "contact VTKS, VTKS support, membership enquiry, trading education support",
     indexable: true,
+  },
+
+  "/payment": {
+    title: "Payment | VTKS Hub",
+    description:
+      "Complete your VTKS Hub membership payment using the available payment options.",
+    keywords: "",
+    indexable: false,
   },
 
   "/login": {
@@ -107,7 +126,12 @@ const seoConfig = {
 };
 
 const getPageConfig = (pathname) => {
-  if (pathname.startsWith("/trade/")) {
+  const cleanPath =
+    pathname === "/"
+      ? "/"
+      : pathname.replace(/\/+$/, "");
+
+  if (cleanPath.startsWith("/trade/")) {
     return {
       title: "Trade Details | VTKS Hub",
       description:
@@ -119,7 +143,7 @@ const getPageConfig = (pathname) => {
   }
 
   return (
-    seoConfig[pathname] || {
+    seoConfig[cleanPath] || {
       title: `Page Not Found | ${SITE_NAME}`,
       description: DEFAULT_DESCRIPTION,
       keywords: "",
