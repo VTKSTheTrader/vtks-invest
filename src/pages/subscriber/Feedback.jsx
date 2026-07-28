@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   getCurrentUserForFeedback,
   getUserTestimonials,
   submitFeedback,
   uploadTestimonialFile,
 } from "../../services/testimonialService";
+import { logoutUser } from "../../services/authService";
 import "./Feedback.css";
 
 const feedbackCategories = [
@@ -30,6 +32,7 @@ const initialForm = {
 };
 
 export default function Feedback() {
+  const navigate = useNavigate();
   const [form, setForm] = useState(initialForm);
   const [user, setUser] = useState(null);
   const [screenshotFile, setScreenshotFile] =
@@ -189,6 +192,17 @@ export default function Feedback() {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      localStorage.clear();
+      navigate("/login", { replace: true });
+    }
+  };
+
   const getStatusClass = (status) => {
     switch (status) {
       case "approved":
@@ -217,16 +231,38 @@ export default function Feedback() {
 
   return (
     <main className="subscriber-feedback-page">
-      <section className="feedback-page-header">
-        <span>VTKS Member Feedback</span>
+      <section className="feedback-topbar">
+        <div>
+          <span className="feedback-topbar-badge">
+            VTKS Member Feedback
+          </span>
 
-        <h1>Share Your Experience</h1>
+          <h1>Share Your Experience</h1>
 
-        <p>
-          Tell us how VTKS has helped improve your
-          learning, discipline, analysis or market
-          understanding.
-        </p>
+          <p>
+            Tell us how VTKS has helped improve your
+            learning, discipline, analysis or market
+            understanding.
+          </p>
+        </div>
+
+        <div className="feedback-topbar-actions">
+          <button
+            type="button"
+            className="feedback-dashboard-button"
+            onClick={() => navigate("/dashboard")}
+          >
+            ← Dashboard
+          </button>
+
+          <button
+            type="button"
+            className="feedback-logout-button"
+            onClick={handleLogout}
+          >
+            Logout
+          </button>
+        </div>
       </section>
 
       <div className="feedback-page-grid">
