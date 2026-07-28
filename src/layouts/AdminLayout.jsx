@@ -22,6 +22,7 @@ export default function AdminLayout() {
     { to: "/admin/scanner", label: "📡 Scanner" },
     { to: "/admin/library", label: "📚 Library" },
     { to: "/admin/community-links", label: "📢 Community Links" },
+    { to: "/admin/testimonials", label: "⭐ Feedback" },
     { to: "/admin/settings", label: "⚙️ Settings" },
   ];
 

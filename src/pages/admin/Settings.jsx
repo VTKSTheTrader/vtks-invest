@@ -105,6 +105,9 @@ export default function Settings() {
       showScanner: Boolean(
         settings.website.showScanner
       ),
+      showTestimonial: Boolean(
+        settings.website.showTestimonial
+      ),
 
       maintenanceMode: Boolean(
         settings.website.maintenanceMode
