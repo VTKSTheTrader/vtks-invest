@@ -4,24 +4,21 @@ import { useLocation } from "react-router-dom";
 const SITE_NAME = "VTKS Hub";
 
 const DEFAULT_DESCRIPTION =
-  "VTKS Hub provides structured stock-market education, technical analysis tools, portfolio insights and disciplined trading resources.";
+  "VTKS Hub provides structured stock market education, technical analysis tools, portfolio insights and disciplined trading resources.";
 
 const seoConfig = {
   "/": {
-    title: "VTKS Hub | Structured Trading & Investment Education",
+    title:
+      "VTKS Hub | Stock Market Education, Swing Trading & Technical Analysis",
     description:
-      "Learn structured trading, swing trading, technical analysis and disciplined investing with VTKS Hub.",
-    keywords:
-      "VTKS, stock market education, swing trading India, technical analysis, investing education, trading framework",
+      "VTKS Hub provides structured stock market education, swing trading frameworks, technical analysis tools, portfolio insights and disciplined investing resources.",
     indexable: true,
   },
 
   "/funds": {
     title: "VTKS Public Fund | Portfolio & Investment Ideas",
     description:
-      "Explore publicly shared VTKS investment ideas, portfolio performance and structured stock-market analysis.",
-    keywords:
-      "VTKS Fund, public portfolio, investment ideas, stock portfolio, swing trading India",
+      "Explore publicly shared VTKS investment ideas, portfolio performance and structured stock market analysis.",
     indexable: true,
   },
 
@@ -29,8 +26,6 @@ const seoConfig = {
     title: "VTKS Indicators | Technical Analysis Tools",
     description:
       "Explore VTKS indicators designed for trend analysis, swing trading, support and resistance and structured decision-making.",
-    keywords:
-      "VTKS indicators, TradingView indicators, technical analysis tools, swing trading indicators",
     indexable: true,
   },
 
@@ -38,8 +33,6 @@ const seoConfig = {
     title: "VTKS Performance & Accuracy | Trade Analytics",
     description:
       "Review VTKS portfolio performance, completed setups, target achievements and transparent trade analytics.",
-    keywords:
-      "VTKS accuracy, trading performance, portfolio returns, trade analytics, target performance",
     indexable: true,
   },
 
@@ -47,35 +40,27 @@ const seoConfig = {
     title: "VTKS Learning Resources | Videos, PDFs & Scanners",
     description:
       "Explore free VTKS learning resources including educational videos, trading PDFs, technical studies and public market scanners.",
-    keywords:
-      "VTKS resources, trading videos, stock market PDFs, technical analysis education, market scanners",
     indexable: true,
   },
 
   "/testimonials": {
-    title: "Testimonials | VTKS Hub",
+    title: "VTKS Member Testimonials | Trading Experiences",
     description:
-      "Read genuine VTKS member experiences in structured trading, technical analysis, risk management and disciplined investing.",
-    keywords:
-      "VTKS testimonials, VTKS member reviews, trading education feedback, stock market learning experiences",
+      "Read genuine VTKS member experiences related to structured trading, technical analysis, risk management and disciplined investing.",
     indexable: true,
   },
 
   "/pricing": {
     title: "VTKS Membership Plans | Education & Resources",
     description:
-      "Compare VTKS membership plans for access to educational resources, scanners, studies and subscriber tools.",
-    keywords:
-      "VTKS pricing, trading education membership, scanner subscription, stock market learning",
+      "Compare VTKS membership plans for access to educational resources, market scanners, technical studies and subscriber tools.",
     indexable: true,
   },
 
   "/about": {
     title: "About VTKS Hub | Our Trading Education Mission",
     description:
-      "Learn about VTKS Hub and its mission to build disciplined, knowledgeable and independent market participants.",
-    keywords:
-      "about VTKS, trading education India, disciplined trading, investment education",
+      "Learn about VTKS Hub and its mission to build disciplined, knowledgeable and independent stock market participants.",
     indexable: true,
   },
 
@@ -83,8 +68,6 @@ const seoConfig = {
     title: "Contact VTKS Hub | Membership & Support",
     description:
       "Contact VTKS Hub for membership information, educational resources, platform assistance and general enquiries.",
-    keywords:
-      "contact VTKS, VTKS support, membership enquiry, trading education support",
     indexable: true,
   },
 
@@ -92,53 +75,97 @@ const seoConfig = {
     title: "Payment | VTKS Hub",
     description:
       "Complete your VTKS Hub membership payment using the available payment options.",
-    keywords: "",
     indexable: false,
   },
 
   "/login": {
     title: "Login | VTKS Hub",
-    description: "Log in to your VTKS Hub account.",
-    keywords: "",
+    description: "Log in securely to your VTKS Hub account.",
     indexable: false,
   },
 
   "/register": {
     title: "Create Account | VTKS Hub",
     description: "Create your VTKS Hub account.",
-    keywords: "",
     indexable: false,
   },
 
   "/forgot-password": {
     title: "Forgot Password | VTKS Hub",
     description: "Recover access to your VTKS Hub account.",
-    keywords: "",
     indexable: false,
   },
 
   "/reset-password": {
     title: "Reset Password | VTKS Hub",
     description: "Create a new password for your VTKS Hub account.",
-    keywords: "",
+    indexable: false,
+  },
+
+  "/dashboard": {
+    title: "Subscriber Dashboard | VTKS Hub",
+    description: "Access your VTKS Hub subscriber dashboard.",
+    indexable: false,
+  },
+
+  "/subscriber/scanner": {
+    title: "Subscriber Scanners | VTKS Hub",
+    description: "Access VTKS Hub subscriber market scanners.",
+    indexable: false,
+  },
+
+  "/subscriber/library": {
+    title: "Subscriber Library | VTKS Hub",
+    description: "Access VTKS Hub subscriber learning resources.",
     indexable: false,
   },
 };
 
-const getPageConfig = (pathname) => {
-  const cleanPath =
-    pathname === "/"
-      ? "/"
-      : pathname.replace(/\/+$/, "");
+const normalizePathname = (pathname) => {
+  if (!pathname || pathname === "/") {
+    return "/";
+  }
 
+  return pathname.replace(/\/+$/, "");
+};
+
+const getPageConfig = (pathname) => {
+  const cleanPath = normalizePathname(pathname);
+
+  /*
+    Trade-detail pages are intentionally noindex.
+
+    This prevents generic "Trade Details" pages from competing
+    with the VTKS homepage in Google search results.
+  */
   if (cleanPath.startsWith("/trade/")) {
     return {
       title: "Trade Details | VTKS Hub",
       description:
         "View VTKS trade details including entry, current price, targets, stop-loss, thesis and performance.",
-      keywords:
-        "VTKS trade details, stock analysis, trading setup, target and stop loss",
-      indexable: true,
+      indexable: false,
+    };
+  }
+
+  /*
+    All admin routes must remain private in search engines.
+  */
+  if (cleanPath.startsWith("/admin")) {
+    return {
+      title: "Admin Panel | VTKS Hub",
+      description: "VTKS Hub administration panel.",
+      indexable: false,
+    };
+  }
+
+  /*
+    All subscriber routes must remain private in search engines.
+  */
+  if (cleanPath.startsWith("/subscriber")) {
+    return {
+      title: "Subscriber Area | VTKS Hub",
+      description: "VTKS Hub subscriber area.",
+      indexable: false,
     };
   }
 
@@ -146,7 +173,6 @@ const getPageConfig = (pathname) => {
     seoConfig[cleanPath] || {
       title: `Page Not Found | ${SITE_NAME}`,
       description: DEFAULT_DESCRIPTION,
-      keywords: "",
       indexable: false,
     }
   );
@@ -154,52 +180,64 @@ const getPageConfig = (pathname) => {
 
 export default function RouteSEO() {
   const { pathname } = useLocation();
-  const config = getPageConfig(pathname);
+
+  const cleanPath = normalizePathname(pathname);
+  const config = getPageConfig(cleanPath);
+  const isHomePage = cleanPath === "/";
 
   const origin =
     typeof window !== "undefined"
       ? window.location.origin
-      : "";
+      : "https://vtks-hub.vercel.app";
 
-  const cleanPath =
-    pathname === "/"
-      ? "/"
-      : pathname.replace(/\/+$/, "");
+  const canonicalUrl =
+    cleanPath === "/"
+      ? `${origin}/`
+      : `${origin}${cleanPath}`;
 
-  const canonicalUrl = origin
-    ? `${origin}${cleanPath}`
-    : "";
+  const socialImageUrl = `${origin}/og-image.png`;
 
-  const socialImageUrl = origin
-    ? `${origin}/og-image.png`
-    : "";
+  /*
+    Public pages:
+    index, follow
 
+    Private and trade-detail pages:
+    noindex, follow
+
+    "follow" allows Google to continue discovering links
+    without showing the page in search results.
+  */
   const robotsContent = config.indexable
-    ? "index, follow, max-image-preview:large"
-    : "noindex, nofollow";
+    ? "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+    : "noindex, follow";
 
   const organizationSchema = {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: SITE_NAME,
-    url: origin || undefined,
-    logo: origin
-      ? `${origin}/favicon.svg`
-      : undefined,
+    alternateName: "VTKS",
+    url: `${origin}/`,
+    logo: `${origin}/favicon.png`,
     description: DEFAULT_DESCRIPTION,
+    sameAs: [],
   };
 
   const websiteSchema = {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: SITE_NAME,
-    url: origin || undefined,
+    alternateName: ["VTKS", "VTKS Hub"],
+    url: `${origin}/`,
     description: DEFAULT_DESCRIPTION,
+    publisher: {
+      "@type": "Organization",
+      name: SITE_NAME,
+    },
   };
 
   return (
     <Helmet>
-      <html lang="en" />
+      <html lang="en-IN" />
 
       <title>{config.title}</title>
 
@@ -208,74 +246,115 @@ export default function RouteSEO() {
         content={config.description}
       />
 
-      {config.keywords && (
-        <meta
-          name="keywords"
-          content={config.keywords}
-        />
-      )}
+      <meta
+        name="robots"
+        content={robotsContent}
+      />
 
-      <meta name="robots" content={robotsContent} />
-      <meta name="googlebot" content={robotsContent} />
+      <meta
+        name="googlebot"
+        content={robotsContent}
+      />
 
-      <meta name="author" content="VTKS Hub" />
-      <meta name="theme-color" content="#0f172a" />
+      <meta
+        name="author"
+        content={SITE_NAME}
+      />
 
-      {canonicalUrl && (
-        <link rel="canonical" href={canonicalUrl} />
-      )}
+      <meta
+        name="application-name"
+        content={SITE_NAME}
+      />
 
-      <meta property="og:type" content="website" />
-      <meta property="og:site_name" content={SITE_NAME} />
-      <meta property="og:title" content={config.title} />
+      <meta
+        name="theme-color"
+        content="#0f172a"
+      />
+
+      <link
+        rel="canonical"
+        href={canonicalUrl}
+      />
+
+      {/* Open Graph */}
+      <meta
+        property="og:type"
+        content="website"
+      />
+
+      <meta
+        property="og:site_name"
+        content={SITE_NAME}
+      />
+
+      <meta
+        property="og:locale"
+        content="en_IN"
+      />
+
+      <meta
+        property="og:title"
+        content={config.title}
+      />
+
       <meta
         property="og:description"
         content={config.description}
       />
 
-      {canonicalUrl && (
-        <meta property="og:url" content={canonicalUrl} />
-      )}
+      <meta
+        property="og:url"
+        content={canonicalUrl}
+      />
 
-      {socialImageUrl && (
-        <meta
-          property="og:image"
-          content={socialImageUrl}
-        />
-      )}
+      <meta
+        property="og:image"
+        content={socialImageUrl}
+      />
 
       <meta
         property="og:image:alt"
-        content="VTKS Hub – Structured Trading and Investment Education"
+        content="VTKS Hub – Stock Market Education, Swing Trading and Technical Analysis"
       />
 
+      {/* Twitter/X Card */}
       <meta
         name="twitter:card"
         content="summary_large_image"
       />
+
       <meta
         name="twitter:title"
         content={config.title}
       />
+
       <meta
         name="twitter:description"
         content={config.description}
       />
 
-      {socialImageUrl && (
-        <meta
-          name="twitter:image"
-          content={socialImageUrl}
-        />
+      <meta
+        name="twitter:image"
+        content={socialImageUrl}
+      />
+
+      <meta
+        name="twitter:image:alt"
+        content="VTKS Hub – Stock Market Education, Swing Trading and Technical Analysis"
+      />
+
+      {/* Add brand schemas only on the homepage */}
+      {isHomePage && (
+        <script type="application/ld+json">
+          {JSON.stringify(organizationSchema)}
+        </script>
       )}
 
-      <script type="application/ld+json">
-        {JSON.stringify(organizationSchema)}
-      </script>
-
-      <script type="application/ld+json">
-        {JSON.stringify(websiteSchema)}
-      </script>
+      {isHomePage && (
+        <script type="application/ld+json">
+          {JSON.stringify(websiteSchema)}
+        </script>
+      )}
     </Helmet>
   );
 }
