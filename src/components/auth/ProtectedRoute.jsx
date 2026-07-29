@@ -1,24 +1,28 @@
-import {
-  useEffect,
-  useState,
-} from "react";
+import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 
 import { supabase } from "../../lib/supabase";
 
 export default function ProtectedRoute({ children }) {
-  const [checkingAuth, setCheckingAuth] =
-    useState(true);
-
-  const [isAdmin, setIsAdmin] =
-    useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     let mounted = true;
 
-    const checkAdminAccess = async () => {
+    /*
+      Check the user's role.
+
+      showLoader is true only during the first page load.
+      Background session checks must not unmount the admin page.
+    */
+    const checkAdminAccess = async ({
+      showLoader = false,
+    } = {}) => {
       try {
-        setCheckingAuth(true);
+        if (showLoader && mounted) {
+          setCheckingAuth(true);
+        }
 
         const {
           data: { user },
@@ -50,9 +54,7 @@ export default function ProtectedRoute({ children }) {
           throw profileError;
         }
 
-        const role = String(
-          profile?.role || ""
-        )
+        const role = String(profile?.role || "")
           .trim()
           .toLowerCase();
 
@@ -69,19 +71,54 @@ export default function ProtectedRoute({ children }) {
           setIsAdmin(false);
         }
       } finally {
-        if (mounted) {
+        /*
+          Hide the loader only when this was the initial check.
+          Background auth events must not replace the page.
+        */
+        if (showLoader && mounted) {
           setCheckingAuth(false);
         }
       }
     };
 
-    checkAdminAccess();
+    // Initial authentication check
+    checkAdminAccess({
+      showLoader: true,
+    });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(
-      () => {
-        checkAdminAccess();
+      (event, session) => {
+        if (!mounted) return;
+
+        /*
+          Immediately remove access after logout.
+        */
+        if (event === "SIGNED_OUT" || !session?.user) {
+          setIsAdmin(false);
+          setCheckingAuth(false);
+          return;
+        }
+
+        /*
+          Recheck the database role only for meaningful
+          account changes, without showing the loader.
+        */
+        if (
+          event === "SIGNED_IN" ||
+          event === "USER_UPDATED"
+        ) {
+          checkAdminAccess({
+            showLoader: false,
+          });
+        }
+
+        /*
+          TOKEN_REFRESHED and other background events
+          are deliberately ignored so open forms and
+          modals remain mounted.
+        */
       }
     );
 
