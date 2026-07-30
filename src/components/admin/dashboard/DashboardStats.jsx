@@ -1,5 +1,6 @@
 import "./DashboardStats.css";
 
+
 const normalize = (value) =>
   String(value || "")
     .trim()
@@ -147,10 +148,146 @@ export default function DashboardStats({
       getMemberStatus(member) === "active"
   ).length;
 
-  const activeHoldings = holdings.filter(
-    (holding) =>
-      getHoldingStatus(holding) === "active"
-  ).length;
+  const activeStatuses = [
+  "active",
+  "target 1 hit",
+  "target 2 hit",
+  "target 3 hit",
+];
+
+const realisedStatuses = [
+  "booked profit",
+  "sl hit",
+];
+
+const activeTradeList = holdings.filter(
+  (holding) =>
+    activeStatuses.includes(
+      getHoldingStatus(holding)
+    )
+);
+
+const realisedTradeList = holdings.filter(
+  (holding) =>
+    realisedStatuses.includes(
+      getHoldingStatus(holding)
+    )
+);
+
+const activeHoldings =
+  activeTradeList.length;
+
+const realisedTrades =
+  realisedTradeList.length;
+
+/* Active return uses Entry → CMP */
+
+const activeReturns = activeTradeList
+  .map((holding) => {
+    const entry = Number(
+      holding.entry || 0
+    );
+
+    const cmp = Number(
+      holding.cmp || 0
+    );
+
+    if (
+      !Number.isFinite(entry) ||
+      !Number.isFinite(cmp) ||
+      entry <= 0 ||
+      cmp <= 0
+    ) {
+      return null;
+    }
+
+    return (
+      ((cmp - entry) / entry) *
+      100
+    );
+  })
+  .filter(
+    (value) =>
+      value !== null &&
+      Number.isFinite(value)
+  );
+
+const activeAverageReturn =
+  activeReturns.length > 0
+    ? (
+        activeReturns.reduce(
+          (total, value) =>
+            total + value,
+          0
+        ) / activeReturns.length
+      ).toFixed(2)
+    : "0.00";
+
+/* Realised return uses saved return or Entry → Exit Price */
+
+const realisedReturns =
+  realisedTradeList
+    .map((holding) => {
+      const savedReturn =
+        holding.realisedReturn ??
+        holding.realised_return;
+
+      if (
+        savedReturn !== null &&
+        savedReturn !== undefined &&
+        savedReturn !== ""
+      ) {
+        const numericReturn =
+          Number(savedReturn);
+
+        return Number.isFinite(
+          numericReturn
+        )
+          ? numericReturn
+          : null;
+      }
+
+      const entry = Number(
+        holding.entry || 0
+      );
+
+      const exitPrice = Number(
+        holding.exitPrice ??
+          holding.exit_price ??
+          0
+      );
+
+      if (
+        !Number.isFinite(entry) ||
+        !Number.isFinite(exitPrice) ||
+        entry <= 0 ||
+        exitPrice <= 0
+      ) {
+        return null;
+      }
+
+      return (
+        ((exitPrice - entry) /
+          entry) *
+        100
+      );
+    })
+    .filter(
+      (value) =>
+        value !== null &&
+        Number.isFinite(value)
+    );
+
+const realisedAverageReturn =
+  realisedReturns.length > 0
+    ? (
+        realisedReturns.reduce(
+          (total, value) =>
+            total + value,
+          0
+        ) / realisedReturns.length
+      ).toFixed(2)
+    : "0.00";
 
   const target1HitCount = holdings.filter(
     (holding) => {
@@ -216,16 +353,8 @@ export default function DashboardStats({
       : "0.0";
       
 
-  const averageReturn =
-    holdings.length > 0
-      ? (
-          holdings.reduce(
-            (total, holding) =>
-              total + calculateReturn(holding),
-            0
-          ) / holdings.length
-        ).toFixed(2)
-      : "0.00";
+  
+
 
   const summaryCards = [
     {
@@ -255,17 +384,39 @@ export default function DashboardStats({
           : "blue",
       icon: "🎯",
     },
-    {
-      title: "Return Generated",
-      value: `${
-        Number(averageReturn) > 0 ? "+" : ""
-      }${averageReturn}%`,
-      tone:
-        Number(averageReturn) >= 0
-          ? "green"
-          : "red",
-      icon: "📈",
-    },
+    
+      {
+  title: "Active Avg Return",
+  value: `${
+    Number(activeAverageReturn) >= 0
+      ? "+"
+      : ""
+  }${activeAverageReturn}%`,
+  tone:
+    Number(activeAverageReturn) >= 0
+      ? "green"
+      : "red",
+  icon: "📈",
+},
+{
+  title: "Realised Avg Return",
+  value: `${
+    Number(realisedAverageReturn) >= 0
+      ? "+"
+      : ""
+  }${realisedAverageReturn}%`,
+  tone:
+    Number(realisedAverageReturn) >= 0
+      ? "green"
+      : "red",
+  icon: "💰",
+},
+{
+  title: "Realised Trades",
+  value: realisedTrades,
+  tone: "blue",
+  icon: "✅",
+},
   ];
 
   const performanceCards = [

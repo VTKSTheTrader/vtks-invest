@@ -44,25 +44,72 @@ const defaultForm = {
   securityId: "",
   exchange: "NSE",
   segment: "NSE_EQ",
+  /* ========= NEW ========= */
+
+  exitPrice: "",
+  exitDate: "",
+  realisedReturn: "",
 };
 
 export default function HoldingModal({ onClose, onSave, editingHolding }) {
-  const initialForm = useMemo(() => ({
+  const initialForm = useMemo(
+  () => ({
     ...defaultForm,
     ...(editingHolding || {}),
-    recommendationDate: editingHolding?.recommendationDate || today,
-    marketCategory: editingHolding?.marketCategory || "Other",
-    accuracyShow: editingHolding?.accuracyShow ?? defaultForm.accuracyShow,
-    accuracyBlur: editingHolding?.accuracyBlur ?? defaultForm.accuracyBlur,
-    featured: Boolean(editingHolding?.featured ?? defaultForm.featured),
-    securityId: editingHolding?.securityId ?? "",
-    exchange: editingHolding?.exchange || "NSE",
+
+    recommendationDate:
+      editingHolding?.recommendationDate ||
+      today,
+
+    marketCategory:
+      editingHolding?.marketCategory ||
+      "Other",
+
+    accuracyShow:
+      editingHolding?.accuracyShow ??
+      defaultForm.accuracyShow,
+
+    accuracyBlur:
+      editingHolding?.accuracyBlur ??
+      defaultForm.accuracyBlur,
+
+    featured: Boolean(
+      editingHolding?.featured ??
+        defaultForm.featured
+    ),
+
+    securityId:
+      editingHolding?.securityId ?? "",
+
+    exchange:
+      editingHolding?.exchange || "NSE",
+
     segment:
       editingHolding?.segment ||
-      (editingHolding?.exchange === "BSE" ? "BSE_EQ" : "NSE_EQ"),
+      (editingHolding?.exchange ===
+      "BSE"
+        ? "BSE_EQ"
+        : "NSE_EQ"),
+
+    /* ========= NEW ========= */
+
+    exitPrice:
+      editingHolding?.exitPrice ??
+      "",
+
+    exitDate:
+      editingHolding?.exitDate ??
+      "",
+
+    realisedReturn:
+      editingHolding?.realisedReturn ??
+      "",
+
     chartImage: null,
     researchPdf: null,
-  }), [editingHolding]);
+  }),
+  [editingHolding]
+);
 
   const [form, setForm] = useState(initialForm);
   const [saving, setSaving] = useState(false);
@@ -87,29 +134,93 @@ export default function HoldingModal({ onClose, onSave, editingHolding }) {
   }, [initialForm, editingHolding]);
 
   const handleChange = (event) => {
-    const { name, value, type, checked, files } = event.target;
+  const {
+    name,
+    value,
+    type,
+    checked,
+    files,
+  } = event.target;
 
-    if (type === "file") {
-      setForm((previous) => ({
-        ...previous,
-        [name]: files?.[0] || null,
-      }));
-      return;
+  if (type === "file") {
+    setForm((previous) => ({
+      ...previous,
+      [name]: files?.[0] || null,
+    }));
+    return;
+  }
+
+  setForm((previous) => {
+    const updated = {
+      ...previous,
+      [name]:
+        type === "checkbox"
+          ? checked
+          : value,
+    };
+
+    if (
+      name === "accuracyShow" &&
+      checked === false
+    ) {
+      updated.accuracyBlur = false;
     }
 
-    setForm((previous) => {
-      const updated = {
-        ...previous,
-        [name]: type === "checkbox" ? checked : value,
-      };
+    /*
+      If Entry changes and Exit Price
+      already exists, recalculate
+      realised return automatically.
+    */
+    if (
+      name === "entry" &&
+      previous.exitPrice
+    ) {
+      updated.realisedReturn =
+        calculateRealisedReturn(
+          value,
+          previous.exitPrice
+        );
+    }
 
-      if (name === "accuracyShow" && checked === false) {
-        updated.accuracyBlur = false;
+    /*
+      If trade becomes Active again,
+      remove exit details.
+    */
+    if (name === "tradeStatus") {
+      const completed =
+        [
+          "booked profit",
+          "sl hit",
+        ].includes(
+          normalize(value)
+        );
+
+      if (!completed) {
+        updated.exitPrice = "";
+        updated.exitDate = "";
+        updated.realisedReturn = "";
       }
+    }
 
-      return updated;
-    });
-  };
+    return updated;
+  });
+};
+  const handleExitPriceChange = (
+  event
+) => {
+  const exitPrice =
+    event.target.value;
+
+  setForm((previous) => ({
+    ...previous,
+    exitPrice,
+    realisedReturn:
+      calculateRealisedReturn(
+        previous.entry,
+        exitPrice
+      ),
+  }));
+};
 
   const handleInstrumentSelect = async (instrument) => {
     const exchange = String(
@@ -188,7 +299,39 @@ export default function HoldingModal({ onClose, onSave, editingHolding }) {
       cmp: "",
     }));
   };
+  const normalize = (value) =>
+  String(value || "")
+    .trim()
+    .toLowerCase();
 
+const isCompletedTrade = [
+  "booked profit",
+  "sl hit",
+].includes(normalize(form.tradeStatus));
+
+const calculateRealisedReturn = (
+  entry,
+  exitPrice
+) => {
+  const entryValue = Number(entry || 0);
+  const exitValue = Number(
+    exitPrice || 0
+  );
+
+  if (
+    !entryValue ||
+    !exitValue ||
+    entryValue <= 0
+  ) {
+    return "";
+  }
+
+  return (
+    ((exitValue - entryValue) /
+      entryValue) *
+    100
+  ).toFixed(2);
+};
   const handleSubmit = async () => {
     if (saving || fetchingCMP) return;
 
@@ -199,7 +342,17 @@ export default function HoldingModal({ onClose, onSave, editingHolding }) {
       alert("Please fill Stock Name, Entry Price and CMP.");
       return;
     }
+    if (isCompletedTrade) {
+  if (!form.exitPrice) {
+    alert("Please enter Exit Price.");
+    return;
+  }
 
+  if (!form.exitDate) {
+    alert("Please select Exit Date.");
+    return;
+  }
+}
     if (!form.securityId) {
       alert("Please select the stock from the Dhan instrument search results.");
       return;
@@ -212,6 +365,7 @@ export default function HoldingModal({ onClose, onSave, editingHolding }) {
     const target2 = Number(form.target2 || 0);
     const target3 = Number(form.target3 || 0);
     const securityId = Number(form.securityId);
+    const exitPrice = Number(form.exitPrice || 0);
 
     if (!Number.isFinite(entry) || !Number.isFinite(cmp) || entry <= 0 || cmp <= 0) {
       alert("Entry Price and CMP must be greater than zero.");
@@ -262,6 +416,12 @@ export default function HoldingModal({ onClose, onSave, editingHolding }) {
         accuracyShow: Boolean(form.accuracyShow),
         accuracyBlur: Boolean(form.accuracyShow && form.accuracyBlur),
         tradeStatus: form.tradeStatus || "Active",
+        exitPrice,
+exitDate: form.exitDate || null,
+realisedReturn:
+  form.realisedReturn === ""
+    ? null
+    : Number(form.realisedReturn),
         publishStatus: form.publishStatus || "Published",
         featured: Boolean(form.featured),
         thesis: String(form.thesis || "").trim(),
@@ -522,6 +682,40 @@ export default function HoldingModal({ onClose, onSave, editingHolding }) {
               <option value="Cancelled">Cancelled</option>
             </select>
           </Field>
+          {isCompletedTrade && (
+  <>
+    <Field label="Exit Price">
+      <input
+        type="number"
+        min="0"
+        step="0.01"
+        name="exitPrice"
+        value={form.exitPrice ?? ""}
+        onChange={handleExitPriceChange}
+        placeholder="Final Exit Price"
+      />
+    </Field>
+
+    <Field label="Exit Date">
+      <input
+        type="date"
+        name="exitDate"
+        value={form.exitDate || ""}
+        onChange={handleChange}
+      />
+    </Field>
+
+    <Field label="Realised Return (%)">
+      <input
+        type="number"
+        name="realisedReturn"
+        value={form.realisedReturn ?? ""}
+        readOnly
+        placeholder="Auto Calculated"
+      />
+    </Field>
+  </>
+)}
 
           <Field label="Publish Status">
             <select

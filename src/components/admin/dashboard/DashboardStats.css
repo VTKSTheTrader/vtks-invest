@@ -15,34 +15,65 @@
 
 .dashboard-summary-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(
+    4,
+    minmax(0, 1fr)
+  );
+  gap: 22px;
+  width: 100%;
+  margin-bottom: 28px;
 }
 
 .dashboard-summary-card {
-  position: relative;
-  overflow: hidden;
-
+  min-width: 0;
+  min-height: 170px;
+  padding: 26px 24px;
+  border: 1px solid #dbe3ef;
+  border-radius: 22px;
+  background: #ffffff;
   display: flex;
   align-items: center;
-  gap: 16px;
-
-  min-width: 0;
-  min-height: 138px;
-  padding: 22px;
-
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 20px;
-
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
-
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease,
-    border-color 0.25s ease;
+  gap: 20px;
+  overflow: hidden;
+  position: relative;
+  box-shadow:
+    0 12px 30px
+    rgba(15, 23, 42, 0.06);
 }
 
+.dashboard-summary-card > div:last-child {
+  min-width: 0;
+  flex: 1;
+}
+
+.dashboard-summary-card h2 {
+  margin: 0 0 6px;
+  font-size: clamp(
+    28px,
+    2.3vw,
+    42px
+  );
+  line-height: 1.05;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.dashboard-summary-card p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.4;
+  font-weight: 700;
+}
+
+.dashboard-summary-icon {
+  width: 68px;
+  height: 68px;
+  min-width: 68px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  font-size: 30px;
+}
 .dashboard-summary-card::after {
   content: "";
   position: absolute;
@@ -644,5 +675,41 @@
 
   .dashboard-performance-card p {
     font-size: 11px;
+  }
+}
+@media (max-width: 1250px) {
+  .dashboard-summary-grid {
+    grid-template-columns: repeat(
+      3,
+      minmax(0, 1fr)
+    );
+  }
+}
+
+@media (max-width: 900px) {
+  .dashboard-summary-grid {
+    grid-template-columns: repeat(
+      2,
+      minmax(0, 1fr)
+    );
+  }
+}
+
+@media (max-width: 560px) {
+  .dashboard-summary-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .dashboard-summary-card {
+    min-height: 140px;
+    padding: 20px;
+  }
+
+  .dashboard-summary-icon {
+    width: 58px;
+    height: 58px;
+    min-width: 58px;
+    font-size: 26px;
   }
 }

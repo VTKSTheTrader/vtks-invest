@@ -14,12 +14,13 @@ import {
 import Pagination from "../../components/common/Pagination";
 import "./Accuracy.css";
 import SEO from "../../components/common/SEO";
-<SEO
-  title="VTKS Performance | Accuracy "
-  description="Trade with Structure, Invest with Conviction ."
-  canonical="https://vtks-hub.vercel.app/accuracy"
-/>
-const ITEMS_PER_PAGE = 6;
+import {
+  calculatePerformanceSummary,
+  getTradeROI,
+  isActiveTrade,
+  isRealisedTrade,
+} from "../../utils/performanceUtils";
+const ITEMS_PER_PAGE = 5;
 const AUTO_REFRESH_INTERVAL = 60 * 1000;
 
 const normalize = (value) =>
@@ -231,76 +232,10 @@ export default function Accuracy() {
   );
 
   const getROI = useCallback(
-    (holding) => {
-      const entry = Number(
-        holding.entry || 0
-      );
-
-      if (!entry) return 0;
-
-      const status = getStatus(
-        holding
-      );
-
-      let exitPrice = Number(
-        holding.cmp || entry
-      );
-
-      if (
-        status === "Target 1 Hit"
-      ) {
-        exitPrice = Number(
-          holding.target1 ||
-            holding.cmp ||
-            entry
-        );
-      }
-
-      if (
-        status === "Target 2 Hit"
-      ) {
-        exitPrice = Number(
-          holding.target2 ||
-            holding.cmp ||
-            entry
-        );
-      }
-
-      if (
-        status === "Target 3 Hit"
-      ) {
-        exitPrice = Number(
-          holding.target3 ||
-            holding.cmp ||
-            entry
-        );
-      }
-
-      if (status === "SL Hit") {
-        exitPrice = Number(
-          holding.stopLoss ||
-            holding.cmp ||
-            entry
-        );
-      }
-
-      if (
-        status === "Booked Profit"
-      ) {
-        exitPrice = Number(
-          holding.cmp || entry
-        );
-      }
-
-      return (
-        ((exitPrice - entry) /
-          entry) *
-        100
-      );
-    },
-    [getStatus]
-  );
-
+  (holding) =>
+    getTradeROI(holding),
+  []
+);
   const accuracyHoldings = useMemo(
     () => {
       return holdings.filter(
@@ -335,70 +270,56 @@ export default function Accuracy() {
     [holdings, getStatus]
   );
 
-  const activeTrades =
-    accuracyHoldings.filter(
-      (holding) =>
-        getStatus(holding) ===
-        "Active"
-    );
-
-  const slTrades =
-    accuracyHoldings.filter(
-      (holding) =>
-        getStatus(holding) ===
-        "SL Hit"
-    );
-
-  const winningTrades =
-    accuracyHoldings.filter(
-      (holding) =>
-        WINNING_STATUSES.includes(
-          getStatus(holding)
-        )
-    );
-
-  const closedTrades =
-    accuracyHoldings.filter(
-      (holding) =>
-        CLOSED_STATUSES.includes(
-          getStatus(holding)
-        )
-    );
-
-  const winRate =
-    closedTrades.length > 0
-      ? (
-          (winningTrades.length /
-            closedTrades.length) *
-          100
-        ).toFixed(1)
-      : "0.0";
-
-  const avgReturn =
-    accuracyHoldings.length > 0
-      ? (
-          accuracyHoldings.reduce(
-            (sum, holding) =>
-              sum + getROI(holding),
-            0
-          ) /
-          accuracyHoldings.length
-        ).toFixed(2)
-      : "0.00";
-
-  const sortedByROI = useMemo(
-    () => {
-      return [
-        ...accuracyHoldings,
-      ].sort(
-        (first, second) =>
-          getROI(second) -
-          getROI(first)
-      );
-    },
-    [accuracyHoldings, getROI]
+  const performanceSummary =
+  useMemo(
+    () =>
+      calculatePerformanceSummary(
+        accuracyHoldings
+      ),
+    [accuracyHoldings]
   );
 
+const activeTrades =
+  accuracyHoldings.filter(
+    isActiveTrade
+  );
+
+const realisedTrades =
+  accuracyHoldings.filter(
+    isRealisedTrade
+  );
+
+const closedTrades =
+  realisedTrades;
+
+const slTrades =
+  realisedTrades.filter(
+    (holding) =>
+      normalize(
+        holding.tradeStatus
+      ) === "sl hit"
+  );
+
+const winRate =
+  performanceSummary.winRate.toFixed(
+    1
+  );
+
+const activeAverageReturn =
+  performanceSummary.activeAverageReturn.toFixed(
+    2
+  );
+
+const realisedAverageReturn =
+  performanceSummary.realisedAverageReturn.toFixed(
+    2
+  );
+  const sortedByROI = useMemo(() => {
+  return [...accuracyHoldings].sort(
+    (first, second) =>
+      getROI(second) - getROI(first)
+  );
+}, [accuracyHoldings, getROI]);
   const bestTrade =
     sortedByROI[0] || null;
 
@@ -597,44 +518,88 @@ export default function Accuracy() {
       )}
 
       <div className="accuracy-stats">
-        <div className="accuracy-card">
-          <h2>
-            {accuracyHoldings.length}
-          </h2>
-          <p>Total Tracked Trades</p>
-        </div>
+  <div className="accuracy-card">
+    <h2>
+      {
+        performanceSummary.totalTrades
+      }
+    </h2>
 
-        <div className="accuracy-card">
-          <h2>
-            {activeTrades.length}
-          </h2>
-          <p>Active Trades</p>
-        </div>
+    <p>Total Tracked Trades</p>
+  </div>
 
-        <div className="accuracy-card">
-          <h2>
-            {closedTrades.length}
-          </h2>
-          <p>Closed Trades</p>
-        </div>
+  <div className="accuracy-card">
+    <h2>
+      {
+        performanceSummary.activeTrades
+      }
+    </h2>
 
-        <div className="accuracy-card">
-          <h2>{winRate}%</h2>
-          <p>Win Rate</p>
-        </div>
+    <p>Active Trades</p>
+  </div>
 
-        <div className="accuracy-card">
-          <h2>{avgReturn}%</h2>
-          <p>Average Return</p>
-        </div>
+  <div className="accuracy-card">
+    <h2>
+      {
+        performanceSummary.realisedTrades
+      }
+    </h2>
 
-        <div className="accuracy-card">
-          <h2>
-            {slTrades.length}
-          </h2>
-          <p>SL Hit</p>
-        </div>
-      </div>
+    <p>Closed Trades</p>
+  </div>
+
+  <div className="accuracy-card">
+    <h2>
+      {winRate}%
+    </h2>
+
+    <p>Win Rate</p>
+  </div>
+
+  <div
+  className={`accuracy-card ${
+    Number(activeAverageReturn) >= 0
+      ? "accuracy-card-positive"
+      : "accuracy-card-negative"
+  }`}
+>
+  <h2>
+    {Number(activeAverageReturn) >= 0
+      ? "+"
+      : ""}
+    {activeAverageReturn}%
+  </h2>
+
+  <p>Active Avg Return</p>
+</div>
+
+  <div
+  className={`accuracy-card ${
+    Number(realisedAverageReturn) >= 0
+      ? "positive-card"
+      : "negative-card"
+  }`}
+>
+  <h2>
+    {Number(realisedAverageReturn) >= 0
+      ? "+"
+      : ""}
+    {realisedAverageReturn}%
+  </h2>
+
+  <p>Realised Avg Return</p>
+</div>
+
+  <div className="accuracy-card">
+    <h2>
+      {
+        performanceSummary.slHitTrades
+      }
+    </h2>
+
+    <p>SL Hit</p>
+  </div>
+</div>
 
       <div className="accuracy-grid">
         <div className="accuracy-panel">
@@ -887,20 +852,28 @@ export default function Accuracy() {
                           </td>
 
                           <td
-                            className={
-                              roi >= 0
-                                ? "positive"
-                                : "negative"
-                            }
-                          >
-                            {roi >= 0
-                              ? "+"
-                              : ""}
-                            {roi.toFixed(
-                              2
-                            )}
-                            %
-                          </td>
+  className={
+    roi >= 0
+      ? "positive"
+      : "negative"
+  }
+>
+  {isRealisedTrade(
+    holding
+  ) && (
+    <span
+      className="accuracy-realised-label"
+      title="Final realised return"
+    >
+      ✓ Realised
+    </span>
+  )}
+
+  <span className="accuracy-roi-value">
+    {roi >= 0 ? "+" : ""}
+    {roi.toFixed(2)}%
+  </span>
+</td>
                         </tr>
                       );
                     }

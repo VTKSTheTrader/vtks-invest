@@ -69,113 +69,139 @@ export const getHoldings = async () => {
    PAYLOAD BUILDER
 ========================================================= */
 
-const buildHoldingPayload = (holding) => ({
-  recommendation_date:
-    holding.recommendationDate || null,
+/* =========================================================
+   BUILD FRONTEND FORM -> SUPABASE PAYLOAD
+========================================================= */
 
-  stock: String(
-    holding.stock || ""
-  ).trim(),
+export const buildHoldingPayload = (
+  form
+) => ({
+  recommendation_date:
+    form.recommendationDate || null,
+
+  stock:
+    form.stock?.trim() || "",
 
   sector:
-    String(
-      holding.sector || ""
-    ).trim() || "General",
+    form.sector?.trim() ||
+    "General",
 
   trade_type:
-    holding.tradeType || "Swing",
+    form.tradeType || "Swing",
 
   market_category:
-    holding.marketCategory || "Other",
+    form.marketCategory ||
+    "Other",
 
   entry: Number(
-    holding.entry || 0
+    form.entry || 0
   ),
 
   cmp: Number(
-    holding.cmp || 0
+    form.cmp || 0
   ),
 
   stop_loss: Number(
-    holding.stopLoss || 0
+    form.stopLoss || 0
   ),
 
   target1: Number(
-    holding.target1 || 0
+    form.target1 || 0
   ),
 
   target2: Number(
-    holding.target2 || 0
+    form.target2 || 0
   ),
 
   target3: Number(
-    holding.target3 || 0
+    form.target3 || 0
   ),
 
   conviction:
-    holding.conviction || "High",
+    form.conviction || "High",
 
   visibility:
-    holding.visibility || "Public",
+    form.visibility || "Public",
 
   accuracy_show:
-    holding.accuracyShow ?? true,
+    form.accuracyShow ?? true,
 
   accuracy_blur:
-    holding.accuracyBlur ?? false,
+    form.accuracyBlur ?? false,
 
-  featured: Boolean(
-    holding.featured
-  ),
+  featured:
+    form.featured ?? false,
 
   publish_status:
-    holding.publishStatus ||
+    form.publishStatus ||
     "Published",
 
   chart_image_url:
-    holding.chartImageUrl || "",
+    form.chartImageUrl || null,
 
   research_pdf_url:
-    holding.researchPdfUrl || "",
+    form.researchPdfUrl || null,
 
-  thesis: String(
-    holding.thesis || ""
-  ).trim(),
+  thesis:
+    form.thesis || "",
 
-  tradingview_symbol: String(
-    holding.tradingviewSymbol || ""
-  ).trim(),
+  tradingview_symbol:
+    form.tradingviewSymbol || "",
 
   holding_status:
-    holding.holdingStatus ||
+    form.holdingStatus ||
     "Active",
 
   trade_status:
-    holding.tradeStatus ||
+    form.tradeStatus ||
     "Active",
 
-  /* Dhan instrument details */
+  /* ======================================
+     REALISED RETURN
+  ====================================== */
+
+  exit_price:
+    form.exitPrice === "" ||
+    form.exitPrice === null ||
+    form.exitPrice === undefined
+      ? null
+      : Number(
+          form.exitPrice
+        ),
+
+  exit_date:
+    form.exitDate || null,
+
+  realised_return:
+    form.realisedReturn === "" ||
+    form.realisedReturn === null ||
+    form.realisedReturn === undefined
+      ? null
+      : Number(
+          form.realisedReturn
+        ),
+
+  /* ======================================
+     DHAN DETAILS
+  ====================================== */
 
   security_id:
-    holding.securityId === "" ||
-    holding.securityId === null ||
-    holding.securityId === undefined
+    form.securityId === "" ||
+    form.securityId === null ||
+    form.securityId === undefined
       ? null
-      : Number(holding.securityId),
+      : String(
+          form.securityId
+        ),
 
   exchange:
-    String(
-      holding.exchange || "NSE"
-    )
-      .trim()
-      .toUpperCase(),
+    form.exchange || "NSE",
 
   segment:
-    String(
-      holding.segment || "NSE_EQ"
-    )
-      .trim()
-      .toUpperCase(),
+    form.segment || "NSE_EQ",
+
+  cmp_updated_at:
+    form.cmpUpdatedAt || null,
 });
 
 /* =========================================================
@@ -516,6 +542,7 @@ export const mapHoldingFromDB = (
 
   recommendationDate:
     holding.recommendation_date ||
+    holding.recommendationDate ||
     "",
 
   stock:
@@ -526,10 +553,12 @@ export const mapHoldingFromDB = (
 
   tradeType:
     holding.trade_type ||
+    holding.tradeType ||
     "Swing",
 
   marketCategory:
     holding.market_category ||
+    holding.marketCategory ||
     "Other",
 
   entry: Number(
@@ -541,34 +570,43 @@ export const mapHoldingFromDB = (
   ),
 
   stopLoss: Number(
-    holding.stop_loss || 0
+    holding.stop_loss ??
+      holding.stopLoss ??
+      0
   ),
 
   target1: Number(
-    holding.target1 || 0
+    holding.target1 ??
+      holding.target_1 ??
+      0
   ),
 
   target2: Number(
-    holding.target2 || 0
+    holding.target2 ??
+      holding.target_2 ??
+      0
   ),
 
   target3: Number(
-    holding.target3 || 0
+    holding.target3 ??
+      holding.target_3 ??
+      0
   ),
 
   conviction:
     holding.conviction || "High",
 
   visibility:
-    holding.visibility ||
-    "Public",
+    holding.visibility || "Public",
 
   accuracyShow:
     holding.accuracy_show ??
+    holding.accuracyShow ??
     true,
 
   accuracyBlur:
     holding.accuracy_blur ??
+    holding.accuracyBlur ??
     false,
 
   featured: Boolean(
@@ -577,14 +615,17 @@ export const mapHoldingFromDB = (
 
   publishStatus:
     holding.publish_status ||
+    holding.publishStatus ||
     "Published",
 
   chartImageUrl:
     holding.chart_image_url ||
+    holding.chartImageUrl ||
     "",
 
   researchPdfUrl:
     holding.research_pdf_url ||
+    holding.researchPdfUrl ||
     "",
 
   thesis:
@@ -592,23 +633,69 @@ export const mapHoldingFromDB = (
 
   tradingviewSymbol:
     holding.tradingview_symbol ||
+    holding.tradingviewSymbol ||
     "",
 
   holdingStatus:
     holding.holding_status ||
+    holding.holdingStatus ||
     "Active",
 
   tradeStatus:
     holding.trade_status ||
+    holding.tradeStatus ||
     "Active",
 
-  /* Dhan instrument details */
+  /* =====================================================
+     EXIT / REALISED RETURN DETAILS
+  ===================================================== */
+
+  exitPrice:
+    holding.exit_price === null ||
+    holding.exit_price === undefined
+      ? holding.exitPrice === null ||
+        holding.exitPrice === undefined
+        ? null
+        : Number(
+            holding.exitPrice
+          )
+      : Number(
+          holding.exit_price
+        ),
+
+  exitDate:
+    holding.exit_date ||
+    holding.exitDate ||
+    "",
+
+  realisedReturn:
+    holding.realised_return === null ||
+    holding.realised_return === undefined
+      ? holding.realisedReturn === null ||
+        holding.realisedReturn === undefined
+        ? null
+        : Number(
+            holding.realisedReturn
+          )
+      : Number(
+          holding.realised_return
+        ),
+
+  /* =====================================================
+     DHAN INSTRUMENT DETAILS
+  ===================================================== */
 
   securityId:
     holding.security_id === null ||
     holding.security_id ===
       undefined
-      ? ""
+      ? holding.securityId === null ||
+        holding.securityId ===
+          undefined
+        ? ""
+        : String(
+            holding.securityId
+          )
       : String(
           holding.security_id
         ),
@@ -622,13 +709,16 @@ export const mapHoldingFromDB = (
 
   cmpUpdatedAt:
     holding.cmp_updated_at ||
+    holding.cmpUpdatedAt ||
     null,
 
   createdAt:
     holding.created_at ||
+    holding.createdAt ||
     null,
 
   updatedAt:
     holding.updated_at ||
+    holding.updatedAt ||
     null,
 });
