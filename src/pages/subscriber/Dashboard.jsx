@@ -498,11 +498,11 @@ export default function Dashboard() {
                         </div>
 
                         <Link
-                          to={`/trade/${holding.id}`}
-                          className="subscriber-view-trade"
-                        >
-                          View Trade →
-                        </Link>
+  to={`/dashboard/trade/${holding.id}`}
+  className="subscriber-view-trade"
+>
+  View Trade →
+</Link>
                       </article>
                     );
                   })}

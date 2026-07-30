@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import {
-  getHoldings,
-  mapHoldingFromDB,
-} from "../../services/holdingService";
+import { Link, useLocation,  useParams,} from "react-router-dom";
+import { getHoldings,  mapHoldingFromDB,} from "../../services/holdingService";
 import "./TradeDetails.css";
 
 const normalize = (value) =>
@@ -13,32 +10,93 @@ const normalize = (value) =>
 
 export default function TradeDetails() {
   const { id } = useParams();
+  const { pathname } = useLocation();
 
+const isSubscriberView =
+  pathname.startsWith("/dashboard/trade/");
   const [trade, setTrade] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadTrade();
-  }, [id]);
+  }, [id, isSubscriberView]);
 
   const loadTrade = async () => {
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      const rows = await getHoldings();
+    const rows = await getHoldings();
 
-      const selected = (rows || [])
-        .map(mapHoldingFromDB)
-        .find((item) => String(item.id) === String(id));
+    const selected = (rows || [])
+      .map(mapHoldingFromDB)
+      .find(
+        (item) =>
+          String(item.id) === String(id)
+      );
 
-      setTrade(selected || null);
-    } catch (error) {
-      console.error("Trade details load error:", error);
-      alert(error.message || "Failed to load trade details");
-    } finally {
-      setLoading(false);
+    if (!selected) {
+      setTrade(null);
+      return;
     }
-  };
+
+    const visibility = normalize(
+      selected.visibility
+    );
+
+    const publishStatus = normalize(
+      selected.publishStatus ||
+        selected.publish_status
+    );
+
+    const tradeStatus = normalize(
+      selected.tradeStatus ||
+        selected.trade_status
+    );
+
+    /*
+      Draft and cancelled trades should never appear.
+    */
+    if (
+      publishStatus === "draft" ||
+      tradeStatus === "cancelled"
+    ) {
+      setTrade(null);
+      return;
+    }
+
+    /*
+      Public route:
+      Only public trades may be opened.
+
+      Subscriber route:
+      Public, subscriber and community trades may be opened.
+    */
+    const allowedVisibilities = isSubscriberView
+      ? ["public", "subscriber", "community"]
+      : ["public"];
+
+    if (!allowedVisibilities.includes(visibility)) {
+      setTrade(null);
+      return;
+    }
+
+    setTrade(selected);
+  } catch (error) {
+    console.error(
+      "Trade details load error:",
+      error
+    );
+
+    alert(
+      error?.message ||
+        "Failed to load trade details"
+    );
+
+    setTrade(null);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const getStatus = (holding) => {
     const manualStatus = normalize(
@@ -172,9 +230,14 @@ export default function TradeDetails() {
             This trade may have been removed or is no longer available.
           </p>
 
-          <Link to="/funds" className="trade-primary-button">
-            Back to Portfolio
-          </Link>
+          <Link
+  to={isSubscriberView ? "/dashboard" : "/funds"}
+  className="trade-primary-button"
+>
+  {isSubscriberView
+    ? "Back to Dashboard"
+    : "Back to Portfolio"}
+</Link>
         </div>
       </main>
     );
@@ -184,10 +247,9 @@ export default function TradeDetails() {
   const roi = getReturn(trade);
   const isPositive = roi >= 0;
 
-  const backPath =
-    normalize(trade.visibility) === "subscriber"
-      ? "/dashboard"
-      : "/funds";
+  const backPath = isSubscriberView
+  ? "/dashboard"
+  : "/funds";
 
   const metricCards = [
     {
@@ -236,9 +298,15 @@ export default function TradeDetails() {
   return (
     <main className="trade-details-page">
       <div className="trade-details-container">
-        <Link to={backPath} className="trade-back-link">
-          ← Back
-        </Link>
+        <Link
+  to={backPath}
+  className="trade-back-link"
+>
+  ←{" "}
+  {isSubscriberView
+    ? "Back to Dashboard"
+    : "Back to Portfolio"}
+</Link>
 
         <section className="trade-hero-card">
           <div className="trade-hero-content">
