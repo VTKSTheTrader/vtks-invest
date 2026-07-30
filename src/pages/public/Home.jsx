@@ -476,11 +476,11 @@ export default function Home() {
         <section className="latest-section">
           <div className="section-title">
             <span>
-              📊 VTKS Fund Portfolio
+              📊 VTKS Knowledge Portfolio
             </span>
 
             <h2>
-              Latest Portfolio Trades
+              Latest Insights
             </h2>
 
             <p>

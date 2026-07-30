@@ -478,13 +478,11 @@ export default function FundList() {
       <div style={headerStyle}>
         <div>
           <h2 style={titleStyle}>
-            Portfolio Trades
+            Market Case Studies
           </h2>
 
           <p style={subtitleStyle}>
-            Public trades are displayed completely.
-            Subscriber trade identity and price levels
-            remain protected until the admin reveals them.
+            Educational market studies are publicly available, while member-exclusive trade details and price levels are released only after official publication.
           </p>
         </div>
 
@@ -749,10 +747,10 @@ function PortfolioCard({
           }
         >
           {protectedTrade
-            ? "🔒 Subscriber Trade"
+            ? "🔒 Members-Only Market Study"
             : isSubscriberTrade
-              ? "🌐 Revealed Subscriber Trade"
-              : "🌐 Public Trade"}
+              ? "🌐 Featured Member Study"
+              : "🌐 Published Market Study"}
         </span>
 
         <StatusBadge status={status} />

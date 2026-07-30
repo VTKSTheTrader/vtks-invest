@@ -472,17 +472,11 @@ const realisedAverageReturn =
         </span>
 
         <h1>
-          Accuracy &amp; Performance
+          Research Performance 
         </h1>
 
         <p>
-          Track VTKS public and
-          subscriber trade performance
-          through transparent win rate,
-          return and trade-status
-          statistics. Subscriber trade
-          details remain protected until
-          publicly revealed.
+          Explore the performance of VTKS market studies through transparent statistics, including study outcomes and average performance. Member-exclusive study details remain protected until officially published.
         </p>
 
         <div className="accuracy-refresh-row">
@@ -525,7 +519,7 @@ const realisedAverageReturn =
       }
     </h2>
 
-    <p>Total Tracked Trades</p>
+    <p>Published Studies</p>
   </div>
 
   <div className="accuracy-card">
@@ -535,7 +529,7 @@ const realisedAverageReturn =
       }
     </h2>
 
-    <p>Active Trades</p>
+    <p>Active Studies</p>
   </div>
 
   <div className="accuracy-card">
@@ -545,7 +539,7 @@ const realisedAverageReturn =
       }
     </h2>
 
-    <p>Closed Trades</p>
+    <p>Closed Studies</p>
   </div>
 
   <div className="accuracy-card">
@@ -705,7 +699,7 @@ const realisedAverageReturn =
       <div className="accuracy-table-wrap">
         <div className="accuracy-table-header">
           <div>
-            <h2>Recent Trades</h2>
+            <h2>Recent Analysis</h2>
 
             <p>
               Showing {ITEMS_PER_PAGE}{" "}
@@ -745,7 +739,7 @@ const realisedAverageReturn =
                   <tr>
                     <th>Stock</th>
                     <th>Sector</th>
-                    <th>Trade</th>
+                    <th>Trade Type</th>
                     <th>Entry</th>
                     <th>CMP</th>
                     <th>SL</th>
