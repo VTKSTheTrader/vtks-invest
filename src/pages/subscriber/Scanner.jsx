@@ -593,7 +593,7 @@ export default function Scanner() {
 const pageStyle = {
   minHeight: "100vh",
   background: "#f8fafc",
-  padding: "40px",
+  padding: "32px",
 };
 
 const loadingStyle = {
@@ -747,20 +747,22 @@ const resultSummary = {
 };
 
 const scannerGrid = {
-  display: "grid",
+   display: "grid",
   gridTemplateColumns:
-    "repeat(auto-fit, minmax(290px, 1fr))",
-  gap: "22px",
+    "repeat(5, minmax(0, 1fr))",
+  gap: "18px",
+  alignItems: "stretch",
 };
 
 const scannerCard = {
   display: "flex",
   flexDirection: "column",
+  minWidth: 0,
   minHeight: "330px",
   background: "#ffffff",
   border: "1px solid #e2e8f0",
-  borderRadius: "22px",
-  padding: "27px",
+  borderRadius: "20px",
+  padding: "22px",
   boxShadow:
     "0 12px 30px rgba(15,23,42,.05)",
 };
@@ -817,9 +819,12 @@ const featuredBadge = {
   fontWeight: 800,
 };
 
-const scannerTitle = {
+const scannerTitle =  {
   color: "#0f172a",
-  margin: "0 0 12px",
+  margin: "0 0 10px",
+  fontSize: "22px",
+  lineHeight: 1.25,
+  overflowWrap: "anywhere",
 };
 
 const scannerDescription = {
@@ -836,8 +841,9 @@ const openButton = {
   background: "#2563eb",
   color: "#ffffff",
   textDecoration: "none",
-  padding: "12px 18px",
-  borderRadius: "12px",
+  padding: "11px 15px",
+  borderRadius: "10px",
+  fontSize: "14px",
   fontWeight: 800,
 };
 
