@@ -156,9 +156,63 @@ const isSubscriberView =
 
   const getReturn = (holding) => {
     const entry = Number(holding.entry || 0);
-    const cmp = Number(holding.cmp || 0);
 
     if (!entry) return 0;
+
+    const tradeStatus = getStatus(holding);
+
+    const completedStatuses = [
+      "booked profit",
+      "sl hit",
+      "target 1 hit",
+      "target 2 hit",
+      "target 3 hit",
+    ];
+
+    const isCompletedTrade =
+      completedStatuses.includes(tradeStatus);
+
+    const realisedReturn =
+      holding.realisedReturn ??
+      holding.realised_return;
+
+    if (
+      isCompletedTrade &&
+      realisedReturn !== null &&
+      realisedReturn !== undefined &&
+      realisedReturn !== ""
+    ) {
+      const parsedReturn = Number(realisedReturn);
+
+      if (Number.isFinite(parsedReturn)) {
+        return parsedReturn;
+      }
+    }
+
+    const exitPrice =
+      holding.exitPrice ??
+      holding.exit_price;
+
+    if (
+      isCompletedTrade &&
+      exitPrice !== null &&
+      exitPrice !== undefined &&
+      exitPrice !== ""
+    ) {
+      const parsedExitPrice = Number(exitPrice);
+
+      if (
+        Number.isFinite(parsedExitPrice) &&
+        parsedExitPrice > 0
+      ) {
+        return (
+          ((parsedExitPrice - entry) / entry) *
+          100
+        );
+      }
+    }
+
+    const cmp = Number(holding.cmp || entry);
 
     return ((cmp - entry) / entry) * 100;
   };
@@ -244,12 +298,40 @@ const isSubscriberView =
   }
 
   const status = getStatus(trade);
+
+  const completedStatuses = [
+    "booked profit",
+    "sl hit",
+    "target 1 hit",
+    "target 2 hit",
+    "target 3 hit",
+  ];
+
+  const isCompletedTrade =
+    completedStatuses.includes(status);
+
+  const savedExitPrice =
+    trade.exitPrice ??
+    trade.exit_price;
+
+  const displayPrice = isCompletedTrade
+    ? savedExitPrice || trade.cmp
+    : trade.cmp;
+
   const roi = getReturn(trade);
   const isPositive = roi >= 0;
 
+  const roiLabel = isCompletedTrade
+    ? "Realised ROI"
+    : "Current ROI";
+
+  const priceLabel = isCompletedTrade
+    ? "Exit Price"
+    : "Current Market Price";
+
   const backPath = isSubscriberView
-  ? "/dashboard"
-  : "/funds";
+    ? "/dashboard"
+    : "/funds";
 
   const metricCards = [
     {
@@ -258,9 +340,9 @@ const isSubscriberView =
       icon: "🎯",
     },
     {
-      label: "Current Market Price",
-      value: formatCurrency(trade.cmp),
-      icon: "📈",
+      label: priceLabel,
+      value: formatCurrency(displayPrice),
+      icon: isCompletedTrade ? "✅" : "📈",
     },
     {
       label: "Stop Loss",
@@ -358,7 +440,7 @@ const isSubscriberView =
                 : "trade-roi-negative"
             }`}
           >
-            <span>Current ROI</span>
+            <span>{roiLabel}</span>
 
             <strong>
               {isPositive ? "+" : ""}
@@ -367,7 +449,7 @@ const isSubscriberView =
 
             <small>
               {formatCurrency(trade.entry)} →{" "}
-              {formatCurrency(trade.cmp)}
+              {formatCurrency(displayPrice)}
             </small>
           </div>
         </section>

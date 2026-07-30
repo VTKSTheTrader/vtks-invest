@@ -210,50 +210,65 @@ export default function FundList() {
 
     const tradeStatus = getStatus(holding);
 
-    let exitPrice = Number(
+    const completedStatuses = [
+      "Booked Profit",
+      "SL Hit",
+      "Target 1 Hit",
+      "Target 2 Hit",
+      "Target 3 Hit",
+    ];
+
+    const isCompletedTrade =
+      completedStatuses.includes(tradeStatus);
+
+    const savedRealisedReturn =
+      holding.realisedReturn ??
+      holding.realised_return;
+
+    if (
+      isCompletedTrade &&
+      savedRealisedReturn !== null &&
+      savedRealisedReturn !== undefined &&
+      savedRealisedReturn !== ""
+    ) {
+      const realisedReturn = Number(
+        savedRealisedReturn
+      );
+
+      if (Number.isFinite(realisedReturn)) {
+        return realisedReturn;
+      }
+    }
+
+    const savedExitPrice =
+      holding.exitPrice ??
+      holding.exit_price;
+
+    if (
+      isCompletedTrade &&
+      savedExitPrice !== null &&
+      savedExitPrice !== undefined &&
+      savedExitPrice !== ""
+    ) {
+      const exitPrice = Number(savedExitPrice);
+
+      if (
+        Number.isFinite(exitPrice) &&
+        exitPrice > 0
+      ) {
+        return (
+          ((exitPrice - entry) / entry) *
+          100
+        );
+      }
+    }
+
+    const livePrice = Number(
       holding.cmp || entry
     );
 
-    if (tradeStatus === "Target 1 Hit") {
-      exitPrice = Number(
-        holding.target1 ||
-          holding.cmp ||
-          entry
-      );
-    }
-
-    if (tradeStatus === "Target 2 Hit") {
-      exitPrice = Number(
-        holding.target2 ||
-          holding.cmp ||
-          entry
-      );
-    }
-
-    if (tradeStatus === "Target 3 Hit") {
-      exitPrice = Number(
-        holding.target3 ||
-          holding.cmp ||
-          entry
-      );
-    }
-
-    if (tradeStatus === "SL Hit") {
-      exitPrice = Number(
-        holding.stopLoss ||
-          holding.cmp ||
-          entry
-      );
-    }
-
-    if (tradeStatus === "Booked Profit") {
-      exitPrice = Number(
-        holding.cmp || entry
-      );
-    }
-
     return (
-      ((exitPrice - entry) / entry) *
+      ((livePrice - entry) / entry) *
       100
     );
   };
@@ -671,21 +686,36 @@ function PortfolioCard({
     visibility === "subscriber" ||
     visibility === "community";
 
-  /*
-    Pre-decided rules:
-
-    Public:
-    Always fully visible and clickable.
-
-    Subscriber / Community + accuracyBlur true:
-    Blurred and not clickable.
-
-    Subscriber / Community + accuracyBlur false:
-    Fully revealed and clickable.
-  */
   const protectedTrade =
     isSubscriberTrade &&
     Boolean(holding.accuracyBlur);
+
+  const completedStatuses = [
+    "Booked Profit",
+    "SL Hit",
+    "Target 1 Hit",
+    "Target 2 Hit",
+    "Target 3 Hit",
+  ];
+
+  const isCompletedTrade =
+    completedStatuses.includes(status);
+
+  const savedExitPrice =
+    holding.exitPrice ??
+    holding.exit_price;
+
+  const displayPrice = isCompletedTrade
+    ? savedExitPrice || holding.cmp
+    : holding.cmp;
+
+  const displayPriceLabel = isCompletedTrade
+    ? "Exit Price"
+    : "Live CMP";
+
+  const returnLabel = isCompletedTrade
+    ? "Realised ROI"
+    : "ROI";
 
   const protectedValue = (value) => {
     if (!protectedTrade) {
@@ -747,15 +777,17 @@ function PortfolioCard({
         />
 
         <Detail
-          label="Live CMP"
+          label={displayPriceLabel}
           value={protectedValue(
-            formatPrice(holding.cmp)
+            displayPrice
+              ? formatPrice(displayPrice)
+              : "₹—"
           )}
         />
 
         <Detail
-          label="ROI"
-          value={
+          label={returnLabel}
+          value={protectedValue(
             <strong
               style={{
                 color:
@@ -765,9 +797,9 @@ function PortfolioCard({
               }}
             >
               {roi >= 0 ? "+" : ""}
-              {roi.toFixed(2)}%
+              {Number(roi || 0).toFixed(2)}%
             </strong>
-          }
+          )}
         />
 
         <Detail
