@@ -890,6 +890,56 @@ const realisedAverageReturn =
           </>
         )}
       </div>
+<section className="accuracy-disclosure">
+  <div className="accuracy-disclosure-icon">
+    ⚠️
+  </div>
+
+  <div className="accuracy-disclosure-content">
+    <div className="accuracy-disclosure-header">
+      <span className="accuracy-disclosure-eyebrow">
+        Important Information
+      </span>
+
+      <h2>Performance & Risk Disclosure</h2>
+    </div>
+
+    <div className="accuracy-disclosure-copy">
+      <p>
+        The historical performance presented on this page is shared solely for
+        educational and research purposes. Past performance reflects prevailing
+        market conditions at the time of publication and should not be
+        interpreted as a guarantee of future returns or investment performance.
+      </p>
+
+      <p>
+        Every market study is published using the information and market
+        conditions available at the time of analysis. Future market conditions
+        may differ significantly. Always conduct your own research, follow
+        disciplined risk management, and make investment decisions according to
+        your financial objectives and risk tolerance.
+      </p>
+    </div>
+
+    <div className="accuracy-standard-disclaimer">
+      <div className="accuracy-standard-disclaimer-title">
+        <span>📜</span>
+        <strong>Standard Disclaimer</strong>
+      </div>
+
+      <p>
+        Investing in the securities market is subject to market risks. The value
+        of investments and the income derived from them may fluctuate due to
+        changing market conditions, and investors may lose part or all of their
+        invested capital. Please read all related documents carefully, conduct
+        your own research (DYOR), and consult a SEBI-registered investment
+        adviser or other qualified financial professional if you require
+        personalised investment advice. Invest only according to your financial
+        objectives, investment horizon, and risk tolerance.
+      </p>
+    </div>
+  </div>
+</section>
     </section>
   );
 }

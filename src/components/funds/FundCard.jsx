@@ -92,7 +92,7 @@ export default function FundCard({ stock }) {
       </div>
 
       <Link className="fund-details-button" to={`/trade/${stock.id}`}>
-        View Trade →
+        View Analysis →
       </Link>
     </article>
   );

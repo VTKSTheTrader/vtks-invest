@@ -635,11 +635,39 @@ export default function FundList() {
             )}
           </div>
 
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-          />
+          <>
+  <Pagination
+    currentPage={currentPage}
+    totalPages={totalPages}
+    onPageChange={setCurrentPage}
+  />
+
+  <section style={learningDisclosureStyle}>
+    <div style={learningDisclosureIconStyle}>
+      🎓
+    </div>
+
+    <div style={learningDisclosureContentStyle}>
+      <h2 style={learningDisclosureTitleStyle}>
+        Learn Before You Invest
+      </h2>
+            <p style={learningDisclosureTextStyle}>
+              Every market study published on VTKS is intended to help you understand market structure, disciplined decision-making, and risk management through real-world examples. Our objective is to help you build knowledge and confidence—not encourage blind trade execution.
+            </p>
+      
+
+      <p style={learningDisclosureTextStyle}>
+        The content on this platform is shared solely for educational and research purposes. It should not be considered investment advice, a buy or sell recommendation, or a guarantee of future returns. Always perform your own research and manage risk according to your financial goals and risk tolerance.
+      </p>
+
+      <p style={learningDisclosureTextStyle}>
+        VTKS believes that consistent learning, disciplined execution and risk
+        management are more valuable than blindly following any single market
+        idea.
+      </p>
+    </div>
+  </section>
+</>
         </>
       )}
     </section>
@@ -843,7 +871,7 @@ function PortfolioCard({
             onClick={handleViewTrade}
             style={viewTradeButtonStyle}
           >
-            View Trade →
+            View Analysis →
           </button>
         )}
       </div>
@@ -1211,4 +1239,45 @@ const emptyStateStyle = {
   background: "#f8fafc",
   color: "#64748b",
   textAlign: "center",
+};
+const learningDisclosureStyle = {
+  display: "flex",
+  alignItems: "flex-start",
+  gap: "20px",
+  marginTop: "42px",
+  padding: "32px",
+  borderRadius: "22px",
+  background: "#f8fbff",
+  border: "1px solid #dbeafe",
+  boxShadow: "0 15px 35px rgba(15,23,42,.05)",
+};
+
+const learningDisclosureIconStyle = {
+  width: "58px",
+  height: "58px",
+  borderRadius: "16px",
+  background: "#dbeafe",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  fontSize: "30px",
+  flexShrink: 0,
+};
+
+const learningDisclosureContentStyle = {
+  flex: 1,
+};
+
+const learningDisclosureTitleStyle = {
+  margin: "0 0 12px",
+  color: "#1e3a8a",
+  fontSize: "24px",
+  fontWeight: 800,
+};
+
+const learningDisclosureTextStyle = {
+  margin: "0 0 12px",
+  color: "#475569",
+  fontSize: "16px",
+  lineHeight: 1.8,
 };

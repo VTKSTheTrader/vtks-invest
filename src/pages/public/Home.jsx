@@ -485,7 +485,7 @@ export default function Home() {
 
             <p>
               Discover recently published and
-              publicly revealed VTKS trades backed
+              publicly revealed VTKS Ideas backed
               by structured analysis and
               disciplined portfolio management.
             </p>
@@ -552,7 +552,7 @@ export default function Home() {
                     </div>
 
                     <div className="trade-card-link">
-                      View Trade →
+                      View Analysis →
                     </div>
                   </Link>
                 );
@@ -567,7 +567,7 @@ export default function Home() {
 
           <div className="center-btn">
             <Link to="/funds">
-              Explore Complete Fund →
+              Explore Complete Analysis →
             </Link>
           </div>
         </section>

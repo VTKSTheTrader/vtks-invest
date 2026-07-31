@@ -501,7 +501,7 @@ export default function Dashboard() {
   to={`/dashboard/trade/${holding.id}`}
   className="subscriber-view-trade"
 >
-  View Trade →
+  View Analysis →
 </Link>
                       </article>
                     );

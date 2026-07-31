@@ -303,7 +303,7 @@ export default function FundPreview() {
                 </div>
 
                 <div className="fund-preview-open">
-                  View Trade →
+                  View Analysis →
                 </div>
               </Link>
             );
@@ -316,7 +316,7 @@ export default function FundPreview() {
           to="/funds"
           className="fund-preview-button"
         >
-          Explore Complete Fund →
+          Explore Complete Analysis →
         </Link>
       </div>
     </section>
