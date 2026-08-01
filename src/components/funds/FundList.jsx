@@ -482,7 +482,7 @@ export default function FundList() {
           </h2>
 
           <p style={subtitleStyle}>
-            Educational market studies are publicly available, while member-exclusive trade details and price levels are released only after official publication.
+            Educational market studies are publicly available, while member-exclusive Study details and price levels are released only after official publication.
           </p>
         </div>
 
@@ -527,25 +527,25 @@ export default function FundList() {
       <div style={summaryGridStyle}>
         <SummaryCard
           value={visibleHoldings.length}
-          label="Total Tracked Trades"
+          label="Total Tracked Studies"
         />
 
         <SummaryCard
           value={activeCount}
-          label="Active Trades"
+          label="Active Studies"
           valueColor="#16a34a"
         />
 
         <SummaryCard
           value={completedCount}
-          label="Completed Trades"
+          label="Completed Studies"
         />
       </div>
 
       <div style={filtersStyle}>
         <input
           type="search"
-          placeholder="Search stock, sector or trade..."
+          placeholder="Search stock, sector or study..."
           value={search}
           onChange={(event) =>
             setSearch(event.target.value)
