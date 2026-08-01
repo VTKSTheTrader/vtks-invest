@@ -36,22 +36,22 @@ export default function Footer() {
   const socialLinks = [
   {
     label: "Telegram",
-    icon: "✈️",
+    icon: <FaTelegramPlane />,
     url: platform.telegramLink,
   },
   {
     label: "Instagram",
-    icon: "📷",
+    icon: <FaInstagram />,
     url: platform.instagramLink,
   },
   {
     label: "X / Twitter",
-    icon: "𝕏",
+    icon: <FaXTwitter />,
     url: platform.twitterLink,
   },
   {
     label: "YouTube",
-    icon: "▶️",
+    icon: <FaYoutube />,
     url: platform.youtubeLink,
   },
 ].filter((item) => item.url);
