@@ -534,19 +534,21 @@ export default function Dashboard() {
             />
 
             <FeatureCard
-              title="⚡ Scanner Access"
-              subtitle="Latest subscriber-only VTKS market scanners."
-              link="/dashboard/scanner"
-              emptyMessage="No scanners uploaded yet."
-              items={latestScanners.map((scanner) => ({
-                id: scanner.id,
-                title: getScannerTitle(scanner),
-                meta: `${scanner.category || "General"} • ${
-                  scanner.timeframe || "Scanner"
-                }`,
-                url: getScannerUrl(scanner),
-              }))}
-            />
+  title="⚡ Scanner Access"
+  subtitle="Latest subscriber-only VTKS market scanners."
+  link="/dashboard/scanner"
+  dashboardLink="https://chartink.com/dashboard/324723"
+  dashboardLabel="Dashboard"
+  emptyMessage="No scanners uploaded yet."
+  items={latestScanners.map((scanner) => ({
+    id: scanner.id,
+    title: getScannerTitle(scanner),
+    meta: `${scanner.category || "General"} • ${
+      scanner.timeframe || "Scanner"
+    }`,
+    url: getScannerUrl(scanner),
+  }))}
+/>
           </section>
 
           <section className="subscriber-community-feedback-grid">
@@ -659,6 +661,8 @@ function FeatureCard({
   title,
   subtitle,
   link,
+  dashboardLink,
+  dashboardLabel = "Dashboard",
   items,
   emptyMessage,
 }) {
@@ -670,11 +674,27 @@ function FeatureCard({
           <p>{subtitle}</p>
         </div>
 
-        {link && (
-          <Link to={link} className="subscriber-small-link">
-            View All →
-          </Link>
-        )}
+        <div className="subscriber-feature-actions">
+          {dashboardLink && (
+            <a
+              href={dashboardLink}
+              target="_blank"
+              rel="noreferrer"
+              className="subscriber-dashboard-link"
+            >
+              {dashboardLabel}
+            </a>
+          )}
+
+          {link && (
+            <Link
+              to={link}
+              className="subscriber-small-link"
+            >
+              View All →
+            </Link>
+          )}
+        </div>
       </div>
 
       {items.length === 0 ? (
