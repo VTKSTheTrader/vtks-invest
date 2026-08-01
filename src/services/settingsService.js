@@ -11,6 +11,7 @@ export const defaultSettings = {
     supportMobile: "",
     telegramLink: "",
     twitterLink: "",
+    instagramLink: "",
     youtubeLink: "",
   },
 
@@ -176,6 +177,9 @@ const mapFromDatabase = (row) => {
 
       twitterLink:
         row.twitter_link || "",
+      instagramLink:
+  row.instagram_link || "",
+  
 
       youtubeLink:
         row.youtube_link || "",
@@ -330,6 +334,8 @@ const mapToDatabase = (settings) => {
     youtube_link:
       mergedSettings.platform.youtubeLink ||
       "",
+    instagram_link:
+  mergedSettings.platform.instagramLink || "",  
 
     monthly_price: toNumber(
       mergedSettings.plans.monthlyPrice,

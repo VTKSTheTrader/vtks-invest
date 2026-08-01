@@ -23,7 +23,7 @@ export default function Hero() {
 
         <div className="hero-buttons">
           <Link to="/funds" className="hero-primary-btn">
-            Explore VTKS Fund
+            Explore VTKS Analysis
           </Link>
 
           <Link to="/indicators" className="hero-secondary-btn">

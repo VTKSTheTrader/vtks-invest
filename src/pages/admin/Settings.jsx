@@ -244,6 +244,17 @@ export default function Settings() {
               )
             }
           />
+          <input
+  placeholder="Instagram Link"
+  value={settings.platform.instagramLink || ""}
+  onChange={(event) =>
+    update(
+      "platform",
+      "instagramLink",
+      event.target.value
+    )
+  }
+/>
 
           <input
             placeholder="YouTube Link"
@@ -258,6 +269,7 @@ export default function Settings() {
               )
             }
           />
+          
 
           <button
             type="button"

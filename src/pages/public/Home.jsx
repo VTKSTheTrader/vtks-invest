@@ -271,7 +271,7 @@ export default function Home() {
 
           <div className="hero-actions">
             <Link to="/funds">
-              Explore VTKS Fund
+              Explore VTKS Analysis
             </Link>
 
             <Link

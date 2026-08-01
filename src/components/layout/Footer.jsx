@@ -1,6 +1,12 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+import {
+  FaTelegramPlane,
+  FaInstagram,
+  FaYoutube,
+} from "react-icons/fa";
 
+import { FaXTwitter } from "react-icons/fa6";
 import {
   defaultSettings,
   loadSettings,
@@ -28,23 +34,27 @@ export default function Footer() {
     settings?.platform || defaultSettings.platform;
 
   const socialLinks = [
-    {
-      label: "Telegram",
-      icon: "✈️",
-      url: platform.telegramLink,
-    },
-    {
-      label: "X / Twitter",
-      icon: "𝕏",
-      url: platform.twitterLink,
-    },
-    {
-      label: "YouTube",
-      icon: "▶️",
-      url: platform.youtubeLink,
-    },
-  ].filter((item) => item.url);
-
+  {
+    label: "Telegram",
+    icon: "✈️",
+    url: platform.telegramLink,
+  },
+  {
+    label: "Instagram",
+    icon: "📷",
+    url: platform.instagramLink,
+  },
+  {
+    label: "X / Twitter",
+    icon: "𝕏",
+    url: platform.twitterLink,
+  },
+  {
+    label: "YouTube",
+    icon: "▶️",
+    url: platform.youtubeLink,
+  },
+].filter((item) => item.url);
   return (
     <footer className="public-footer">
       <div className="footer-container">
@@ -117,7 +127,7 @@ export default function Footer() {
                   aria-label={item.label}
                   title={item.label}
                 >
-                  <span>{item.icon}</span>
+                  {item.icon}
                 </a>
               ))}
             </div>

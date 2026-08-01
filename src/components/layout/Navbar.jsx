@@ -55,7 +55,7 @@ export default function Navbar({ settings }) {
               className={getNavClass}
               onClick={closeMenu}
             >
-              Fund
+              Analysis
             </NavLink>
           )}
 
