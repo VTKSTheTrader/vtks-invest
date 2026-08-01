@@ -482,13 +482,13 @@ export default function FundList() {
           </h2>
 
           <p style={subtitleStyle}>
-            Educational market studies are publicly available, while member-exclusive Study details and price levels are released only after official publication.
+            Educational market ideas are publicly available, while member-exclusive analysis details and price levels are released only after official publication.
           </p>
         </div>
 
         <div style={headerActionsStyle}>
           <span style={countBadgeStyle}>
-            {filteredHoldings.length} Trades
+            {filteredHoldings.length} Ideas
           </span>
 
           <button
