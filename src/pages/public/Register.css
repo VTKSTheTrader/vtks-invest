@@ -219,7 +219,16 @@
 }
 
 .register-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+
   margin-top: 23px;
+
+  color: #64748b;
+  font-size: 14px;
   text-align: center;
 }
 
@@ -293,5 +302,261 @@
 
   .register-heading h1 {
     font-size: 28px;
+  }
+}
+/* =========================================================
+   REGISTER VALIDATION
+========================================================= */
+
+.register-error-message {
+  margin: 0 0 20px;
+  padding: 13px 15px;
+
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+
+  background: #fef2f2;
+  color: #991b1b;
+
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.register-field-help {
+  display: block;
+  margin-top: 2px;
+
+  color: #64748b;
+
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* =========================================================
+   REGISTRATION SUCCESS SCREEN
+========================================================= */
+
+.register-success-card {
+  text-align: center;
+}
+
+.register-success-icon {
+  width: 74px;
+  height: 74px;
+  margin: 0 auto 20px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 22px;
+
+  background: #dbeafe;
+  color: #1d4ed8;
+
+  font-size: 34px;
+}
+
+.register-success-content {
+  width: 100%;
+}
+
+.register-success-content h1 {
+  margin: 20px 0 12px;
+
+  color: #0f172a;
+
+  font-size: 34px;
+  line-height: 1.15;
+}
+
+.register-success-content > p {
+  margin: 0;
+
+  color: #64748b;
+
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.register-email-highlight {
+  margin: 16px 0 24px;
+  padding: 13px 16px;
+
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+
+  background: #eff6ff;
+  color: #1d4ed8;
+
+  font-size: 15px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.register-next-steps {
+  margin-top: 22px;
+  padding: 22px;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+
+  background: #f8fafc;
+
+  text-align: left;
+}
+
+.register-next-steps h2 {
+  margin: 0 0 17px;
+
+  color: #0f172a;
+
+  font-size: 19px;
+}
+
+.register-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.register-step + .register-step {
+  margin-top: 14px;
+}
+
+.register-step span {
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 50%;
+
+  background: #2563eb;
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.register-step p {
+  margin: 3px 0 0;
+
+  color: #475569;
+
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.register-verification-note {
+  margin-top: 20px;
+  padding: 13px 15px;
+
+  border: 1px solid #fde68a;
+  border-radius: 12px;
+
+  background: #fffbeb;
+  color: #92400e;
+
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.register-existing-account-note {
+  margin-top: 18px !important;
+}
+
+.register-success-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+
+  margin-top: 24px;
+}
+
+.register-success-primary,
+.register-success-secondary {
+  min-height: 46px;
+  padding: 12px 20px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  font-size: 14px;
+  font-weight: 800;
+  text-decoration: none;
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.register-success-primary {
+  border: 1px solid #2563eb;
+
+  background: #2563eb;
+  color: #ffffff;
+
+  box-shadow:
+    0 10px 22px
+    rgba(37, 99, 235, 0.2);
+}
+
+.register-success-primary:hover {
+  transform: translateY(-2px);
+
+  background: #1d4ed8;
+  color: #ffffff;
+}
+
+.register-success-secondary {
+  border: 1px solid #2563eb;
+
+  background: #ffffff;
+  color: #2563eb;
+}
+
+.register-success-secondary:hover {
+  transform: translateY(-2px);
+
+  background: #eff6ff;
+}
+
+/* =========================================================
+   SUCCESS SCREEN RESPONSIVE
+========================================================= */
+
+@media (max-width: 560px) {
+  .register-success-icon {
+    width: 64px;
+    height: 64px;
+
+    border-radius: 19px;
+
+    font-size: 29px;
+  }
+
+  .register-success-content h1 {
+    font-size: 29px;
+  }
+
+  .register-next-steps {
+    padding: 18px 15px;
+  }
+
+  .register-success-actions {
+    flex-direction: column;
+  }
+
+  .register-success-primary,
+  .register-success-secondary {
+    width: 100%;
   }
 }

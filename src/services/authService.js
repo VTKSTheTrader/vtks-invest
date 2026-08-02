@@ -1,6 +1,8 @@
 import { supabase } from "../lib/supabase";
 
-/* ---------------- REGISTER ---------------- */
+/* =========================================================
+   REGISTER
+========================================================= */
 
 export async function registerUser({
   fullName,
@@ -8,85 +10,230 @@ export async function registerUser({
   mobile,
   password,
 }) {
-  const { data, error } = await supabase.auth.signUp({
-    email: email.trim().toLowerCase(),
-    password,
-    options: {
-      data: {
-        full_name: fullName,
-        mobile,
-      },
-    },
-  });
+  const normalizedEmail = String(email || "")
+    .trim()
+    .toLowerCase();
 
-  if (error) throw error;
+  const normalizedFullName = String(
+    fullName || ""
+  ).trim();
+
+  const normalizedMobile = String(
+    mobile || ""
+  ).trim();
+
+  const { data, error } =
+    await supabase.auth.signUp({
+      email: normalizedEmail,
+      password,
+
+      options: {
+        data: {
+          full_name: normalizedFullName,
+          mobile: normalizedMobile,
+        },
+
+        emailRedirectTo: `${window.location.origin}/login`,
+      },
+    });
+
+  if (error) {
+    const errorCode = String(
+      error.code || ""
+    ).toLowerCase();
+
+    const errorMessage = String(
+      error.message || ""
+    ).toLowerCase();
+
+    if (
+      errorCode === "user_already_exists" ||
+      errorMessage.includes(
+        "already registered"
+      ) ||
+      errorMessage.includes(
+        "already exists"
+      ) ||
+      errorMessage.includes(
+        "user already"
+      )
+    ) {
+      throw new Error(
+        "This email address is already registered. Please log in or use Forgot Password."
+      );
+    }
+
+    throw error;
+  }
+
+  /*
+    When email confirmation is enabled, Supabase may return
+    an obfuscated user object for an email that already exists.
+
+    A newly created email/password account normally contains
+    an email identity. The obfuscated duplicate response can
+    contain an empty identities array.
+  */
+  const identities = data?.user?.identities;
+
+  if (
+    Array.isArray(identities) &&
+    identities.length === 0
+  ) {
+    throw new Error(
+      "This email address is already registered. Please log in or use Forgot Password."
+    );
+  }
+
+  if (!data?.user) {
+    throw new Error(
+      "Registration could not be completed. Please try again."
+    );
+  }
 
   return data;
 }
 
+/* =========================================================
+   LOGIN
+========================================================= */
 /* ---------------- LOGIN ---------------- */
 
 export async function loginUser(email, password) {
+  const normalizedEmail = String(email || "")
+    .trim()
+    .toLowerCase();
+
   const { data, error } =
     await supabase.auth.signInWithPassword({
-      email: email.trim().toLowerCase(),
+      email: normalizedEmail,
       password,
     });
 
-  if (error) throw error;
+  if (error) {
+    throw error;
+  }
 
-  const { data: profile, error: profileError } =
-    await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", data.user.id)
-      .single();
+  if (!data?.user) {
+    throw new Error(
+      "Unable to retrieve your account details."
+    );
+  }
 
-  if (profileError) throw profileError;
+  const {
+    data: profile,
+    error: profileError,
+  } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", data.user.id)
+    .limit(1)
+    .maybeSingle();
+
+  if (profileError) {
+    console.error(
+      "Profile loading error:",
+      profileError
+    );
+
+    throw new Error(
+      "Login succeeded, but your profile could not be loaded."
+    );
+  }
+
+  /*
+    Preserve the database profile whenever it exists.
+    This keeps the admin role and existing subscriber
+    permissions unchanged.
+
+    If an Auth user has no profile row, use safe Auth
+    metadata so login does not crash.
+  */
+  const resolvedProfile =
+    profile || {
+      id: data.user.id,
+      email: data.user.email || normalizedEmail,
+      full_name:
+        data.user.user_metadata?.full_name || "",
+      mobile:
+        data.user.user_metadata?.mobile || "",
+      role:
+        data.user.user_metadata?.role ||
+        "subscriber",
+      status: "active",
+    };
 
   return {
     user: data.user,
-    profile,
+    profile: resolvedProfile,
   };
 }
 
-/* ---------------- LOGOUT ---------------- */
+/* =========================================================
+   LOGOUT
+========================================================= */
 
 export async function logoutUser() {
-  await supabase.auth.signOut();
+  const { error } =
+    await supabase.auth.signOut();
+
+  if (error) {
+    throw error;
+  }
 }
 
-/* ---------------- RESET MAIL ---------------- */
+/* =========================================================
+   RESET PASSWORD EMAIL
+========================================================= */
 
-export async function sendResetEmail(email) {
+export async function sendResetEmail(
+  email
+) {
+  const normalizedEmail = String(email || "")
+    .trim()
+    .toLowerCase();
+
   const { error } =
     await supabase.auth.resetPasswordForEmail(
-      email.trim().toLowerCase(),
+      normalizedEmail,
       {
-        redirectTo:
-          window.location.origin + "/reset-password",
+        redirectTo: `${window.location.origin}/reset-password`,
       }
     );
 
-  if (error) throw error;
+  if (error) {
+    throw error;
+  }
 }
 
-/* ---------------- CHANGE PASSWORD ---------------- */
+/* =========================================================
+   CHANGE PASSWORD
+========================================================= */
 
-export async function updatePassword(password) {
+export async function updatePassword(
+  password
+) {
   const { error } =
     await supabase.auth.updateUser({
       password,
     });
 
-  if (error) throw error;
+  if (error) {
+    throw error;
+  }
 }
 
-/* ---------------- CURRENT USER ---------------- */
+/* =========================================================
+   CURRENT USER
+========================================================= */
 
 export async function getCurrentUser() {
-  const { data } =
+  const { data, error } =
     await supabase.auth.getUser();
 
-  return data.user;
+  if (error) {
+    throw error;
+  }
+
+  return data?.user || null;
 }
