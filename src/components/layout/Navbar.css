@@ -482,8 +482,16 @@
   text-transform: uppercase;
 }
 /* Keep mobile navbar clean */
-@media (max-width: 1100px) {
+@@media (max-width: 768px) {
   .brand-philosophy {
-    display: none;
+    display: block;
+    margin-top: 4px;
+    max-width: 210px;
+    font-size: 7px;
+    font-weight: 800;
+    color: #475569;
+    letter-spacing: 0.2px;
+    line-height: 1.2;
+    white-space: nowrap;
   }
 }
