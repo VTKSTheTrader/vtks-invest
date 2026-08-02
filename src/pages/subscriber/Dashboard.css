@@ -466,13 +466,14 @@
 }
 
 @media (max-width: 700px) {
+
   .subscriber-dashboard-page {
     padding: 18px;
   }
 
   .subscriber-hero {
-    align-items: flex-start;
     flex-direction: column;
+    align-items: flex-start;
     padding: 28px 22px;
   }
 
@@ -482,20 +483,43 @@
 
   .subscriber-section-header,
   .subscriber-feature-header {
-    align-items: flex-start;
     flex-direction: column;
+    align-items: flex-start;
   }
 
-  .subscriber-small-link {
+  .subscriber-feature-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
     width: 100%;
+    justify-content: flex-start;
+    margin-top: 12px;
+  }
+
+  .subscriber-dashboard-link,
+  .subscriber-small-link {
+
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+
+    width: auto;
+    min-width: 120px;
+    height: 44px;
+
+    padding: 0 18px;
+
     text-align: center;
+
+    flex: 0 0 auto;
   }
 
   .subscriber-trade-grid {
     grid-template-columns: 1fr;
   }
-}
 
+}
 @media (max-width: 480px) {
   .subscriber-dashboard-page {
     padding: 10px;
@@ -708,41 +732,20 @@ transform:translateY(-2px);
     width: 100%;
   }
 }
-.subscriber-feature-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.subscriber-dashboard-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  padding: 10px 18px;
-
-  border: 1px solid #2563eb;
-  border-radius: 12px;
-
-  background: #ffffff;
-  color: #2563eb;
-
-  text-decoration: none;
-  font-weight: 700;
-
-  transition: all 0.2s ease;
-}
-
-.subscriber-dashboard-link:hover {
-  background: #2563eb;
-  color: #ffffff;
-  transform: translateY(-2px);
-}
-
 @media (max-width: 768px) {
-  .subscriber-feature-actions {
-    width: 100%;
-    justify-content: space-between;
-    margin-top: 14px;
+
+  .subscriber-feature-actions{
+    display:flex;
+    gap:10px;
+    justify-content:flex-start;
+    flex-wrap:wrap;
   }
+
+  .subscriber-dashboard-link,
+  .subscriber-small-link{
+    width:auto;
+    min-width:120px;
+    flex:0 0 auto;
+  }
+
 }
