@@ -1,0 +1,48 @@
+/* ===========================
+   Scanner Grid
+=========================== */
+
+.subscriber-scanner-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+  width: 100%;
+  align-items: start;
+}
+
+/* Force every card to behave correctly */
+.subscriber-scanner-grid > article {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+/* ===========================
+   Tablet
+=========================== */
+
+@media (max-width: 992px) {
+  .subscriber-scanner-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+}
+
+/* ===========================
+   Mobile
+=========================== */
+
+@media (max-width: 768px) {
+  .subscriber-scanner-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .subscriber-scanner-grid > article {
+    width: 100%;
+  }
+}

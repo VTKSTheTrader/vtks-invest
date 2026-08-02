@@ -8,7 +8,7 @@ import {
   getSubscriberMembership,
   getSubscriberScanners,
 } from "../../services/subscriberService";
-
+import "./Scanner.css";
 const ITEMS_PER_PAGE = 4;
 
 const normalize = (value) =>
@@ -491,7 +491,7 @@ export default function Scanner() {
                 </span>
               </div>
 
-              <section style={scannerGrid}>
+              <section className="subscriber-scanner-grid">
                 {paginatedScanners.map(
                   (item) => (
                     <article
@@ -746,12 +746,6 @@ const resultSummary = {
   flexWrap: "wrap",
 };
 
-const scannerGrid = {
-  display: "grid",
-  gridTemplateColumns: "repeat(4, 1fr)",
-  gap: "20px",
-  alignItems: "stretch",
-};
 
 const scannerCard = {
   display: "flex",
