@@ -19,9 +19,18 @@ export default function Navbar({ settings }) {
           to="/"
           className="brand-logo"
           onClick={closeMenu}
+          aria-label="VTKS HUB Home"
         >
-          <span className="brand-vtks">VTKS</span>
-          <span className="brand-hub">HUB</span>
+          <div className="brand-content">
+            <div className="brand-logo-main">
+              <span className="brand-vtks">VTKS</span>
+              <span className="brand-hub">HUB</span>
+            </div>
+
+            <span className="brand-philosophy">
+              Vision • Trend • Knowledge • Strategy
+            </span>
+          </div>
         </NavLink>
 
         <button
