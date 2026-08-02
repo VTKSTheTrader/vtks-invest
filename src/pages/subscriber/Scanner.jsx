@@ -9,7 +9,7 @@ import {
   getSubscriberScanners,
 } from "../../services/subscriberService";
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 4;
 
 const normalize = (value) =>
   String(value || "")
@@ -593,7 +593,7 @@ export default function Scanner() {
 const pageStyle = {
   minHeight: "100vh",
   background: "#f8fafc",
-  padding: "32px",
+  padding: "clamp(16px,3vw,32px)",
 };
 
 const loadingStyle = {
@@ -747,10 +747,9 @@ const resultSummary = {
 };
 
 const scannerGrid = {
-   display: "grid",
-  gridTemplateColumns:
-    "repeat(5, minmax(0, 1fr))",
-  gap: "18px",
+  display: "grid",
+  gridTemplateColumns: "repeat(4, 1fr)",
+  gap: "20px",
   alignItems: "stretch",
 };
 
@@ -758,7 +757,7 @@ const scannerCard = {
   display: "flex",
   flexDirection: "column",
   minWidth: 0,
-  minHeight: "330px",
+  minHeight: "280px",
   background: "#ffffff",
   border: "1px solid #e2e8f0",
   borderRadius: "20px",
@@ -819,12 +818,13 @@ const featuredBadge = {
   fontWeight: 800,
 };
 
-const scannerTitle =  {
+const scannerTitle = {
   color: "#0f172a",
   margin: "0 0 10px",
   fontSize: "22px",
-  lineHeight: 1.25,
-  overflowWrap: "anywhere",
+  lineHeight: "1.3",
+  wordBreak: "break-word",
+  whiteSpace: "normal",
 };
 
 const scannerDescription = {
