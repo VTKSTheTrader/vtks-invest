@@ -357,9 +357,31 @@
 
 .subscriber-feature-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
   gap: 20px;
   margin-bottom: 26px;
+}
+
+.subscriber-feature-grid .subscriber-feature-card {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.subscriber-feature-grid .subscriber-list-item {
+  min-width: 0;
+}
+
+.subscriber-feature-grid .subscriber-list-item > div {
+  min-width: 0;
+}
+
+.subscriber-feature-grid .subscriber-list-item strong,
+.subscriber-feature-grid .subscriber-list-item p {
+  overflow-wrap: anywhere;
 }
 
 .subscriber-small-link {
@@ -515,6 +537,12 @@
 
 @media (max-width: 1250px) {
   .subscriber-trade-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1350px) {
+  .subscriber-feature-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

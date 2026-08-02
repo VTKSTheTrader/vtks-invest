@@ -50,6 +50,7 @@ export const defaultSettings = {
     showFunds: true,
     showAccuracy: true,
     showScanner: true,
+    showMonthlyLevels: true,
     showTestimonial: true,
     maintenanceMode: false,
   },
@@ -281,6 +282,11 @@ const mapFromDatabase = (row) => {
   row.show_testimonial,
   defaultSettings.website.showTestimonial
 ),
+showMonthlyLevels: toBoolean(
+  row.show_monthly_levels,
+  defaultSettings.website.showMonthlyLevels
+),
+
 
 
       maintenanceMode: toBoolean(
@@ -437,7 +443,10 @@ const mapToDatabase = (settings) => {
   mergedSettings.website.showTestimonial,
   true
 ),
-
+show_monthly_levels: toBoolean(
+  mergedSettings.website.showMonthlyLevels,
+  true
+),
 
     maintenance_mode: toBoolean(
       mergedSettings.website.maintenanceMode,

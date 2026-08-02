@@ -16,14 +16,43 @@ export default function AdminLayout() {
   };
 
   const menuItems = [
-    { to: "/admin", label: "📊 Dashboard", end: true },
-    { to: "/admin/holdings", label: "📈 Holdings" },
-    { to: "/admin/members", label: "👥 Members" },
-    { to: "/admin/scanner", label: "📡 Scanner" },
-    { to: "/admin/library", label: "📚 Library" },
-    { to: "/admin/community-links", label: "📢 Community Links" },
-    { to: "/admin/testimonials", label: "⭐ Feedback" },
-    { to: "/admin/settings", label: "⚙️ Settings" },
+    {
+      to: "/admin",
+      label: "📊 Dashboard",
+      end: true,
+    },
+    {
+      to: "/admin/holdings",
+      label: "📈 Holdings",
+    },
+    {
+      to: "/admin/monthly-levels",
+      label: "📅 Monthly Levels",
+    },
+    {
+      to: "/admin/members",
+      label: "👥 Members",
+    },
+    {
+      to: "/admin/scanner",
+      label: "📡 Scanner",
+    },
+    {
+      to: "/admin/library",
+      label: "📚 Library",
+    },
+    {
+      to: "/admin/community-links",
+      label: "📢 Community Links",
+    },
+    {
+      to: "/admin/testimonials",
+      label: "⭐ Feedback",
+    },
+    {
+      to: "/admin/settings",
+      label: "⚙️ Settings",
+    },
   ];
 
   return (
@@ -52,7 +81,11 @@ export default function AdminLayout() {
       )}
 
       {/* Sidebar */}
-      <aside className={`admin-sidebar ${sidebarOpen ? "open" : ""}`}>
+      <aside
+        className={`admin-sidebar ${
+          sidebarOpen ? "open" : ""
+        }`}
+      >
         <h2>VTKS Control</h2>
 
         <nav>

@@ -8,13 +8,16 @@ export default function Navbar({ settings }) {
   const closeMenu = () => setMenuOpen(false);
 
   const getNavClass = ({ isActive }) =>
-    isActive ? "nav-link nav-link-active" : "nav-link";
+    isActive
+      ? "nav-link nav-link-active"
+      : "nav-link";
 
   const website = settings?.website || {};
 
   return (
     <header className="navbar-wrapper">
       <nav className="navbar">
+        {/* Brand */}
         <NavLink
           to="/"
           className="brand-logo"
@@ -23,8 +26,13 @@ export default function Navbar({ settings }) {
         >
           <div className="brand-content">
             <div className="brand-logo-main">
-              <span className="brand-vtks">VTKS</span>
-              <span className="brand-hub">HUB</span>
+              <span className="brand-vtks">
+                VTKS
+              </span>
+
+              <span className="brand-hub">
+                HUB
+              </span>
             </div>
 
             <span className="brand-philosophy">
@@ -33,16 +41,20 @@ export default function Navbar({ settings }) {
           </div>
         </NavLink>
 
+        {/* Mobile menu button */}
         <button
           type="button"
           className="mobile-menu-button"
-          onClick={() => setMenuOpen((prev) => !prev)}
+          onClick={() =>
+            setMenuOpen((previous) => !previous)
+          }
           aria-label="Toggle navigation menu"
           aria-expanded={menuOpen}
         >
           {menuOpen ? "✕" : "☰"}
         </button>
 
+        {/* Navigation */}
         <div
           className={
             menuOpen
@@ -68,6 +80,15 @@ export default function Navbar({ settings }) {
             </NavLink>
           )}
 
+          {website.showMonthlyLevels && (
+  <NavLink
+    to="/monthly-levels"
+    className={getNavClass}
+    onClick={closeMenu}
+  >
+    Market Outlook
+  </NavLink>
+)}
           {website.showIndicators && (
             <NavLink
               to="/indicators"
@@ -132,6 +153,7 @@ export default function Navbar({ settings }) {
             Contact
           </NavLink>
 
+          {/* Mobile authentication buttons */}
           <div className="mobile-auth-buttons">
             <NavLink
               to="/register"
@@ -151,6 +173,7 @@ export default function Navbar({ settings }) {
           </div>
         </div>
 
+        {/* Desktop authentication buttons */}
         <div className="desktop-auth-buttons">
           <NavLink
             to="/register"

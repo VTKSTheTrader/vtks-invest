@@ -26,7 +26,9 @@ import {
 } from "../../services/communityService";
 
 import "./Dashboard.css";
-
+import {
+  getSubscriberMonthlyLevels,
+} from "../../services/monthlyLevelsService";
 const PORTFOLIO_ITEMS_PER_PAGE = 4;
 const DASHBOARD_PREVIEW_ITEMS = 3;
 
@@ -40,6 +42,7 @@ export default function Dashboard() {
   const [library, setLibrary] = useState([]);
   const [scanners, setScanners] = useState([]);
   const [communityLinks, setCommunityLinks] = useState([]);
+  const [monthlyLevels, setMonthlyLevels] = useState([]);
   const [portfolioPage, setPortfolioPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
@@ -63,11 +66,13 @@ export default function Dashboard() {
         libraryRows,
         scannerRows,
         communityRows,
+        monthlyRows,
       ] = await Promise.all([
         getHoldings(),
         getSubscriberLibrary(),
         getSubscriberScanners(),
         getSubscriberCommunityLinks(),
+        getSubscriberMonthlyLevels(),
       ]);
 
       const visibleHoldings = (holdingRows || [])
@@ -92,6 +97,7 @@ export default function Dashboard() {
       setLibrary(libraryRows || []);
       setScanners(scannerRows || []);
       setCommunityLinks(communityRows || []);
+      setMonthlyLevels(monthlyRows || []);
     } catch (error) {
       console.error("Subscriber dashboard error:", error);
       setLoadError(
@@ -267,6 +273,15 @@ export default function Dashboard() {
       })
       .slice(0, DASHBOARD_PREVIEW_ITEMS);
   }, [communityLinks]);
+  const latestMonthlyLevels = useMemo(() => {
+    return [...monthlyLevels]
+      .sort((first, second) =>
+        String(first.instrument || "").localeCompare(
+          String(second.instrument || "")
+        )
+      )
+      .slice(0, DASHBOARD_PREVIEW_ITEMS);
+  }, [monthlyLevels]);
 
   const getResourceUrl = (item) =>
     item.video_url ||
@@ -519,6 +534,21 @@ export default function Dashboard() {
 
           <section className="subscriber-feature-grid">
             <FeatureCard
+              title="📊 Market Outlook"
+              subtitle="Monthly support, resistance, charts and technical outlook."
+              link="/dashboard/monthly-levels"
+              emptyMessage="No monthly market outlook available."
+              items={latestMonthlyLevels.map((item) => ({
+                id: item.id,
+                title: item.instrument || "Market Outlook",
+                meta: `${item.month || "Current Month"} • ${
+                  item.bias || "Neutral"
+                }`,
+                internalUrl: "/dashboard/monthly-levels",
+              }))}
+            />
+
+            <FeatureCard
               title="📚 Knowledge Library"
               subtitle="Latest premium videos, PDFs and recorded sessions."
               link="/dashboard/library"
@@ -535,7 +565,7 @@ export default function Dashboard() {
 
             <FeatureCard
   title="⚡ Scanner Access"
-  subtitle="Latest subscriber-only VTKS market scanners."
+  subtitle="Latest VTKS market scanners."
   link="/dashboard/scanner"
   dashboardLink="https://chartink.com/dashboard/324723"
   dashboardLabel="Dashboard"
@@ -712,7 +742,11 @@ function FeatureCard({
               <p>{item.meta}</p>
             </div>
 
-            {item.url ? (
+            {item.internalUrl ? (
+              <Link to={item.internalUrl}>
+                Open →
+              </Link>
+            ) : item.url ? (
               <a
                 href={item.url}
                 target="_blank"

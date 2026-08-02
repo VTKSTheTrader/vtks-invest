@@ -569,6 +569,19 @@ export default function Settings() {
             }
           />
           <CheckboxRow
+  label="Show Market Outlook"
+  checked={Boolean(
+    settings.website.showMonthlyLevels
+  )}
+  onChange={(checked) =>
+    update(
+      "website",
+      "showMonthlyLevels",
+      checked
+    )
+  }
+/>
+          <CheckboxRow
   label="Show Testimonials Page"
   checked={Boolean(
               settings.website.showTestimonial

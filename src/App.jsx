@@ -37,13 +37,14 @@ import AdminLibrary from "./pages/admin/Library";
 import AdminSettings from "./pages/admin/Settings";
 import CommunityLinks from "./pages/admin/CommunityLinks";
 import AdminTestimonials from "./pages/admin/Testimonials";
-
+import MonthlyLevels from "./pages/admin/MonthlyLevels";
+import PublicMonthlyLevels from "./pages/public/MonthlyLevels";
 /* Subscriber pages */
 import SubscriberDashboard from "./pages/subscriber/Dashboard";
 import SubscriberLibrary from "./pages/subscriber/Library";
 import SubscriberScanner from "./pages/subscriber/Scanner";
 import Feedback from "./pages/subscriber/Feedback";
-
+import SubscriberMonthlyLevels from "./pages/subscriber/MonthlyLevels";
 function App() {
   return (
     <BrowserRouter>
@@ -52,17 +53,32 @@ function App() {
         <Route element={<PublicLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/funds" element={<Funds />} />
+
           <Route
             path="/indicators"
             element={<Indicators />}
           />
-          <Route path="/pricing" element={<Pricing />} />
-          <Route path="/payment" element={<Payment />} />
-          <Route path="/accuracy" element={<Accuracy />} />
+
+          <Route
+            path="/pricing"
+            element={<Pricing />}
+          />
+
+          <Route
+            path="/payment"
+            element={<Payment />}
+          />
+
+          <Route
+            path="/accuracy"
+            element={<Accuracy />}
+          />
+
           <Route
             path="/resources"
             element={<Resources />}
           />
+
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
 
@@ -72,24 +88,30 @@ function App() {
           />
 
           <Route path="/login" element={<Login />} />
+
           <Route
             path="/register"
             element={<Register />}
           />
+
           <Route
             path="/forgot-password"
             element={<ForgotPassword />}
           />
+
           <Route
             path="/reset-password"
             element={<ResetPassword />}
           />
 
-          {/* Public trade route */}
           <Route
             path="/trade/:id"
             element={<TradeDetails />}
           />
+          <Route
+  path="/monthly-levels"
+  element={<PublicMonthlyLevels />}
+/>
 
           <Route path="*" element={<NotFound />} />
         </Route>
@@ -103,7 +125,10 @@ function App() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<AdminDashboard />} />
+          <Route
+            index
+            element={<AdminDashboard />}
+          />
 
           <Route
             path="holdings"
@@ -139,9 +164,15 @@ function App() {
             path="testimonials"
             element={<AdminTestimonials />}
           />
+
+          {/* Temporary local testing route */}
+          <Route
+            path="monthly-levels"
+            element={<MonthlyLevels />}
+          />
         </Route>
 
-        {/* Subscriber dashboard */}
+        {/* Subscriber routes */}
         <Route
           path="/dashboard"
           element={
@@ -150,6 +181,14 @@ function App() {
             </SubscriberRoute>
           }
         />
+        <Route
+  path="/dashboard/monthly-levels"
+  element={
+    <SubscriberRoute>
+      <SubscriberMonthlyLevels />
+    </SubscriberRoute>
+  }
+/>
 
         <Route
           path="/dashboard/library"
@@ -169,7 +208,6 @@ function App() {
           }
         />
 
-        {/* Protected subscriber trade route */}
         <Route
           path="/dashboard/trade/:id"
           element={

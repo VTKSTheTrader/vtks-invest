@@ -1,0 +1,624 @@
+.monthly-level-stat-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(6, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.monthly-level-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 18px;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+
+  background: #ffffff;
+}
+
+.monthly-level-stat-card > span {
+  font-size: 26px;
+}
+
+.monthly-level-stat-card strong {
+  display: block;
+  color: #0f172a;
+  font-size: 24px;
+}
+
+.monthly-level-stat-card p {
+  margin: 2px 0 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.monthly-level-admin-card {
+  padding: 22px;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+
+  background: #ffffff;
+}
+
+.monthly-level-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+
+  margin-bottom: 22px;
+}
+
+.monthly-level-filter-group {
+  flex: 1;
+
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.monthly-level-search,
+.monthly-level-filter {
+  min-height: 44px;
+  padding: 10px 13px;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 11px;
+
+  background: #ffffff;
+  color: #0f172a;
+
+  font: inherit;
+}
+
+.monthly-level-search {
+  min-width: 250px;
+  flex: 1;
+}
+
+.monthly-level-clear-button,
+.monthly-level-add-button,
+.monthly-level-edit-button,
+.monthly-level-delete-button {
+  min-height: 42px;
+  padding: 10px 14px;
+
+  border-radius: 10px;
+
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+
+  cursor: pointer;
+}
+
+.monthly-level-clear-button {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #475569;
+}
+
+.monthly-level-add-button {
+  flex-shrink: 0;
+
+  border: 1px solid #2563eb;
+
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.monthly-level-state-message {
+  padding: 50px 20px;
+  text-align: center;
+  color: #64748b;
+}
+
+.monthly-level-state-message h3 {
+  margin: 0 0 7px;
+  color: #0f172a;
+}
+
+.monthly-level-pagination-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 14px;
+
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.monthly-level-table-wrapper {
+  overflow-x: auto;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+}
+
+.monthly-level-table {
+  width: 100%;
+  min-width: 1180px;
+
+  border-collapse: collapse;
+}
+
+.monthly-level-table th,
+.monthly-level-table td {
+  padding: 14px 15px;
+
+  border-bottom: 1px solid #e2e8f0;
+
+  text-align: left;
+  vertical-align: middle;
+}
+
+.monthly-level-table th {
+  background: #f8fafc;
+  color: #475569;
+
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.monthly-level-table td {
+  color: #334155;
+  font-size: 14px;
+}
+
+.monthly-level-instrument-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.monthly-level-instrument-cell strong {
+  color: #0f172a;
+}
+
+.monthly-level-instrument-cell span {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.monthly-level-category-badge,
+.monthly-level-bias-badge,
+.monthly-level-visibility-badge,
+.monthly-level-status-badge {
+  display: inline-flex;
+
+  padding: 6px 9px;
+
+  border-radius: 999px;
+
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.monthly-level-category-badge {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.monthly-level-bias-bullish {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.monthly-level-bias-neutral {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.monthly-level-bias-bearish {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.monthly-level-visibility-public {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.monthly-level-visibility-subscriber {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.monthly-level-visibility-private {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.monthly-level-status-published {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.monthly-level-status-draft {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.monthly-level-status-archived {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.monthly-level-chart-links {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.monthly-level-chart-links a {
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.monthly-level-chart-links span {
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.monthly-level-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.monthly-level-edit-button {
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.monthly-level-delete-button {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+@media (max-width: 1200px) {
+  .monthly-level-stat-grid {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 800px) {
+  .monthly-level-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .monthly-level-add-button {
+    width: 100%;
+  }
+
+  .monthly-level-stat-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .monthly-level-stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .monthly-level-search,
+  .monthly-level-filter,
+  .monthly-level-clear-button {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .monthly-level-pagination-summary {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+}
+/* =========================================================
+   TABLET (1024px)
+========================================================= */
+
+@media (max-width: 1024px) {
+
+  .monthly-level-admin-card {
+    padding: 18px;
+  }
+
+  .monthly-level-toolbar {
+    gap: 16px;
+  }
+
+  .monthly-level-filter-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .monthly-level-search,
+  .monthly-level-filter,
+  .monthly-level-clear-button,
+  .monthly-level-add-button {
+    width: 100%;
+  }
+
+  .monthly-level-table {
+    min-width: 1000px;
+  }
+
+}
+
+/* =========================================================
+   MOBILE (768px)
+========================================================= */
+
+@media (max-width:768px){
+
+  .monthly-level-admin-card{
+    padding:16px;
+    border-radius:16px;
+  }
+
+  .monthly-level-stat-grid{
+    grid-template-columns:repeat(2,1fr);
+    gap:12px;
+  }
+
+  .monthly-level-stat-card{
+    padding:14px;
+  }
+
+  .monthly-level-stat-card strong{
+    font-size:20px;
+  }
+
+  .monthly-level-stat-card>span{
+    font-size:22px;
+  }
+
+  .monthly-level-toolbar{
+    margin-bottom:18px;
+  }
+
+  .monthly-level-filter-group{
+    width:100%;
+    gap:10px;
+  }
+
+  .monthly-level-search,
+  .monthly-level-filter,
+  .monthly-level-clear-button,
+  .monthly-level-add-button{
+
+    width:100%;
+    min-width:0;
+  }
+
+  .monthly-level-pagination-summary{
+    flex-direction:column;
+    align-items:flex-start;
+    gap:8px;
+  }
+
+  .monthly-level-table-wrapper{
+    border-radius:12px;
+  }
+
+  .monthly-level-table th,
+  .monthly-level-table td{
+
+    padding:12px 10px;
+    font-size:13px;
+
+  }
+
+}
+
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
+@media (max-width:480px){
+
+  .monthly-level-stat-grid{
+    grid-template-columns:1fr;
+  }
+
+  .monthly-level-stat-card{
+
+    justify-content:center;
+    text-align:center;
+
+  }
+
+  .monthly-level-stat-card>span{
+
+    font-size:24px;
+
+  }
+
+  .monthly-level-toolbar{
+
+    gap:12px;
+
+  }
+
+  .monthly-level-search{
+
+    font-size:14px;
+
+  }
+
+  .monthly-level-filter{
+
+    font-size:14px;
+
+  }
+
+  .monthly-level-add-button,
+  .monthly-level-clear-button{
+
+    min-height:46px;
+
+  }
+
+  .monthly-level-table{
+
+    min-width:900px;
+
+  }
+
+}
+/* =========================================================
+   MOBILE CARD VIEW
+========================================================= */
+
+.monthly-level-mobile-list {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .monthly-level-table-wrapper {
+    display: none;
+  }
+
+  .monthly-level-mobile-list {
+    display: grid;
+    gap: 14px;
+  }
+
+  .monthly-level-mobile-card {
+    padding: 16px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+
+    background: #ffffff;
+
+    box-shadow:
+      0 10px 28px
+      rgba(15, 23, 42, 0.06);
+  }
+
+  .monthly-level-mobile-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+
+    padding-bottom: 14px;
+
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .monthly-level-mobile-card-header > div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .monthly-level-mobile-card-header strong {
+    color: #0f172a;
+
+    font-size: 18px;
+  }
+
+  .monthly-level-mobile-card-header span {
+    color: #64748b;
+
+    font-size: 12px;
+  }
+
+  .monthly-level-mobile-card-grid {
+    display: grid;
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+    gap: 12px;
+
+    padding: 15px 0;
+  }
+
+  .monthly-level-mobile-card-grid div {
+    min-width: 0;
+
+    padding: 11px;
+
+    border-radius: 11px;
+
+    background: #f8fafc;
+  }
+
+  .monthly-level-mobile-card-grid span {
+    display: block;
+
+    margin-bottom: 4px;
+
+    color: #64748b;
+
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .monthly-level-mobile-card-grid strong {
+    display: block;
+
+    color: #0f172a;
+
+    font-size: 13px;
+
+    overflow-wrap: anywhere;
+  }
+
+  .monthly-level-mobile-chart-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+
+    padding-bottom: 15px;
+  }
+
+  .monthly-level-mobile-chart-row a {
+    color: #2563eb;
+
+    font-size: 12px;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .monthly-level-mobile-chart-row span {
+    color: #94a3b8;
+
+    font-size: 12px;
+  }
+
+  .monthly-level-mobile-actions {
+    display: grid;
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .monthly-level-mobile-actions button {
+    width: 100%;
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 380px) {
+  .monthly-level-mobile-card-grid {
+    grid-template-columns: 1fr;
+  }
+}

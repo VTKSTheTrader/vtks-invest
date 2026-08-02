@@ -255,3 +255,33 @@
   font-size: 18px;
   font-weight: 600;
 }
+.website-controls-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.website-control-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  color: #1e293b;
+  font-size: 15px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.website-control-item input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+
+  accent-color: #2563eb;
+  cursor: pointer;
+}
+
+.website-control-item span {
+  line-height: 1.3;
+}
