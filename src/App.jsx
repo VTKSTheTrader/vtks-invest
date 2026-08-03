@@ -27,7 +27,8 @@ import TradeDetails from "./pages/public/TradeDetails";
 import Payment from "./pages/public/Payment";
 import NotFound from "./pages/public/NotFound";
 import PublicTestimonials from "./pages/public/Testimonials";
-
+import AskVTKS from "./pages/public/AskVTKS";
+import AnsweredQueries from "./pages/public/AnsweredQueries";
 /* Admin pages */
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminHoldings from "./pages/admin/Holdings";
@@ -39,6 +40,7 @@ import CommunityLinks from "./pages/admin/CommunityLinks";
 import AdminTestimonials from "./pages/admin/Testimonials";
 import MonthlyLevels from "./pages/admin/MonthlyLevels";
 import PublicMonthlyLevels from "./pages/public/MonthlyLevels";
+import AdminStockQueries from "./pages/admin/StockQueries";
 /* Subscriber pages */
 import SubscriberDashboard from "./pages/subscriber/Dashboard";
 import SubscriberLibrary from "./pages/subscriber/Library";
@@ -112,6 +114,12 @@ function App() {
   path="/monthly-levels"
   element={<PublicMonthlyLevels />}
 />
+<Route path="/ask-vtks" element={<AskVTKS />} />
+
+<Route
+  path="/answered-queries"
+  element={<AnsweredQueries />}
+/>
 
           <Route path="*" element={<NotFound />} />
         </Route>
@@ -149,7 +157,10 @@ function App() {
             path="library"
             element={<AdminLibrary />}
           />
-
+<Route
+  path="stock-queries"
+  element={<AdminStockQueries />}
+/>
           <Route
             path="settings"
             element={<AdminSettings />}

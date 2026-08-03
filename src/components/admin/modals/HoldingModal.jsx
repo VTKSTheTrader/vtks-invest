@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import "./HoldingModal.css";
 import InstrumentSearch from "../InstrumentSearch";
-import { fetchSelectedInstrumentCMP } from "../../../services/holdingService";
+import {
+  fetchSelectedInstrumentCMP,
+  removeHoldingChart,
+} from "../../../services/holdingService";
 const today = new Date().toISOString().split("T")[0];
 
 const marketCategories = [
@@ -37,9 +40,18 @@ const defaultForm = {
   featured: false,
   thesis: "",
   tradingviewSymbol: "",
+  // Legacy single-chart field retained for older holdings.
   chartImageUrl: "",
+
+  // Before / After chart comparison.
+  beforeChartUrl: "",
+  afterChartUrl: "",
+  beforeChartCaption: "",
+  afterChartCaption: "",
+  beforeChart: null,
+  afterChart: null,
+
   researchPdfUrl: "",
-  chartImage: null,
   researchPdf: null,
   securityId: "",
   exchange: "NSE",
@@ -105,7 +117,8 @@ export default function HoldingModal({ onClose, onSave, editingHolding }) {
       editingHolding?.realisedReturn ??
       "",
 
-    chartImage: null,
+    beforeChart: null,
+    afterChart: null,
     researchPdf: null,
   }),
   [editingHolding]
@@ -113,8 +126,20 @@ export default function HoldingModal({ onClose, onSave, editingHolding }) {
 
   const [form, setForm] = useState(initialForm);
   const [saving, setSaving] = useState(false);
-  const [fetchingCMP, setFetchingCMP] = useState(false);
-  const [selectedInstrument, setSelectedInstrument] = useState(null);
+ const [fetchingCMP, setFetchingCMP] =
+  useState(false);
+
+const [selectedInstrument, setSelectedInstrument] =
+  useState(null);
+
+const [removingChart, setRemovingChart] =
+  useState("");
+
+const [chartMessage, setChartMessage] =
+  useState({ type: "", text: "" });
+
+const [chartToRemove, setChartToRemove] =
+  useState(null);
 
   useEffect(() => {
     setForm(initialForm);
@@ -332,6 +357,102 @@ const calculateRealisedReturn = (
     100
   ).toFixed(2);
 };
+const handleRemoveChart = (chartType) => {
+  if (!editingHolding?.id) {
+    setChartMessage({
+      type: "error",
+      text: "Save the holding first before removing an uploaded chart.",
+    });
+    return;
+  }
+
+  const isBefore = chartType === "before";
+  const chartLabel = isBefore
+    ? "Before Chart"
+    : "After Chart";
+
+  const chartUrl = isBefore
+    ? form.beforeChartUrl ||
+      form.chartImageUrl ||
+      ""
+    : form.afterChartUrl || "";
+
+  if (!chartUrl) {
+    setChartMessage({
+      type: "error",
+      text: `No ${chartLabel.toLowerCase()} is currently uploaded.`,
+    });
+    return;
+  }
+
+  setChartMessage({ type: "", text: "" });
+  setChartToRemove({
+    chartType,
+    chartLabel,
+    chartUrl,
+  });
+};
+
+const confirmRemoveChart = async () => {
+  if (!chartToRemove) return;
+
+  const {
+    chartType,
+    chartLabel,
+    chartUrl,
+  } = chartToRemove;
+
+  const isBefore = chartType === "before";
+
+  try {
+    setRemovingChart(chartType);
+    setChartMessage({ type: "", text: "" });
+
+    await removeHoldingChart({
+      holdingId: editingHolding.id,
+      chartType,
+      chartUrl,
+    });
+
+    setForm((previous) => {
+      if (isBefore) {
+        return {
+          ...previous,
+          beforeChart: null,
+          beforeChartUrl: "",
+          beforeChartCaption: "",
+          chartImage: null,
+          chartImageUrl: "",
+        };
+      }
+
+      return {
+        ...previous,
+        afterChart: null,
+        afterChartUrl: "",
+        afterChartCaption: "",
+      };
+    });
+
+    setChartToRemove(null);
+    setChartMessage({
+      type: "success",
+      text: `${chartLabel} removed successfully.`,
+    });
+  } catch (error) {
+    console.error("Remove chart error:", error);
+
+    setChartMessage({
+      type: "error",
+      text:
+        error?.message ||
+        `Unable to remove ${chartLabel.toLowerCase()}.`,
+    });
+  } finally {
+    setRemovingChart("");
+  }
+};
+
   const handleSubmit = async () => {
     if (saving || fetchingCMP) return;
 
@@ -777,19 +898,142 @@ realisedReturn:
             <span>Feature this holding</span>
           </label>
 
-          <Field label="Chart Image">
-            <input
-              type="file"
-              name="chartImage"
-              accept="image/*"
-              onChange={handleChange}
-            />
+          {chartMessage.text && (
+            <div
+              className={`holding-chart-message ${
+                chartMessage.type === "success"
+                  ? "holding-chart-success"
+                  : "holding-chart-error"
+              }`}
+              role={
+                chartMessage.type === "error"
+                  ? "alert"
+                  : "status"
+              }
+            >
+              {chartMessage.type === "success" ? "✓ " : "⚠ "}
+              {chartMessage.text}
+            </div>
+          )}
 
-            {form.chartImageUrl && !form.chartImage && (
-              <a href={form.chartImageUrl} target="_blank" rel="noreferrer">
-                View existing chart
-              </a>
-            )}
+          <Field label="Before Chart Image">
+  <input
+    type="file"
+    name="beforeChart"
+    accept="image/png,image/jpeg,image/webp"
+    onChange={handleChange}
+    disabled={
+      saving ||
+      Boolean(removingChart)
+    }
+  />
+
+  {form.beforeChart && (
+    <small className="holding-selected-file">
+      Selected: {form.beforeChart.name}
+    </small>
+  )}
+
+  {(form.beforeChartUrl ||
+    form.chartImageUrl) &&
+    !form.beforeChart && (
+      <div className="holding-existing-file-actions">
+        <a
+          href={
+            form.beforeChartUrl ||
+            form.chartImageUrl
+          }
+          target="_blank"
+          rel="noreferrer"
+        >
+          View existing before chart
+        </a>
+
+        <button
+          type="button"
+          className="holding-remove-file-button"
+          onClick={() =>
+            handleRemoveChart("before")
+          }
+          disabled={
+            saving ||
+            removingChart === "before"
+          }
+        >
+          {removingChart === "before"
+            ? "Removing..."
+            : "🗑 Remove Before Chart"}
+        </button>
+      </div>
+    )}
+</Field>
+
+          <Field label="After Chart Image">
+  <input
+    type="file"
+    name="afterChart"
+    accept="image/png,image/jpeg,image/webp"
+    onChange={handleChange}
+    disabled={
+      saving ||
+      Boolean(removingChart)
+    }
+  />
+
+  {form.afterChart && (
+    <small className="holding-selected-file">
+      Selected: {form.afterChart.name}
+    </small>
+  )}
+
+  {form.afterChartUrl &&
+    !form.afterChart && (
+      <div className="holding-existing-file-actions">
+        <a
+          href={form.afterChartUrl}
+          target="_blank"
+          rel="noreferrer"
+        >
+          View existing after chart
+        </a>
+
+        <button
+          type="button"
+          className="holding-remove-file-button"
+          onClick={() =>
+            handleRemoveChart("after")
+          }
+          disabled={
+            saving ||
+            removingChart === "after"
+          }
+        >
+          {removingChart === "after"
+            ? "Removing..."
+            : "🗑 Remove After Chart"}
+        </button>
+      </div>
+    )}
+</Field>
+
+          <Field label="Before Chart Caption">
+            <input
+              type="text"
+              name="beforeChartCaption"
+              value={form.beforeChartCaption || ""}
+              onChange={handleChange}
+              placeholder="Example: Initial setup before breakout"
+            />
+          </Field>
+
+          <Field label="After Chart Caption">
+            <input
+              type="text"
+              name="afterChartCaption"
+              value={form.afterChartCaption || ""}
+              onChange={handleChange}
+              placeholder="Example: Result after target achievement"
+            />
           </Field>
 
           <Field label="Research PDF">
@@ -844,6 +1088,62 @@ realisedReturn:
                 : "Save Holding"}
           </button>
         </div>
+
+        {chartToRemove && (
+          <div
+            className="holding-confirm-overlay"
+            onMouseDown={(event) => {
+              if (
+                event.target === event.currentTarget &&
+                !removingChart
+              ) {
+                setChartToRemove(null);
+              }
+            }}
+          >
+            <div
+              className="holding-confirm-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="holding-confirm-title"
+            >
+              <div className="holding-confirm-icon">
+                🗑️
+              </div>
+
+              <h3 id="holding-confirm-title">
+                Remove {chartToRemove.chartLabel}?
+              </h3>
+
+              <p>
+                The image will immediately disappear from the public and
+                subscriber trade pages. This action cannot be undone.
+              </p>
+
+              <div className="holding-confirm-actions">
+                <button
+                  type="button"
+                  className="holding-confirm-cancel"
+                  onClick={() => setChartToRemove(null)}
+                  disabled={Boolean(removingChart)}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="button"
+                  className="holding-confirm-delete"
+                  onClick={confirmRemoveChart}
+                  disabled={Boolean(removingChart)}
+                >
+                  {removingChart
+                    ? "Removing..."
+                    : "Delete Image"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

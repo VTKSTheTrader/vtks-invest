@@ -1,0 +1,570 @@
+/* =========================================================
+   ASK VTKS PUBLIC PAGE
+   All styles are scoped to .ask-vtks-page to prevent
+   conflicts with the Ask VTKS section on the Home page.
+========================================================= */
+
+.ask-vtks-page {
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background: #f8fafc;
+}
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.ask-vtks-page .ask-vtks-hero {
+  width: 100%;
+  padding: 76px 7% 64px;
+  box-sizing: border-box;
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(37, 99, 235, 0.2),
+      transparent 38%
+    ),
+    linear-gradient(135deg, #0f172a, #172554);
+  color: #ffffff;
+}
+
+.ask-vtks-page .ask-vtks-hero-content {
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.ask-vtks-page .ask-vtks-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 0 18px;
+  padding: 8px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.09);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ask-vtks-page .ask-vtks-hero h1 {
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(36px, 5vw, 58px);
+  line-height: 1.12;
+}
+
+.ask-vtks-page .ask-vtks-hero p {
+  max-width: 740px;
+  margin: 20px auto 0;
+  color: #cbd5e1;
+  font-size: 17px;
+  line-height: 1.75;
+}
+
+/* =========================================================
+   PAGE CONTENT
+========================================================= */
+
+.ask-vtks-page .ask-vtks-content {
+  width: 100%;
+  max-width: none;
+  padding: 60px 7%;
+  box-sizing: border-box;
+}
+
+.ask-vtks-page .ask-vtks-grid {
+  display: grid;
+  grid-template-columns:
+    minmax(280px, 0.72fr)
+    minmax(0, 1.45fr);
+  align-items: start;
+  gap: 28px;
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+/* =========================================================
+   CARDS
+========================================================= */
+
+.ask-vtks-page .ask-vtks-info-card,
+.ask-vtks-page .ask-vtks-form-card {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  border: 1px solid #e2e8f0;
+  border-radius: 22px;
+  background: #ffffff;
+  box-shadow: 0 16px 42px rgba(15, 23, 42, 0.07);
+}
+
+.ask-vtks-page .ask-vtks-info-card {
+  position: sticky;
+  top: 110px;
+  padding: 30px;
+}
+
+.ask-vtks-page .ask-vtks-form-card {
+  padding: 34px;
+}
+
+.ask-vtks-page .ask-vtks-info-card h2,
+.ask-vtks-page .ask-vtks-form-card h2 {
+  margin: 0 0 22px;
+  color: #0f172a;
+  font-size: 26px;
+  line-height: 1.3;
+}
+
+.ask-vtks-page .ask-vtks-info-card ul {
+  display: grid;
+  gap: 15px;
+  margin: 0;
+  padding-left: 22px;
+  color: #475569;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.ask-vtks-page .ask-vtks-info-card li {
+  padding-left: 2px;
+}
+
+.ask-vtks-page .ask-vtks-disclaimer {
+  margin-top: 26px;
+  padding: 17px;
+  border-left: 4px solid #2563eb;
+  border-radius: 10px;
+  background: #eff6ff;
+  color: #1e3a8a;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+/* =========================================================
+   FORM
+========================================================= */
+
+.ask-vtks-page .ask-vtks-form {
+  display: grid;
+  gap: 20px;
+  width: 100%;
+  margin: 0;
+}
+
+.ask-vtks-page .ask-vtks-form-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  width: 100%;
+}
+
+.ask-vtks-page .ask-vtks-field {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+
+.ask-vtks-page .ask-vtks-field label {
+  margin: 0;
+  color: #1e293b;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.ask-vtks-page .ask-vtks-field input,
+.ask-vtks-page .ask-vtks-field select,
+.ask-vtks-page .ask-vtks-field textarea {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #0f172a;
+  font-family: inherit;
+  font-size: 15px;
+  outline: none;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.ask-vtks-page .ask-vtks-field input,
+.ask-vtks-page .ask-vtks-field select {
+  min-height: 50px;
+  padding: 0 15px;
+}
+
+.ask-vtks-page .ask-vtks-field textarea {
+  min-height: 150px;
+  padding: 14px 15px;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.ask-vtks-page .ask-vtks-field input::placeholder,
+.ask-vtks-page .ask-vtks-field textarea::placeholder {
+  color: #94a3b8;
+}
+
+.ask-vtks-page .ask-vtks-field input:focus,
+.ask-vtks-page .ask-vtks-field select:focus,
+.ask-vtks-page .ask-vtks-field textarea:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.ask-vtks-page .ask-vtks-field input:disabled,
+.ask-vtks-page .ask-vtks-field select:disabled,
+.ask-vtks-page .ask-vtks-field textarea:disabled {
+  cursor: not-allowed;
+  background: #f1f5f9;
+}
+
+.ask-vtks-page .ask-vtks-character-count {
+  justify-self: end;
+  margin: 0;
+  color: #64748b;
+  font-size: 12px;
+}
+
+/* =========================================================
+   MESSAGES
+========================================================= */
+
+.ask-vtks-page .ask-vtks-message {
+  width: 100%;
+  padding: 14px 16px;
+  box-sizing: border-box;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.ask-vtks-page .ask-vtks-message-success {
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.ask-vtks-page .ask-vtks-message-error {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+/* =========================================================
+   SUBMIT BUTTON
+========================================================= */
+
+.ask-vtks-page .ask-vtks-submit-button {
+  width: 100%;
+  min-height: 52px;
+  padding: 14px 20px;
+  border: 0;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.ask-vtks-page .ask-vtks-submit-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 25px rgba(37, 99, 235, 0.28);
+}
+
+.ask-vtks-page .ask-vtks-submit-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.68;
+}
+
+.ask-vtks-page .ask-vtks-form-note {
+  margin: 0;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.65;
+  text-align: center;
+}
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 1024px) {
+  .ask-vtks-page .ask-vtks-hero {
+    padding: 68px 5% 56px;
+  }
+
+  .ask-vtks-page .ask-vtks-content {
+    padding: 52px 5%;
+  }
+
+  .ask-vtks-page .ask-vtks-grid {
+    grid-template-columns:
+      minmax(250px, 0.8fr)
+      minmax(0, 1.2fr);
+    gap: 22px;
+  }
+
+  .ask-vtks-page .ask-vtks-info-card {
+    padding: 24px;
+  }
+
+  .ask-vtks-page .ask-vtks-form-card {
+    padding: 28px;
+  }
+}
+
+/* =========================================================
+   SMALL TABLET
+========================================================= */
+
+@media (max-width: 900px) {
+  .ask-vtks-page .ask-vtks-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ask-vtks-page .ask-vtks-info-card {
+    position: static;
+  }
+
+  .ask-vtks-page .ask-vtks-info-card,
+  .ask-vtks-page .ask-vtks-form-card {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 640px) {
+  .ask-vtks-page .ask-vtks-hero {
+    padding: 52px 18px 42px;
+  }
+
+  .ask-vtks-page .ask-vtks-badge {
+    margin-bottom: 14px;
+    padding: 7px 13px;
+    font-size: 11px;
+  }
+
+  .ask-vtks-page .ask-vtks-hero h1 {
+    font-size: 33px;
+    line-height: 1.15;
+  }
+
+  .ask-vtks-page .ask-vtks-hero p {
+    margin-top: 16px;
+    font-size: 15px;
+    line-height: 1.65;
+  }
+
+  .ask-vtks-page .ask-vtks-content {
+    padding: 34px 16px 48px;
+  }
+
+  .ask-vtks-page .ask-vtks-grid {
+    gap: 18px;
+  }
+
+  .ask-vtks-page .ask-vtks-info-card,
+  .ask-vtks-page .ask-vtks-form-card {
+    width: 100%;
+    max-width: none;
+    padding: 20px;
+    border-radius: 18px;
+  }
+
+  .ask-vtks-page .ask-vtks-info-card h2,
+  .ask-vtks-page .ask-vtks-form-card h2 {
+    margin-bottom: 18px;
+    font-size: 22px;
+  }
+
+  .ask-vtks-page .ask-vtks-info-card ul {
+    gap: 12px;
+    padding-left: 20px;
+    font-size: 14px;
+  }
+
+  .ask-vtks-page .ask-vtks-disclaimer {
+    margin-top: 20px;
+    padding: 14px;
+    font-size: 13px;
+  }
+
+  .ask-vtks-page .ask-vtks-form {
+    gap: 17px;
+  }
+
+  .ask-vtks-page .ask-vtks-form-row {
+    grid-template-columns: 1fr;
+    gap: 17px;
+  }
+
+  .ask-vtks-page .ask-vtks-field input,
+  .ask-vtks-page .ask-vtks-field select {
+    min-height: 48px;
+    padding: 0 13px;
+    font-size: 16px;
+  }
+
+  .ask-vtks-page .ask-vtks-field textarea {
+    min-height: 135px;
+    padding: 13px;
+    font-size: 16px;
+  }
+
+  .ask-vtks-page .ask-vtks-submit-button {
+    min-height: 50px;
+    font-size: 15px;
+  }
+
+  .ask-vtks-page .ask-vtks-form-note {
+    font-size: 12px;
+  }
+}
+
+/* =========================================================
+   VERY SMALL MOBILE
+========================================================= */
+
+@media (max-width: 380px) {
+  .ask-vtks-page .ask-vtks-hero {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .ask-vtks-page .ask-vtks-hero h1 {
+    font-size: 29px;
+  }
+
+  .ask-vtks-page .ask-vtks-content {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .ask-vtks-page .ask-vtks-info-card,
+  .ask-vtks-page .ask-vtks-form-card {
+    padding: 17px;
+  }
+}
+.ask-vtks-page .ask-vtks-info-extra {
+  display: grid;
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.ask-vtks-page .ask-vtks-info-block {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 13px;
+  align-items: start;
+  padding: 15px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.ask-vtks-page .ask-vtks-info-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: #eff6ff;
+  font-size: 20px;
+}
+
+.ask-vtks-page .ask-vtks-info-block strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #0f172a;
+  font-size: 14px;
+}
+
+.ask-vtks-page .ask-vtks-info-block p {
+  margin: 0;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.ask-vtks-page .ask-vtks-view-answers {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  margin-top: 20px;
+  padding: 11px 16px;
+  border: 1px solid #2563eb;
+  border-radius: 11px;
+  background: #ffffff;
+  color: #2563eb;
+  font-size: 14px;
+  font-weight: 800;
+  text-decoration: none;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.ask-vtks-page .ask-vtks-view-answers:hover {
+  transform: translateY(-1px);
+  background: #2563eb;
+  color: #ffffff;
+}
+
+@media (max-width: 900px) {
+  .ask-vtks-page .ask-vtks-info-extra {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .ask-vtks-page .ask-vtks-info-block {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .ask-vtks-page .ask-vtks-info-icon {
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .ask-vtks-page .ask-vtks-info-extra {
+    grid-template-columns: 1fr;
+  }
+
+  .ask-vtks-page .ask-vtks-info-block {
+    grid-template-columns: 42px minmax(0, 1fr);
+    text-align: left;
+  }
+
+  .ask-vtks-page .ask-vtks-info-icon {
+    margin: 0;
+  }
+}

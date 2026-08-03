@@ -761,3 +761,230 @@
     border-radius: 20px;
   }
 }
+/* =========================================================
+   BEFORE / AFTER CHART COMPARISON
+========================================================= */
+
+.trade-chart-comparison-section {
+  margin-top: 30px;
+}
+
+.trade-chart-comparison-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 22px;
+  margin-top: 24px;
+}
+
+.trade-chart-comparison-grid.trade-chart-single {
+  grid-template-columns:
+    minmax(0, 1fr);
+}
+
+.trade-comparison-card {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #f8fafc;
+}
+
+.trade-comparison-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 18px 14px;
+}
+
+.trade-comparison-card-header h3 {
+  margin: 8px 0 0;
+  color: #0f172a;
+  font-size: 19px;
+  line-height: 1.35;
+}
+
+.trade-comparison-label {
+  display: inline-flex;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.trade-before-label {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.trade-after-label {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.trade-chart-open-button {
+  flex-shrink: 0;
+  min-height: 36px;
+  padding: 7px 11px;
+  border: 1px solid #2563eb;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #2563eb;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.trade-chart-caption {
+  margin: 0;
+  padding: 0 18px 15px;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.trade-comparison-image-button {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-top: 1px solid #e2e8f0;
+  background: #ffffff;
+  cursor: zoom-in;
+}
+
+.trade-comparison-image-button img {
+  display: block;
+  width: 100%;
+  height: 390px;
+  object-fit: contain;
+  background: #ffffff;
+}
+
+/* =========================================================
+   FULL-SCREEN CHART MODAL
+========================================================= */
+
+.trade-chart-modal-backdrop {
+  position: fixed;
+  z-index: 30000;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.86);
+  backdrop-filter: blur(4px);
+}
+
+.trade-chart-modal {
+  width: min(1280px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow:
+    0 30px 90px
+    rgba(15, 23, 42, 0.48);
+}
+
+.trade-chart-modal-header {
+  position: sticky;
+  z-index: 2;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 14px 18px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #ffffff;
+}
+
+.trade-chart-modal-header h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 20px;
+}
+
+.trade-chart-modal-header button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 10px;
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 27px;
+  cursor: pointer;
+}
+
+.trade-chart-modal img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Tablet */
+
+@media (max-width: 900px) {
+  .trade-chart-comparison-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .trade-comparison-image-button img {
+    height: auto;
+    max-height: 520px;
+  }
+}
+
+/* Mobile */
+
+@media (max-width: 640px) {
+  .trade-chart-comparison-grid {
+    gap: 16px;
+    margin-top: 18px;
+  }
+
+  .trade-comparison-card-header {
+    flex-direction: column;
+    padding: 16px;
+  }
+
+  .trade-chart-open-button {
+    width: 100%;
+  }
+
+  .trade-chart-caption {
+    padding:
+      0
+      16px
+      14px;
+  }
+
+  .trade-comparison-image-button img {
+    height: auto;
+    min-height: 210px;
+  }
+
+  .trade-chart-modal-backdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .trade-chart-modal {
+    width: 100%;
+    max-height: 94vh;
+    border-radius:
+      20px
+      20px
+      0
+      0;
+  }
+}

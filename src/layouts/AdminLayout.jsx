@@ -34,6 +34,10 @@ export default function AdminLayout() {
       label: "👥 Members",
     },
     {
+      to: "/admin/stock-queries",
+      label: "💬 Stock Queries",
+    },
+    {
       to: "/admin/scanner",
       label: "📡 Scanner",
     },
@@ -57,13 +61,13 @@ export default function AdminLayout() {
 
   return (
     <div className="admin-layout">
-
       {/* Mobile Header */}
       <header className="admin-mobile-header">
         <button
           type="button"
           className="admin-menu-btn"
           onClick={() => setSidebarOpen(true)}
+          aria-label="Open admin menu"
         >
           ☰
         </button>
@@ -74,9 +78,10 @@ export default function AdminLayout() {
       {/* Backdrop */}
       {sidebarOpen && (
         <button
+          type="button"
           className="admin-backdrop"
           onClick={closeSidebar}
-          aria-label="Close Menu"
+          aria-label="Close menu"
         />
       )}
 
@@ -103,6 +108,7 @@ export default function AdminLayout() {
           <hr />
 
           <button
+            type="button"
             className="logout-btn"
             onClick={() => {
               closeSidebar();
@@ -117,7 +123,6 @@ export default function AdminLayout() {
       <main className="admin-main">
         <Outlet />
       </main>
-
     </div>
   );
 }

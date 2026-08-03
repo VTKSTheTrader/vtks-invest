@@ -52,6 +52,12 @@ export const defaultSettings = {
     showScanner: true,
     showMonthlyLevels: true,
     showTestimonial: true,
+
+    // Ask VTKS controls
+    showAskVTKS: true,
+    acceptAskQueries: true,
+    showAnsweredQueries: true,
+
     maintenanceMode: false,
   },
 
@@ -65,6 +71,10 @@ export const defaultSettings = {
   },
 };
 
+/* =========================================================
+   HELPERS
+========================================================= */
+
 const toNumber = (value, fallback = 0) => {
   const number = Number(value);
 
@@ -73,7 +83,10 @@ const toNumber = (value, fallback = 0) => {
     : fallback;
 };
 
-const toBoolean = (value, fallback = false) => {
+const toBoolean = (
+  value,
+  fallback = false
+) => {
   if (typeof value === "boolean") {
     return value;
   }
@@ -118,7 +131,9 @@ const toBoolean = (value, fallback = false) => {
   return fallback;
 };
 
-const mergeWithDefaults = (settings = {}) => ({
+const mergeWithDefaults = (
+  settings = {}
+) => ({
   ...defaultSettings,
   ...settings,
 
@@ -153,6 +168,10 @@ const mergeWithDefaults = (settings = {}) => ({
   },
 });
 
+/* =========================================================
+   MAP DATABASE → WEBSITE SETTINGS
+========================================================= */
+
 const mapFromDatabase = (row) => {
   if (!row) {
     return mergeWithDefaults();
@@ -178,9 +197,9 @@ const mapFromDatabase = (row) => {
 
       twitterLink:
         row.twitter_link || "",
+
       instagramLink:
-  row.instagram_link || "",
-  
+        row.instagram_link || "",
 
       youtubeLink:
         row.youtube_link || "",
@@ -204,26 +223,31 @@ const mapFromDatabase = (row) => {
 
       monthlyDescription:
         row.monthly_description ||
-        defaultSettings.plans.monthlyDescription,
+        defaultSettings.plans
+          .monthlyDescription,
 
       quarterlyPrice: toNumber(
         row.quarterly_price,
-        defaultSettings.plans.quarterlyPrice
+        defaultSettings.plans
+          .quarterlyPrice
       ),
 
       quarterlyDays: toNumber(
         row.quarterly_days,
-        defaultSettings.plans.quarterlyDays
+        defaultSettings.plans
+          .quarterlyDays
       ),
 
       quarterlyEnabled: toBoolean(
         row.quarterly_enabled,
-        defaultSettings.plans.quarterlyEnabled
+        defaultSettings.plans
+          .quarterlyEnabled
       ),
 
       quarterlyDescription:
         row.quarterly_description ||
-        defaultSettings.plans.quarterlyDescription,
+        defaultSettings.plans
+          .quarterlyDescription,
 
       annualPrice: toNumber(
         row.annual_price,
@@ -242,7 +266,8 @@ const mapFromDatabase = (row) => {
 
       annualDescription:
         row.annual_description ||
-        defaultSettings.plans.annualDescription,
+        defaultSettings.plans
+          .annualDescription,
 
       featuredPlan:
         row.featured_plan ||
@@ -252,16 +277,22 @@ const mapFromDatabase = (row) => {
     payment: {
       upiId: row.upi_id || "",
       bankName: row.bank_name || "",
+
       accountNumber:
         row.account_number || "",
-      ifscCode: row.ifsc_code || "",
-      qrUrl: row.payment_qr || "",
+
+      ifscCode:
+        row.ifsc_code || "",
+
+      qrUrl:
+        row.payment_qr || "",
     },
 
     website: {
       showIndicators: toBoolean(
         row.show_indicators,
-        defaultSettings.website.showIndicators
+        defaultSettings.website
+          .showIndicators
       ),
 
       showFunds: toBoolean(
@@ -271,27 +302,48 @@ const mapFromDatabase = (row) => {
 
       showAccuracy: toBoolean(
         row.show_accuracy,
-        defaultSettings.website.showAccuracy
+        defaultSettings.website
+          .showAccuracy
       ),
 
       showScanner: toBoolean(
         row.show_scanner,
         defaultSettings.website.showScanner
       ),
+
       showTestimonial: toBoolean(
-  row.show_testimonial,
-  defaultSettings.website.showTestimonial
-),
-showMonthlyLevels: toBoolean(
-  row.show_monthly_levels,
-  defaultSettings.website.showMonthlyLevels
-),
+        row.show_testimonial,
+        defaultSettings.website
+          .showTestimonial
+      ),
 
+      showMonthlyLevels: toBoolean(
+        row.show_monthly_levels,
+        defaultSettings.website
+          .showMonthlyLevels
+      ),
 
+      showAskVTKS: toBoolean(
+        row.show_ask_vtks,
+        defaultSettings.website.showAskVTKS
+      ),
+
+      acceptAskQueries: toBoolean(
+        row.accept_ask_queries,
+        defaultSettings.website
+          .acceptAskQueries
+      ),
+
+      showAnsweredQueries: toBoolean(
+        row.show_answered_queries,
+        defaultSettings.website
+          .showAnsweredQueries
+      ),
 
       maintenanceMode: toBoolean(
         row.maintenance_mode,
-        defaultSettings.website.maintenanceMode
+        defaultSettings.website
+          .maintenanceMode
       ),
     },
 
@@ -307,10 +359,15 @@ showMonthlyLevels: toBoolean(
     },
 
     admin: {
-      email: row.admin_email || "",
+      email:
+        row.admin_email || "",
     },
   });
 };
+
+/* =========================================================
+   MAP WEBSITE SETTINGS → DATABASE
+========================================================= */
 
 const mapToDatabase = (settings) => {
   const mergedSettings =
@@ -326,22 +383,24 @@ const mapToDatabase = (settings) => {
       "",
 
     support_phone:
-      mergedSettings.platform.supportMobile ||
-      "",
+      mergedSettings.platform
+        .supportMobile || "",
 
     telegram_link:
-      mergedSettings.platform.telegramLink ||
-      "",
+      mergedSettings.platform
+        .telegramLink || "",
 
     twitter_link:
-      mergedSettings.platform.twitterLink ||
-      "",
+      mergedSettings.platform
+        .twitterLink || "",
+
+    instagram_link:
+      mergedSettings.platform
+        .instagramLink || "",
 
     youtube_link:
-      mergedSettings.platform.youtubeLink ||
-      "",
-    instagram_link:
-  mergedSettings.platform.instagramLink || "",  
+      mergedSettings.platform
+        .youtubeLink || "",
 
     monthly_price: toNumber(
       mergedSettings.plans.monthlyPrice,
@@ -364,17 +423,21 @@ const mapToDatabase = (settings) => {
 
     quarterly_price: toNumber(
       mergedSettings.plans.quarterlyPrice,
-      defaultSettings.plans.quarterlyPrice
+      defaultSettings.plans
+        .quarterlyPrice
     ),
 
     quarterly_days: toNumber(
       mergedSettings.plans.quarterlyDays,
-      defaultSettings.plans.quarterlyDays
+      defaultSettings.plans
+        .quarterlyDays
     ),
 
     quarterly_enabled: toBoolean(
-      mergedSettings.plans.quarterlyEnabled,
-      defaultSettings.plans.quarterlyEnabled
+      mergedSettings.plans
+        .quarterlyEnabled,
+      defaultSettings.plans
+        .quarterlyEnabled
     ),
 
     quarterly_description:
@@ -411,8 +474,8 @@ const mapToDatabase = (settings) => {
       mergedSettings.payment.bankName || "",
 
     account_number:
-      mergedSettings.payment.accountNumber ||
-      "",
+      mergedSettings.payment
+        .accountNumber || "",
 
     ifsc_code:
       mergedSettings.payment.ifscCode || "",
@@ -421,7 +484,8 @@ const mapToDatabase = (settings) => {
       mergedSettings.payment.qrUrl || "",
 
     show_indicators: toBoolean(
-      mergedSettings.website.showIndicators,
+      mergedSettings.website
+        .showIndicators,
       true
     ),
 
@@ -439,22 +503,45 @@ const mapToDatabase = (settings) => {
       mergedSettings.website.showScanner,
       true
     ),
+
     show_testimonial: toBoolean(
-  mergedSettings.website.showTestimonial,
-  true
-),
-show_monthly_levels: toBoolean(
-  mergedSettings.website.showMonthlyLevels,
-  true
-),
+      mergedSettings.website
+        .showTestimonial,
+      true
+    ),
+
+    show_monthly_levels: toBoolean(
+      mergedSettings.website
+        .showMonthlyLevels,
+      true
+    ),
+
+    show_ask_vtks: toBoolean(
+      mergedSettings.website.showAskVTKS,
+      true
+    ),
+
+    accept_ask_queries: toBoolean(
+      mergedSettings.website
+        .acceptAskQueries,
+      true
+    ),
+
+    show_answered_queries: toBoolean(
+      mergedSettings.website
+        .showAnsweredQueries,
+      true
+    ),
 
     maintenance_mode: toBoolean(
-      mergedSettings.website.maintenanceMode,
+      mergedSettings.website
+        .maintenanceMode,
       false
     ),
 
     announcement:
-      mergedSettings.announcement.text || "",
+      mergedSettings.announcement.text ||
+      "",
 
     announcement_enabled: toBoolean(
       mergedSettings.announcement.enabled,
@@ -464,9 +551,14 @@ show_monthly_levels: toBoolean(
     admin_email:
       mergedSettings.admin.email || "",
 
-    updated_at: new Date().toISOString(),
+    updated_at:
+      new Date().toISOString(),
   };
 };
+
+/* =========================================================
+   LOAD SETTINGS
+========================================================= */
 
 export const loadSettings = async () => {
   const { data, error } = await supabase
@@ -489,6 +581,10 @@ export const loadSettings = async () => {
 
   return mapFromDatabase(data);
 };
+
+/* =========================================================
+   SAVE SETTINGS
+========================================================= */
 
 export const saveSettings = async (
   settings
@@ -537,6 +633,10 @@ export const saveSettings = async (
   return mapFromDatabase(data);
 };
 
+/* =========================================================
+   PLAN HELPERS
+========================================================= */
+
 export const getAllPlans = async () => {
   const settings =
     await loadSettings();
@@ -576,17 +676,20 @@ export const getAllPlans = async () => {
 
       price: toNumber(
         plans.quarterlyPrice,
-        defaultSettings.plans.quarterlyPrice
+        defaultSettings.plans
+          .quarterlyPrice
       ),
 
       days: toNumber(
         plans.quarterlyDays,
-        defaultSettings.plans.quarterlyDays
+        defaultSettings.plans
+          .quarterlyDays
       ),
 
       enabled: toBoolean(
         plans.quarterlyEnabled,
-        defaultSettings.plans.quarterlyEnabled
+        defaultSettings.plans
+          .quarterlyEnabled
       ),
 
       description:
@@ -631,7 +734,8 @@ export const getEnabledPlans =
       await getAllPlans();
 
     return plans.filter(
-      (plan) => plan.enabled === true
+      (plan) =>
+        plan.enabled === true
     );
   };
 

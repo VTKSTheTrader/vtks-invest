@@ -1,17 +1,25 @@
 import { useEffect, useState } from "react";
+
 import PageHeader from "../../components/admin/PageHeader";
 import ChangePassword from "../../components/auth/ChangePassword";
+
 import {
   defaultSettings,
   loadSettings,
   saveSettings,
 } from "../../services/settingsService";
+
 import "./Settings.css";
 
 export default function Settings() {
-  const [settings, setSettings] = useState(defaultSettings);
-  const [loading, setLoading] = useState(true);
-  const [savingSection, setSavingSection] = useState("");
+  const [settings, setSettings] =
+    useState(defaultSettings);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [savingSection, setSavingSection] =
+    useState("");
 
   useEffect(() => {
     fetchSettings();
@@ -25,15 +33,24 @@ export default function Settings() {
 
       setSettings(data || defaultSettings);
     } catch (error) {
-      console.error("Failed to load settings:", error);
+      console.error(
+        "Failed to load settings:",
+        error
+      );
+
       alert("Failed to load settings.");
+
       setSettings(defaultSettings);
     } finally {
       setLoading(false);
     }
   };
 
-  const update = (section, key, value) => {
+  const update = (
+    section,
+    key,
+    value
+  ) => {
     setSettings((previous) => ({
       ...previous,
 
@@ -105,8 +122,25 @@ export default function Settings() {
       showScanner: Boolean(
         settings.website.showScanner
       ),
+
+      showMonthlyLevels: Boolean(
+        settings.website.showMonthlyLevels
+      ),
+
       showTestimonial: Boolean(
         settings.website.showTestimonial
+      ),
+
+      showAskVTKS: Boolean(
+        settings.website.showAskVTKS
+      ),
+
+      acceptAskQueries: Boolean(
+        settings.website.acceptAskQueries
+      ),
+
+      showAnsweredQueries: Boolean(
+        settings.website.showAnsweredQueries
       ),
 
       maintenanceMode: Boolean(
@@ -123,24 +157,33 @@ export default function Settings() {
     },
   });
 
-  const handleSave = async (sectionName) => {
+  const handleSave = async (
+    sectionName
+  ) => {
     try {
       setSavingSection(sectionName);
 
       const preparedSettings =
         prepareSettingsForSave();
 
-      const savedSettings = await saveSettings(
-        preparedSettings
-      );
+      const savedSettings =
+        await saveSettings(
+          preparedSettings
+        );
 
       setSettings(
-        savedSettings || preparedSettings
+        savedSettings ||
+          preparedSettings
       );
 
-      alert("✅ Settings saved successfully");
+      alert(
+        "✅ Settings saved successfully"
+      );
     } catch (error) {
-      console.error("Failed to save settings:", error);
+      console.error(
+        "Failed to save settings:",
+        error
+      );
 
       alert(
         error?.message ||
@@ -151,7 +194,9 @@ export default function Settings() {
     }
   };
 
-  const isSaving = (sectionName) =>
+  const isSaving = (
+    sectionName
+  ) =>
     savingSection === sectionName;
 
   if (loading) {
@@ -177,7 +222,8 @@ export default function Settings() {
           <input
             placeholder="Website Name"
             value={
-              settings.platform.websiteName || ""
+              settings.platform
+                .websiteName || ""
             }
             onChange={(event) =>
               update(
@@ -192,7 +238,8 @@ export default function Settings() {
             type="email"
             placeholder="Support Email"
             value={
-              settings.platform.supportEmail || ""
+              settings.platform
+                .supportEmail || ""
             }
             onChange={(event) =>
               update(
@@ -206,7 +253,8 @@ export default function Settings() {
           <input
             placeholder="Support Mobile"
             value={
-              settings.platform.supportMobile || ""
+              settings.platform
+                .supportMobile || ""
             }
             onChange={(event) =>
               update(
@@ -220,7 +268,8 @@ export default function Settings() {
           <input
             placeholder="Telegram Link"
             value={
-              settings.platform.telegramLink || ""
+              settings.platform
+                .telegramLink || ""
             }
             onChange={(event) =>
               update(
@@ -234,7 +283,8 @@ export default function Settings() {
           <input
             placeholder="X / Twitter Link"
             value={
-              settings.platform.twitterLink || ""
+              settings.platform
+                .twitterLink || ""
             }
             onChange={(event) =>
               update(
@@ -244,22 +294,27 @@ export default function Settings() {
               )
             }
           />
+
           <input
-  placeholder="Instagram Link"
-  value={settings.platform.instagramLink || ""}
-  onChange={(event) =>
-    update(
-      "platform",
-      "instagramLink",
-      event.target.value
-    )
-  }
-/>
+            placeholder="Instagram Link"
+            value={
+              settings.platform
+                .instagramLink || ""
+            }
+            onChange={(event) =>
+              update(
+                "platform",
+                "instagramLink",
+                event.target.value
+              )
+            }
+          />
 
           <input
             placeholder="YouTube Link"
             value={
-              settings.platform.youtubeLink || ""
+              settings.platform
+                .youtubeLink || ""
             }
             onChange={(event) =>
               update(
@@ -269,12 +324,15 @@ export default function Settings() {
               )
             }
           />
-          
 
           <button
             type="button"
-            onClick={() => handleSave("platform")}
-            disabled={Boolean(savingSection)}
+            onClick={() =>
+              handleSave("platform")
+            }
+            disabled={Boolean(
+              savingSection
+            )}
           >
             {isSaving("platform")
               ? "Saving..."
@@ -284,20 +342,27 @@ export default function Settings() {
 
         {/* SUBSCRIPTION PLANS */}
         <div className="settings-card">
-          <h2>💳 Subscription Plans</h2>
+          <h2>
+            💳 Subscription Plans
+          </h2>
 
           <PlanRow
             label="Monthly"
             enabled={
-              settings.plans.monthlyEnabled
+              settings.plans
+                .monthlyEnabled
             }
             price={
-              settings.plans.monthlyPrice
+              settings.plans
+                .monthlyPrice
             }
             days={
-              settings.plans.monthlyDays
+              settings.plans
+                .monthlyDays
             }
-            onEnabledChange={(checked) =>
+            onEnabledChange={(
+              checked
+            ) =>
               update(
                 "plans",
                 "monthlyEnabled",
@@ -323,15 +388,20 @@ export default function Settings() {
           <PlanRow
             label="Quarterly"
             enabled={
-              settings.plans.quarterlyEnabled
+              settings.plans
+                .quarterlyEnabled
             }
             price={
-              settings.plans.quarterlyPrice
+              settings.plans
+                .quarterlyPrice
             }
             days={
-              settings.plans.quarterlyDays
+              settings.plans
+                .quarterlyDays
             }
-            onEnabledChange={(checked) =>
+            onEnabledChange={(
+              checked
+            ) =>
               update(
                 "plans",
                 "quarterlyEnabled",
@@ -357,15 +427,20 @@ export default function Settings() {
           <PlanRow
             label="Annual"
             enabled={
-              settings.plans.annualEnabled
+              settings.plans
+                .annualEnabled
             }
             price={
-              settings.plans.annualPrice
+              settings.plans
+                .annualPrice
             }
             days={
-              settings.plans.annualDays
+              settings.plans
+                .annualDays
             }
-            onEnabledChange={(checked) =>
+            onEnabledChange={(
+              checked
+            ) =>
               update(
                 "plans",
                 "annualEnabled",
@@ -395,19 +470,26 @@ export default function Settings() {
               marginTop: "14px",
             }}
           >
-            Disabled plans will be hidden from the
-            public pricing page and member plan
+            Disabled plans will be
+            hidden from the public
+            pricing page and member plan
             selection.
           </p>
 
           <button
             type="button"
             onClick={() =>
-              handleSave("subscription")
+              handleSave(
+                "subscription"
+              )
             }
-            disabled={Boolean(savingSection)}
+            disabled={Boolean(
+              savingSection
+            )}
           >
-            {isSaving("subscription")
+            {isSaving(
+              "subscription"
+            )
               ? "Saving..."
               : "💾 Save Subscription Plans"}
           </button>
@@ -419,7 +501,10 @@ export default function Settings() {
 
           <input
             placeholder="UPI ID"
-            value={settings.payment.upiId || ""}
+            value={
+              settings.payment.upiId ||
+              ""
+            }
             onChange={(event) =>
               update(
                 "payment",
@@ -431,7 +516,10 @@ export default function Settings() {
 
           <input
             placeholder="Bank Name"
-            value={settings.payment.bankName || ""}
+            value={
+              settings.payment
+                .bankName || ""
+            }
             onChange={(event) =>
               update(
                 "payment",
@@ -444,7 +532,8 @@ export default function Settings() {
           <input
             placeholder="Account Number"
             value={
-              settings.payment.accountNumber || ""
+              settings.payment
+                .accountNumber || ""
             }
             onChange={(event) =>
               update(
@@ -458,7 +547,8 @@ export default function Settings() {
           <input
             placeholder="IFSC Code"
             value={
-              settings.payment.ifscCode || ""
+              settings.payment
+                .ifscCode || ""
             }
             onChange={(event) =>
               update(
@@ -468,42 +558,55 @@ export default function Settings() {
               )
             }
           />
-          <label>Payment QR Image URL</label>
 
-<input
-  type="url"
-  placeholder="https://...payment-qr.png"
-  value={settings.payment.qrUrl || ""}
-  onChange={(event) =>
-    update(
-      "payment",
-      "qrUrl",
-      event.target.value
-    )
-  }
-/>
+          <label>
+            Payment QR Image URL
+          </label>
 
-{settings.payment.qrUrl && (
-  <img
-    src={settings.payment.qrUrl}
-    alt="Payment QR preview"
-    style={{
-      width: "180px",
-      height: "180px",
-      objectFit: "contain",
-      margin: "12px auto",
-      padding: "8px",
-      border: "1px solid #e2e8f0",
-      borderRadius: "14px",
-      background: "#ffffff",
-    }}
-  />
-)}
+          <input
+            type="url"
+            placeholder="https://...payment-qr.png"
+            value={
+              settings.payment.qrUrl ||
+              ""
+            }
+            onChange={(event) =>
+              update(
+                "payment",
+                "qrUrl",
+                event.target.value
+              )
+            }
+          />
+
+          {settings.payment.qrUrl && (
+            <img
+              src={
+                settings.payment.qrUrl
+              }
+              alt="Payment QR preview"
+              style={{
+                width: "180px",
+                height: "180px",
+                objectFit: "contain",
+                margin: "12px auto",
+                padding: "8px",
+                border:
+                  "1px solid #e2e8f0",
+                borderRadius: "14px",
+                background: "#ffffff",
+              }}
+            />
+          )}
 
           <button
             type="button"
-            onClick={() => handleSave("payment")}
-            disabled={Boolean(savingSection)}
+            onClick={() =>
+              handleSave("payment")
+            }
+            disabled={Boolean(
+              savingSection
+            )}
           >
             {isSaving("payment")
               ? "Saving..."
@@ -513,13 +616,16 @@ export default function Settings() {
 
         {/* WEBSITE CONTROLS */}
         <div className="settings-card">
-          <h2>🌐 Website Controls</h2>
+          <h2>
+            🌐 Website Controls
+          </h2>
 
           <CheckboxRow
             label="Show Indicators Page"
-            checked={
-              settings.website.showIndicators
-            }
+            checked={Boolean(
+              settings.website
+                .showIndicators
+            )}
             onChange={(checked) =>
               update(
                 "website",
@@ -531,7 +637,9 @@ export default function Settings() {
 
           <CheckboxRow
             label="Show Funds Page"
-            checked={settings.website.showFunds}
+            checked={Boolean(
+              settings.website.showFunds
+            )}
             onChange={(checked) =>
               update(
                 "website",
@@ -543,9 +651,10 @@ export default function Settings() {
 
           <CheckboxRow
             label="Show Accuracy Page"
-            checked={
-              settings.website.showAccuracy
-            }
+            checked={Boolean(
+              settings.website
+                .showAccuracy
+            )}
             onChange={(checked) =>
               update(
                 "website",
@@ -557,9 +666,10 @@ export default function Settings() {
 
           <CheckboxRow
             label="Show Scanner Page"
-            checked={
-              settings.website.showScanner
-            }
+            checked={Boolean(
+              settings.website
+                .showScanner
+            )}
             onChange={(checked) =>
               update(
                 "website",
@@ -568,39 +678,92 @@ export default function Settings() {
               )
             }
           />
+
           <CheckboxRow
-  label="Show Market Outlook"
-  checked={Boolean(
-    settings.website.showMonthlyLevels
-  )}
-  onChange={(checked) =>
-    update(
-      "website",
-      "showMonthlyLevels",
-      checked
-    )
-  }
-/>
-          <CheckboxRow
-  label="Show Testimonials Page"
-  checked={Boolean(
-              settings.website.showTestimonial
+            label="Show Market Outlook"
+            checked={Boolean(
+              settings.website
+                .showMonthlyLevels
             )}
-  onChange={(checked) =>
-    update(
-      "website",
-      "showTestimonial",
-      checked
-    )
-  }
-/>
+            onChange={(checked) =>
+              update(
+                "website",
+                "showMonthlyLevels",
+                checked
+              )
+            }
+          />
+
+          <CheckboxRow
+            label="Show Testimonials Page"
+            checked={Boolean(
+              settings.website
+                .showTestimonial
+            )}
+            onChange={(checked) =>
+              update(
+                "website",
+                "showTestimonial",
+                checked
+              )
+            }
+          />
+
+          
+
+          <CheckboxRow
+            label="Show Ask VTKS Feature"
+            checked={Boolean(
+              settings.website
+                .showAskVTKS
+            )}
+            onChange={(checked) =>
+              update(
+                "website",
+                "showAskVTKS",
+                checked
+              )
+            }
+          />
+
+          <CheckboxRow
+            label="Accept New Stock Queries"
+            checked={Boolean(
+              settings.website
+                .acceptAskQueries
+            )}
+            onChange={(checked) =>
+              update(
+                "website",
+                "acceptAskQueries",
+                checked
+              )
+            }
+          />
+
+          <CheckboxRow
+            label="Show Answered Queries Page"
+            checked={Boolean(
+              settings.website
+                .showAnsweredQueries
+            )}
+            onChange={(checked) =>
+              update(
+                "website",
+                "showAnsweredQueries",
+                checked
+              )
+            }
+          />
+
           
 
           <CheckboxRow
             label="Maintenance Mode"
-            checked={
-              settings.website.maintenanceMode
-            }
+            checked={Boolean(
+              settings.website
+                .maintenanceMode
+            )}
             onChange={(checked) =>
               update(
                 "website",
@@ -612,8 +775,12 @@ export default function Settings() {
 
           <button
             type="button"
-            onClick={() => handleSave("website")}
-            disabled={Boolean(savingSection)}
+            onClick={() =>
+              handleSave("website")
+            }
+            disabled={Boolean(
+              savingSection
+            )}
           >
             {isSaving("website")
               ? "Saving..."
@@ -629,7 +796,8 @@ export default function Settings() {
             rows={5}
             placeholder="Enter announcement text"
             value={
-              settings.announcement.text || ""
+              settings.announcement
+                .text || ""
             }
             onChange={(event) =>
               update(
@@ -642,9 +810,10 @@ export default function Settings() {
 
           <CheckboxRow
             label="Show Announcement"
-            checked={
-              settings.announcement.enabled
-            }
+            checked={Boolean(
+              settings.announcement
+                .enabled
+            )}
             onChange={(checked) =>
               update(
                 "announcement",
@@ -657,11 +826,17 @@ export default function Settings() {
           <button
             type="button"
             onClick={() =>
-              handleSave("announcement")
+              handleSave(
+                "announcement"
+              )
             }
-            disabled={Boolean(savingSection)}
+            disabled={Boolean(
+              savingSection
+            )}
           >
-            {isSaving("announcement")
+            {isSaving(
+              "announcement"
+            )
               ? "Saving..."
               : "💾 Save Announcement"}
           </button>
@@ -674,7 +849,9 @@ export default function Settings() {
           <input
             type="email"
             placeholder="Admin Email"
-            value={settings.admin.email || ""}
+            value={
+              settings.admin.email || ""
+            }
             onChange={(event) =>
               update(
                 "admin",
@@ -686,8 +863,12 @@ export default function Settings() {
 
           <button
             type="button"
-            onClick={() => handleSave("admin")}
-            disabled={Boolean(savingSection)}
+            onClick={() =>
+              handleSave("admin")
+            }
+            disabled={Boolean(
+              savingSection
+            )}
           >
             {isSaving("admin")
               ? "Saving..."
@@ -700,7 +881,8 @@ export default function Settings() {
               marginTop: "20px",
             }}
           >
-            Change your login password below.
+            Change your login password
+            below.
           </p>
 
           <ChangePassword />
@@ -729,7 +911,9 @@ function PlanRow({
           type="checkbox"
           checked={Boolean(enabled)}
           onChange={(event) =>
-            onEnabledChange(event.target.checked)
+            onEnabledChange(
+              event.target.checked
+            )
           }
         />
 
@@ -743,7 +927,9 @@ function PlanRow({
         aria-label={`${label} price`}
         value={price ?? ""}
         onChange={(event) =>
-          onPriceChange(event.target.value)
+          onPriceChange(
+            event.target.value
+          )
         }
         disabled={!enabled}
         placeholder="Price"
@@ -756,7 +942,9 @@ function PlanRow({
         aria-label={`${label} duration in days`}
         value={days ?? ""}
         onChange={(event) =>
-          onDaysChange(event.target.value)
+          onDaysChange(
+            event.target.value
+          )
         }
         disabled={!enabled}
         placeholder="Days"
@@ -776,7 +964,9 @@ function CheckboxRow({
         type="checkbox"
         checked={Boolean(checked)}
         onChange={(event) =>
-          onChange(event.target.checked)
+          onChange(
+            event.target.checked
+          )
         }
       />
 

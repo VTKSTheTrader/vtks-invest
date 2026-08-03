@@ -3,6 +3,7 @@ import {
   useMemo,
   useState,
 } from "react";
+
 import {
   Link,
   useOutletContext,
@@ -35,8 +36,19 @@ export default function Home() {
     settings?.website?.showTestimonial
   );
 
-  const [holdings, setHoldings] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const showAskVTKS = Boolean(
+    settings?.website?.showAskVTKS
+  );
+
+  const showAnsweredQueries = Boolean(
+    settings?.website?.showAnsweredQueries
+  );
+
+  const [holdings, setHoldings] =
+    useState([]);
+
+  const [loading, setLoading] =
+    useState(true);
 
   const [testimonials, setTestimonials] =
     useState([]);
@@ -122,7 +134,9 @@ export default function Home() {
       return manualStatus;
     }
 
-    const cmp = Number(holding.cmp || 0);
+    const cmp = Number(
+      holding.cmp || 0
+    );
 
     const stopLoss = Number(
       holding.stopLoss || 0
@@ -140,19 +154,31 @@ export default function Home() {
       holding.target3 || 0
     );
 
-    if (stopLoss && cmp <= stopLoss) {
+    if (
+      stopLoss &&
+      cmp <= stopLoss
+    ) {
       return "SL Hit";
     }
 
-    if (target3 && cmp >= target3) {
+    if (
+      target3 &&
+      cmp >= target3
+    ) {
       return "Target 3 Hit";
     }
 
-    if (target2 && cmp >= target2) {
+    if (
+      target2 &&
+      cmp >= target2
+    ) {
       return "Target 2 Hit";
     }
 
-    if (target1 && cmp >= target1) {
+    if (
+      target1 &&
+      cmp >= target1
+    ) {
       return "Target 1 Hit";
     }
 
@@ -197,7 +223,8 @@ export default function Home() {
             visibility === "community") &&
           holding.accuracyBlur === false;
 
-        const status = getStatus(holding);
+        const status =
+          getStatus(holding);
 
         return (
           (isPublicTrade ||
@@ -220,8 +247,13 @@ export default function Home() {
             0
         ).getTime();
 
-        if (secondDate !== firstDate) {
-          return secondDate - firstDate;
+        if (
+          secondDate !== firstDate
+        ) {
+          return (
+            secondDate -
+            firstDate
+          );
         }
 
         return (
@@ -229,11 +261,16 @@ export default function Home() {
           Number(first.id || 0)
         );
       })
-      .slice(0, MAX_HOME_TRADES);
+      .slice(
+        0,
+        MAX_HOME_TRADES
+      );
   }, [holdings]);
 
   const formatPrice = (value) => {
-    const number = Number(value || 0);
+    const number = Number(
+      value || 0
+    );
 
     if (!number) {
       return "₹—";
@@ -248,256 +285,192 @@ export default function Home() {
   };
 
   return (
-    <>
-      <main className="home-page">
-        <section className="hero-section">
-          <span className="hero-badge">
-            🚀 Professional Trading & Investment Platform
+    <main className="home-page">
+      {/* HERO */}
+      <section className="hero-section">
+        <span className="hero-badge">
+          🚀 Professional Trading & Investment Platform
+        </span>
+
+        <h1>
+          Trade with Structure.
+          <br />
+          Invest with Conviction.
+        </h1>
+
+        <p>
+          VTKS HUB combines structured
+          trading education, portfolio
+          tracking, rule-based indicators,
+          market scanners and performance
+          analytics in one professional
+          platform.
+        </p>
+
+        <div className="hero-actions">
+          <Link to="/funds">
+            Explore VTKS Analysis
+          </Link>
+
+          <Link
+            to="/indicators"
+            className="outline-btn"
+          >
+            View Indicators
+          </Link>
+        </div>
+      </section>
+
+      {/* WHY VTKS */}
+      <section className="why-section">
+        <div className="section-title">
+          <span>
+            Why VTKS HUB?
           </span>
 
-          <h1>
-            Trade with Structure.
-            <br />
-            Invest with Conviction.
-          </h1>
+          <h2>
+            Everything a Trader Needs.
+          </h2>
 
           <p>
-            VTKS HUB combines structured trading
-            education, portfolio tracking,
-            rule-based indicators, market scanners
-            and performance analytics in one
-            professional platform.
+            One platform to understand
+            structured setups, analyse
+            performance, manage risk, scan
+            opportunities and develop
+            long-term conviction.
           </p>
+        </div>
 
-          <div className="hero-actions">
-            <Link to="/funds">
-              Explore VTKS Analysis
-            </Link>
-
-            <Link
-              to="/indicators"
-              className="outline-btn"
-            >
-              View Indicators
-            </Link>
-          </div>
-        </section>
-
-        <section className="why-section">
-          <div className="section-title">
-            <span>Why VTKS HUB?</span>
-
-            <h2>
-              Everything a Trader Needs.
-            </h2>
-
-            <p>
-              One platform to understand
-              structured setups, analyse
-              performance, manage risk, scan
-              opportunities and develop long-term
-              conviction.
-            </p>
-          </div>
-
-          <div className="why-grid">
-            <article className="why-card">
-              <div className="why-icon">
-                📊
-              </div>
-
-              <h3>
-                Portfolio Management
-              </h3>
-
-              <p>
-                Track trades with entry, CMP,
-                targets, stop loss, ROI, status
-                and performance.
-              </p>
-            </article>
-
-            <article className="why-card">
-              <div className="why-icon">
-                📈
-              </div>
-
-              <h3>
-                Professional Indicators
-              </h3>
-
-              <p>
-                Learn rule-based indicators for
-                swing, positional and investment
-                frameworks.
-              </p>
-            </article>
-
-            <article className="why-card">
-              <div className="why-icon">
-                ⚡
-              </div>
-
-              <h3>Market Scanners</h3>
-
-              <p>
-                Identify structured market
-                opportunities using predefined
-                VTKS conditions.
-              </p>
-            </article>
-
-            <article className="why-card">
-              <div className="why-icon">
-                📚
-              </div>
-
-              <h3>Knowledge Library</h3>
-
-              <p>
-                Learn through structured videos,
-                PDFs, recorded sessions and case
-                studies.
-              </p>
-            </article>
-
-            <article className="why-card">
-              <div className="why-icon">
-                🎯
-              </div>
-
-              <h3>
-                Performance Analytics
-              </h3>
-
-              <p>
-                Measure returns, win rate, best
-                trades and overall framework
-                performance.
-              </p>
-            </article>
-
-            <article className="why-card">
-              <div className="why-icon">
-                👥
-              </div>
-
-              <h3>Private Community</h3>
-
-              <p>
-                Discuss markets, improve analysis
-                and grow with discipline and
-                accountability.
-              </p>
-            </article>
-          </div>
-        </section>
-
-        <EducationDisclosure />
-
-        {showTestimonials && (
-          <section className="home-testimonials-section">
-            <div className="section-title">
-              <span>
-                ⭐ Member Experiences
-              </span>
-
-              <h2>
-                What Our Members Say
-              </h2>
-
-              <p>
-                Genuine feedback from VTKS
-                members learning structured
-                trading, technical analysis and
-                disciplined investing.
-              </p>
+        <div className="why-grid">
+          <article className="why-card">
+            <div className="why-icon">
+              📊
             </div>
 
-            {testimonialsLoading ? (
-              <p className="home-testimonial-message">
-                Loading testimonials...
-              </p>
-            ) : testimonials.length > 0 ? (
-              <div className="home-testimonials-grid">
-                {testimonials.map(
-                  (testimonial) => (
-                    <article
-                      key={testimonial.id}
-                      className="home-testimonial-card"
-                    >
-                      <div className="home-testimonial-rating">
-                        {"★".repeat(
-                          Number(
-                            testimonial.rating ||
-                              0
-                          )
-                        )}
-                      </div>
-
-                      <p>
-                        “{testimonial.message}”
-                      </p>
-
-                      <div className="home-testimonial-footer">
-                        <strong>
-                          {testimonial.show_name ===
-                          false
-                            ? "VTKS Member"
-                            : testimonial.name ||
-                              "VTKS Member"}
-                        </strong>
-
-                        {testimonial.verified_member && (
-                          <span>
-                            Verified Member
-                          </span>
-                        )}
-                      </div>
-                    </article>
-                  )
-                )}
-              </div>
-            ) : (
-              <p className="home-testimonial-message">
-                No approved testimonials are
-                available yet.
-              </p>
-            )}
-
-            <div className="center-btn">
-              <Link to="/testimonials">
-                View All Testimonials →
-              </Link>
-            </div>
-          </section>
-        )}
-
-        <section className="latest-section">
-          <div className="section-title">
-            <span>
-              📊 VTKS Knowledge Portfolio
-            </span>
-
-            <h2>
-              Latest Insights
-            </h2>
+            <h3>
+              Portfolio Management
+            </h3>
 
             <p>
-              Discover recently published and
-              publicly revealed VTKS Ideas backed
-              by structured analysis and
-              disciplined portfolio management.
+              Track trades with entry, CMP,
+              targets, stop loss, ROI, status
+              and performance.
             </p>
-          </div>
+          </article>
 
-          {loading ? (
-            <p className="home-trade-message">
-              Loading latest trades...
+          <article className="why-card">
+            <div className="why-icon">
+              📈
+            </div>
+
+            <h3>
+              Professional Indicators
+            </h3>
+
+            <p>
+              Learn rule-based indicators
+              for swing, positional and
+              investment frameworks.
             </p>
-          ) : latestTrades.length > 0 ? (
-            <div className="trade-grid">
-              {latestTrades.map((holding) => {
+          </article>
+
+          <article className="why-card">
+            <div className="why-icon">
+              ⚡
+            </div>
+
+            <h3>
+              Market Scanners
+            </h3>
+
+            <p>
+              Identify structured market
+              opportunities using predefined
+              VTKS conditions.
+            </p>
+          </article>
+
+          <article className="why-card">
+            <div className="why-icon">
+              📚
+            </div>
+
+            <h3>
+              Knowledge Library
+            </h3>
+
+            <p>
+              Learn through structured
+              videos, PDFs, recorded
+              sessions and case studies.
+            </p>
+          </article>
+
+          <article className="why-card">
+            <div className="why-icon">
+              🎯
+            </div>
+
+            <h3>
+              Performance Analytics
+            </h3>
+
+            <p>
+              Measure returns, win rate,
+              best trades and overall
+              framework performance.
+            </p>
+          </article>
+
+          <article className="why-card">
+            <div className="why-icon">
+              👥
+            </div>
+
+            <h3>
+              Private Community
+            </h3>
+
+            <p>
+              Discuss markets, improve
+              analysis and grow with
+              discipline and accountability.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <EducationDisclosure />
+
+      
+      {/* LATEST INSIGHTS */}
+      <section className="latest-section">
+        <div className="section-title">
+          <span>
+            📊 VTKS Knowledge Portfolio
+          </span>
+
+          <h2>
+            Latest Insights
+          </h2>
+
+          <p>
+            Discover recently published
+            and publicly revealed VTKS
+            Ideas backed by structured
+            analysis and disciplined
+            portfolio management.
+          </p>
+        </div>
+
+        {loading ? (
+          <p className="home-trade-message">
+            Loading latest trades...
+          </p>
+        ) : latestTrades.length > 0 ? (
+          <div className="trade-grid">
+            {latestTrades.map(
+              (holding) => {
                 const roi =
                   getReturn(holding);
 
@@ -529,7 +502,9 @@ export default function Home() {
                           : "trade-return negative-return"
                       }
                     >
-                      {roi >= 0 ? "+" : ""}
+                      {roi >= 0
+                        ? "+"
+                        : ""}
                       {roi.toFixed(2)}%
                     </div>
 
@@ -548,7 +523,9 @@ export default function Home() {
                         )}
                       </span>
 
-                      <span>{status}</span>
+                      <span>
+                        {status}
+                      </span>
                     </div>
 
                     <div className="trade-card-link">
@@ -556,22 +533,189 @@ export default function Home() {
                     </div>
                   </Link>
                 );
-              })}
+              }
+            )}
+          </div>
+        ) : (
+          <p className="home-trade-message">
+            No public trades are currently
+            available.
+          </p>
+        )}
+
+        <div className="center-btn">
+          <Link to="/funds">
+            Explore Complete Analysis →
+          </Link>
+        </div>
+      </section>
+{/* TESTIMONIALS */}
+      {showTestimonials && (
+        <section className="home-testimonials-section">
+          <div className="section-title">
+            <span>
+              ⭐ Member Experiences
+            </span>
+
+            <h2>
+              What Our Members Say
+            </h2>
+
+            <p>
+              Genuine feedback from VTKS
+              members learning structured
+              trading, technical analysis
+              and disciplined investing.
+            </p>
+          </div>
+
+          {testimonialsLoading ? (
+            <p className="home-testimonial-message">
+              Loading testimonials...
+            </p>
+          ) : testimonials.length > 0 ? (
+            <div className="home-testimonials-grid">
+              {testimonials.map(
+                (testimonial) => (
+                  <article
+                    key={testimonial.id}
+                    className="home-testimonial-card"
+                  >
+                    <div className="home-testimonial-rating">
+                      {"★".repeat(
+                        Number(
+                          testimonial.rating ||
+                            0
+                        )
+                      )}
+                    </div>
+
+                    <p>
+                      “
+                      {
+                        testimonial.message
+                      }
+                      ”
+                    </p>
+
+                    <div className="home-testimonial-footer">
+                      <strong>
+                        {testimonial.show_name ===
+                        false
+                          ? "VTKS Member"
+                          : testimonial.name ||
+                            "VTKS Member"}
+                      </strong>
+
+                      {testimonial.verified_member && (
+                        <span>
+                          Verified Member
+                        </span>
+                      )}
+                    </div>
+                  </article>
+                )
+              )}
             </div>
           ) : (
-            <p className="home-trade-message">
-              No public trades are currently
-              available.
+            <p className="home-testimonial-message">
+              No approved testimonials are
+              available yet.
             </p>
           )}
 
           <div className="center-btn">
-            <Link to="/funds">
-              Explore Complete Analysis →
+            <Link to="/testimonials">
+              View All Testimonials →
             </Link>
           </div>
         </section>
-      </main>
-    </>
+      )}
+
+      {/* ASK VTKS */}
+      {showAskVTKS && (
+        <section className="ask-vtks-home">
+          <div className="ask-vtks-content">
+            <span className="ask-vtks-badge">
+              💬 Stock Queries
+            </span>
+
+            <h2>
+              Have a Question About Any
+              Stock?
+            </h2>
+
+            <p>
+              Submit your stock query and
+              receive a structured
+              educational explanation from
+              the VTKS team through charts,
+              videos or written analysis.
+              Browse previously answered
+              queries to learn from real
+              market examples.
+            </p>
+
+            <div className="ask-vtks-buttons">
+              <Link
+                to="/ask-vtks"
+                className="ask-primary-btn"
+              >
+                Ask Your Stock →
+              </Link>
+
+              {showAnsweredQueries && (
+                <Link
+                  to="/answered-queries"
+                  className="ask-secondary-btn"
+                >
+                  View Answered Queries
+                </Link>
+              )}
+            </div>
+          </div>
+
+          <div className="ask-vtks-stats">
+            <div className="ask-stat-card">
+              <h3>📈</h3>
+
+              <strong>
+                Chart Analysis
+              </strong>
+
+              <p>
+                Educational chart-based
+                responses.
+              </p>
+            </div>
+
+            <div className="ask-stat-card">
+              <h3>🎥</h3>
+
+              <strong>
+                Video Explanation
+              </strong>
+
+              <p>
+                Upload or YouTube supported.
+              </p>
+            </div>
+
+            <div className="ask-stat-card">
+              <h3>📝</h3>
+
+              <strong>
+                Written View
+              </strong>
+
+              <p>
+                Simple and structured
+                explanation.
+              </p>
+            </div>
+          </div>
+        </section>
+      )}
+    </main>
   );
 }

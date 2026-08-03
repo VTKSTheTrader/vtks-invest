@@ -457,3 +457,545 @@
     width: 100%;
   }
 }
+/* =========================================================
+   EXISTING FILE ACTIONS
+========================================================= */
+
+.holding-existing-file-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+  padding: 11px 12px;
+  border: 1px solid #dbeafe;
+  border-radius: 10px;
+  background: #eff6ff;
+}
+
+.holding-existing-file-actions a {
+  min-width: 0;
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.holding-existing-file-actions a:hover {
+  text-decoration: underline;
+}
+
+.holding-remove-file-button {
+  flex-shrink: 0;
+  min-height: 37px;
+  padding: 7px 11px;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #dc2626;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.holding-remove-file-button:hover:not(:disabled) {
+  border-color: #dc2626;
+  background: #fef2f2;
+}
+
+.holding-remove-file-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.holding-selected-file {
+  display: block;
+  margin-top: 9px;
+  padding: 9px 11px;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  background: #f0fdf4;
+  color: #166534;
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .holding-existing-file-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .holding-remove-file-button {
+    width: 100%;
+  }
+}
+/* =========================================================
+   CHART FILE ACTIONS
+========================================================= */
+
+.holding-existing-file-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+  padding: 11px 12px;
+  border: 1px solid #dbeafe;
+  border-radius: 10px;
+  background: #eff6ff;
+}
+
+.holding-existing-file-actions a {
+  min-width: 0;
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.45;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.holding-existing-file-actions a:hover {
+  text-decoration: underline;
+}
+
+.holding-remove-file-button {
+  flex-shrink: 0;
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 1px solid #fecaca;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #dc2626;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.holding-remove-file-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: #dc2626;
+  background: #fef2f2;
+}
+
+.holding-remove-file-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.holding-selected-file {
+  display: block;
+  margin-top: 9px;
+  padding: 9px 11px;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  background: #f0fdf4;
+  color: #166534;
+  font-size: 13px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+/* =========================================================
+   INLINE CHART MESSAGES
+========================================================= */
+
+.holding-chart-message {
+  grid-column: 1 / -1;
+  width: 100%;
+  padding: 13px 16px;
+  box-sizing: border-box;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+.holding-chart-success {
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.holding-chart-error {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+/* =========================================================
+   CUSTOM REMOVE CONFIRMATION
+========================================================= */
+
+.holding-confirm-overlay {
+  position: fixed;
+  z-index: 100000;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.68);
+  backdrop-filter: blur(4px);
+}
+
+.holding-confirm-modal {
+  width: min(450px, 100%);
+  padding: 30px;
+  box-sizing: border-box;
+  border: 1px solid #e2e8f0;
+  border-radius: 21px;
+  background: #ffffff;
+  box-shadow: 0 28px 85px rgba(15, 23, 42, 0.38);
+  text-align: center;
+  animation: holding-confirm-enter 0.2s ease;
+}
+
+@keyframes holding-confirm-enter {
+  from {
+    opacity: 0;
+    transform: translateY(15px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.holding-confirm-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 66px;
+  height: 66px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  background: #fee2e2;
+  font-size: 30px;
+}
+
+.holding-confirm-modal h3 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 25px;
+  line-height: 1.3;
+}
+
+.holding-confirm-modal p {
+  margin: 14px 0 25px;
+  color: #64748b;
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.holding-confirm-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.holding-confirm-cancel,
+.holding-confirm-delete {
+  min-height: 48px;
+  padding: 11px 16px;
+  border-radius: 11px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.holding-confirm-cancel {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+}
+
+.holding-confirm-delete {
+  border: 1px solid #dc2626;
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.holding-confirm-cancel:hover:not(:disabled) {
+  background: #f8fafc;
+}
+
+.holding-confirm-delete:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+.holding-confirm-cancel:disabled,
+.holding-confirm-delete:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+@media (max-width: 640px) {
+  .holding-existing-file-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .holding-remove-file-button {
+    width: 100%;
+  }
+
+  .holding-confirm-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .holding-confirm-modal {
+    width: 100%;
+    padding: 26px 20px 22px;
+    border-radius: 22px 22px 0 0;
+  }
+
+  .holding-confirm-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .holding-confirm-delete {
+    order: 1;
+  }
+
+  .holding-confirm-cancel {
+    order: 2;
+  }
+}/* =========================================================
+   CHART FILE ACTIONS
+========================================================= */
+
+.holding-existing-file-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+  padding: 11px 12px;
+  border: 1px solid #dbeafe;
+  border-radius: 10px;
+  background: #eff6ff;
+}
+
+.holding-existing-file-actions a {
+  min-width: 0;
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.45;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.holding-existing-file-actions a:hover {
+  text-decoration: underline;
+}
+
+.holding-remove-file-button {
+  flex-shrink: 0;
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 1px solid #fecaca;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #dc2626;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.holding-remove-file-button:hover:not(:disabled) {
+  border-color: #dc2626;
+  background: #fef2f2;
+}
+
+.holding-remove-file-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.holding-selected-file {
+  display: block;
+  margin-top: 9px;
+  padding: 9px 11px;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  background: #f0fdf4;
+  color: #166534;
+  font-size: 13px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+/* =========================================================
+   INLINE CHART MESSAGES
+========================================================= */
+
+.holding-chart-message {
+  grid-column: 1 / -1;
+  width: 100%;
+  padding: 13px 16px;
+  box-sizing: border-box;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+.holding-chart-success {
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.holding-chart-error {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+/* =========================================================
+   CUSTOM REMOVE CONFIRMATION
+========================================================= */
+
+.holding-confirm-overlay {
+  position: fixed;
+  z-index: 100000;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.68);
+  backdrop-filter: blur(4px);
+}
+
+.holding-confirm-modal {
+  width: min(450px, 100%);
+  padding: 30px;
+  box-sizing: border-box;
+  border: 1px solid #e2e8f0;
+  border-radius: 21px;
+  background: #ffffff;
+  box-shadow: 0 28px 85px rgba(15, 23, 42, 0.38);
+  text-align: center;
+  animation: holding-confirm-enter 0.2s ease;
+}
+
+@keyframes holding-confirm-enter {
+  from {
+    opacity: 0;
+    transform: translateY(15px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.holding-confirm-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 66px;
+  height: 66px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  background: #fee2e2;
+  font-size: 30px;
+}
+
+.holding-confirm-modal h3 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 25px;
+  line-height: 1.3;
+}
+
+.holding-confirm-modal p {
+  margin: 14px 0 25px;
+  color: #64748b;
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.holding-confirm-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.holding-confirm-cancel,
+.holding-confirm-delete {
+  min-height: 48px;
+  padding: 11px 16px;
+  border-radius: 11px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.holding-confirm-cancel {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+}
+
+.holding-confirm-delete {
+  border: 1px solid #dc2626;
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.holding-confirm-cancel:hover:not(:disabled) {
+  background: #f8fafc;
+}
+
+.holding-confirm-delete:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+.holding-confirm-cancel:disabled,
+.holding-confirm-delete:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+@media (max-width: 640px) {
+  .holding-existing-file-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .holding-remove-file-button {
+    width: 100%;
+  }
+
+  .holding-confirm-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .holding-confirm-modal {
+    width: 100%;
+    padding: 26px 20px 22px;
+    border-radius: 22px 22px 0 0;
+  }
+
+  .holding-confirm-actions {
+    grid-template-columns: 1fr;
+  }
+}
