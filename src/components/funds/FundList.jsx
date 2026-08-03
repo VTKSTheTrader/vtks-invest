@@ -14,6 +14,7 @@ import {
 
 import Pagination from "../common/Pagination";
 
+
 const ITEMS_PER_PAGE = 6;
 const AUTO_REFRESH_INTERVAL = 60 * 1000;
 
@@ -855,6 +856,8 @@ function PortfolioCard({
           )}
         />
       </div>
+
+      
 
       <div style={cardFooterStyle}>
         <span style={tradeTypeStyle}>

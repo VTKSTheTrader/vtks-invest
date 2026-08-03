@@ -222,39 +222,79 @@ export default function Holdings() {
     if (!entry) return "0.00";
 
     const currentStatus = getDisplayStatus(row);
-    let exitPrice = Number(row.cmp || 0);
+
+    const savedRealisedReturn =
+      row.realisedReturn ??
+      row.realised_return;
+
+    if (
+      savedRealisedReturn !== null &&
+      savedRealisedReturn !== undefined &&
+      savedRealisedReturn !== ""
+    ) {
+      const realisedReturn = Number(
+        savedRealisedReturn
+      );
+
+      if (Number.isFinite(realisedReturn)) {
+        return realisedReturn.toFixed(2);
+      }
+    }
+
+    const savedExitPrice =
+      row.exitPrice ??
+      row.exit_price;
+
+    if (
+      savedExitPrice !== null &&
+      savedExitPrice !== undefined &&
+      savedExitPrice !== ""
+    ) {
+      const exitPrice = Number(savedExitPrice);
+
+      if (
+        Number.isFinite(exitPrice) &&
+        exitPrice > 0
+      ) {
+        return (
+          ((exitPrice - entry) / entry) *
+          100
+        ).toFixed(2);
+      }
+    }
+
+    let fallbackExitPrice = Number(
+      row.cmp || entry
+    );
 
     if (currentStatus === "Target 1 Hit") {
-      exitPrice = Number(
+      fallbackExitPrice = Number(
         row.target1 || row.cmp || entry
       );
     }
 
     if (currentStatus === "Target 2 Hit") {
-      exitPrice = Number(
+      fallbackExitPrice = Number(
         row.target2 || row.cmp || entry
       );
     }
 
     if (currentStatus === "Target 3 Hit") {
-      exitPrice = Number(
+      fallbackExitPrice = Number(
         row.target3 || row.cmp || entry
       );
     }
 
-    if (currentStatus === "Booked Profit") {
-      exitPrice = Number(row.cmp || row.entry);
-    }
-
     if (currentStatus === "SL Hit") {
-      exitPrice = Number(
+      fallbackExitPrice = Number(
         row.stopLoss || row.cmp || entry
       );
     }
 
-    return (((exitPrice - entry) / entry) * 100).toFixed(
-      2
-    );
+    return (
+      ((fallbackExitPrice - entry) / entry) *
+      100
+    ).toFixed(2);
   };
 
   const statusBadge = (status) => {
@@ -667,20 +707,32 @@ export default function Holdings() {
       key: "cmp",
       label: "CMP / ROI",
       render: (row) => {
-        const liveReturn = Number(
-          getReturn(row)
-        );
-
+        const liveReturn = Number(getReturn(row));
         const achievedReturn = Number(
           getAchievedReturn(row)
         );
-
         const currentStatus =
           getDisplayStatus(row);
 
+        const isCompleted =
+          currentStatus !== "Active" &&
+          currentStatus !== "Cancelled";
+
+        const displayedReturn = isCompleted
+          ? achievedReturn
+          : liveReturn;
+
         return (
           <div style={{ lineHeight: "1.5" }}>
-            <strong>₹{row.cmp}</strong>
+            <strong>
+              ₹
+              {Number(row.cmp || 0).toLocaleString(
+                "en-IN",
+                {
+                  maximumFractionDigits: 2,
+                }
+              )}
+            </strong>
 
             <br />
 
@@ -691,48 +743,77 @@ export default function Holdings() {
                 padding: "3px 8px",
                 borderRadius: "14px",
                 background:
-                  liveReturn >= 0
-                    ? "#dcfce7"
+                  displayedReturn >= 0
+                    ? isCompleted
+                      ? "#dbeafe"
+                      : "#dcfce7"
                     : "#fee2e2",
                 color:
-                  liveReturn >= 0
-                    ? "#166534"
+                  displayedReturn >= 0
+                    ? isCompleted
+                      ? "#1e40af"
+                      : "#166534"
                     : "#991b1b",
                 fontWeight: 700,
                 fontSize: "12px",
+                whiteSpace: "nowrap",
               }}
             >
-              Live {liveReturn}%
+              {isCompleted
+                ? "Realised ROI"
+                : "Live ROI"}{" "}
+              {displayedReturn >= 0 ? "+" : ""}
+              {displayedReturn.toFixed(2)}%
             </span>
-
-            {currentStatus !== "Active" &&
-              currentStatus !== "Cancelled" && (
-                <>
-                  <br />
-
-                  <span
-                    style={{
-                      display: "inline-block",
-                      marginTop: "4px",
-                      padding: "3px 8px",
-                      borderRadius: "14px",
-                      background:
-                        achievedReturn >= 0
-                          ? "#dbeafe"
-                          : "#fee2e2",
-                      color:
-                        achievedReturn >= 0
-                          ? "#1e40af"
-                          : "#991b1b",
-                      fontWeight: 700,
-                      fontSize: "12px",
-                    }}
-                  >
-                    ROI {achievedReturn}%
-                  </span>
-                </>
-              )}
           </div>
+        );
+      },
+    },
+    {
+      key: "exitPrice",
+      label: "Exit Price",
+      render: (row) => {
+        const currentStatus =
+          getDisplayStatus(row);
+
+        const isCompleted =
+          currentStatus !== "Active" &&
+          currentStatus !== "Cancelled";
+
+        if (!isCompleted) {
+          return "₹—";
+        }
+
+        const exitPrice = Number(
+          row.exitPrice ??
+            row.exit_price ??
+            0
+        );
+
+        if (!Number.isFinite(exitPrice) || exitPrice <= 0) {
+          return (
+            <span
+              style={{
+                color: "#94a3b8",
+                fontSize: "12px",
+                fontWeight: 700,
+              }}
+            >
+              Not added
+            </span>
+          );
+        }
+
+        return (
+          <strong>
+            ₹
+            {exitPrice.toLocaleString(
+              "en-IN",
+              {
+                maximumFractionDigits: 2,
+              }
+            )}
+          </strong>
         );
       },
     },
