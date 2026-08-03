@@ -89,6 +89,15 @@ export default function Navbar({ settings }) {
     Market Outlook
   </NavLink>
 )}
+{website.showAccuracy && (
+            <NavLink
+              to="/accuracy"
+              className={getNavClass}
+              onClick={closeMenu}
+            >
+              Accuracy
+            </NavLink>
+          )}
           {website.showIndicators && (
             <NavLink
               to="/indicators"
@@ -107,15 +116,7 @@ export default function Navbar({ settings }) {
             Pricing
           </NavLink>
 
-          {website.showAccuracy && (
-            <NavLink
-              to="/accuracy"
-              className={getNavClass}
-              onClick={closeMenu}
-            >
-              Accuracy
-            </NavLink>
-          )}
+          
 
           {website.showScanner && (
             <NavLink
