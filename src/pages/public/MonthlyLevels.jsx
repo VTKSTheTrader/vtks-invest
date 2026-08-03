@@ -153,13 +153,10 @@ export default function MonthlyLevels() {
           📊 VTKS Market Outlook
         </span>
 
-        <h1> Monthly Support & Resistance Levels</h1>
+        <h1> Market Outlook & Key Levels</h1>
 
         <p>
-          Structured reference levels for indices
-          and commodities, supported by charts,
-          market bias, technical outlook and
-          educational observations.
+          Structured market analysis featuring key price levels, technical outlook, market bias and chart-based learning.
         </p>
       </section>
 
@@ -170,12 +167,10 @@ export default function MonthlyLevels() {
       <section className="public-monthly-levels-section">
         <div className="public-monthly-levels-toolbar">
           <div>
-            <h2>Key Levels for This Month</h2>
+            <h2>Technical Market Outlook</h2>
 
             <p>
-              Select an instrument to review its
-              market structure, important levels and
-              analytical outlook.
+              Select an instrument to explore support & resistance, market bias, trend and detailed chart analysis.
             </p>
           </div>
 
@@ -769,11 +764,7 @@ function MonthlyLevelDetails({
             )}
 
             <p className="public-monthly-detail-disclaimer">
-              Monthly market levels are shared for
-              educational and analytical purposes
-              only. They do not constitute investment
-              advice or a recommendation to buy or
-              sell any security.
+              VTKS market levels and technical observations are provided for educational and analytical purposes only. Always perform your own research and manage risk before taking any trading or investment decision.
             </p>
           </div>
         </section>

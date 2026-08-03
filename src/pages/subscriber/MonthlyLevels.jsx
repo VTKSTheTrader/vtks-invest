@@ -7,9 +7,9 @@ import {
 import {
   getSubscriberMonthlyLevels,
 } from "../../services/monthlyLevelsService";
-
 import "../public/MonthlyLevels.css";
-
+import "./MonthlyLevels.css";
+import { useNavigate } from "react-router-dom";
 const formatNumber = (value) => {
   if (
     value === "" ||
@@ -59,6 +59,7 @@ export default function SubscriberMonthlyLevels() {
 
   const [currentPage, setCurrentPage] =
     useState(1);
+  const navigate = useNavigate();  
 
   useEffect(() => {
     document.title =
@@ -149,20 +150,33 @@ export default function SubscriberMonthlyLevels() {
           HERO
       ===================================================== */}
 
-      <section className="public-monthly-levels-hero">
-        <span className="public-monthly-levels-badge">
-          🔐 VTKS Subscriber Market Outlook
-        </span>
+     <section className="public-monthly-levels-hero">
+  <div className="subscriber-outlook-hero-inner">
+    <span className="public-monthly-levels-badge">
+      🔐 VTKS Subscriber Market Outlook
+    </span>
 
-        <h1>Subscriber Market Outlook</h1>
+    <h1>Subscriber Market Outlook</h1>
 
-        <p>
-          Access public and subscriber-only monthly
-          levels for indices and commodities, supported
-          by charts, market bias, technical outlook and
-          educational observations.
-        </p>
-      </section>
+    <p>
+      Access public and subscriber-only technical key
+      levels for indices and commodities, supported by
+      charts, market bias, technical outlook and
+      educational observations.
+    </p>
+
+    <div className="subscriber-outlook-back-row">
+      <button
+        type="button"
+        className="subscriber-outlook-back-btn"
+        onClick={() => navigate("/dashboard")}
+      >
+        <span aria-hidden="true">←</span>
+        Back to Dashboard
+      </button>
+    </div>
+  </div>
+</section>
 
       {/* =====================================================
           LEVEL CARDS
@@ -515,7 +529,7 @@ function MonthlyLevelDetails({
 
               <p>
                 {level.trend ||
-                  "Monthly market structure"}
+                  "Technical market structure"}
               </p>
             </div>
 
@@ -762,11 +776,11 @@ function MonthlyLevelDetails({
             )}
 
             <p className="public-monthly-detail-disclaimer">
-              Monthly market levels are shared for
-              educational and analytical purposes
-              only. They do not constitute investment
-              advice or a recommendation to buy or
-              sell any security.
+              VTKS market levels and technical observations
+              are provided for educational and analytical
+              purposes only. They do not constitute investment
+              advice or a recommendation to buy or sell any
+              security.
             </p>
           </div>
         </section>

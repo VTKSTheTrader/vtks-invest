@@ -535,7 +535,7 @@ export default function Dashboard() {
           <section className="subscriber-feature-grid">
             <FeatureCard
               title="📊 Market Outlook"
-              subtitle="Monthly support, resistance, charts and technical outlook."
+              subtitle="Technical support, resistance, charts and technical outlook."
               link="/dashboard/monthly-levels"
               emptyMessage="No monthly market outlook available."
               items={latestMonthlyLevels.map((item) => ({

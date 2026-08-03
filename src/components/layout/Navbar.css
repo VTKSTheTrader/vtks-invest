@@ -535,3 +535,97 @@
     font-size: 18px;
   }
 }
+/* =========================================================
+   FORCE VTKS PHILOSOPHY VISIBLE
+========================================================= */
+
+.brand-philosophy {
+  display: block;
+}
+
+@media (max-width: 1180px) {
+  .brand-content {
+    min-width: 0;
+  }
+
+  .brand-philosophy {
+    display: block !important;
+
+    max-width: 240px;
+    margin-top: 4px;
+
+    color: #475569;
+
+    font-size: 7px;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: 0.12px;
+
+    white-space: nowrap;
+    text-transform: uppercase;
+  }
+}
+
+@media (max-width: 600px) {
+  .navbar {
+    min-height: 76px;
+  }
+
+  .brand-logo {
+    min-width: 0;
+    max-width: calc(100% - 60px);
+  }
+
+  .brand-content {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .brand-logo-main {
+    gap: 7px;
+  }
+
+  .brand-vtks {
+    font-size: 25px;
+  }
+
+  .brand-hub {
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+
+  .brand-philosophy {
+    display: block !important;
+
+    max-width: 225px;
+    margin-top: 5px;
+
+    font-size: 6.5px;
+    line-height: 1.15;
+    letter-spacing: 0.04px;
+
+    overflow: visible;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 380px) {
+  .brand-vtks {
+    font-size: 22px;
+  }
+
+  .brand-hub {
+    padding: 5px 7px;
+    font-size: 10px;
+  }
+
+  .brand-philosophy {
+    display: block !important;
+
+    max-width: 195px;
+
+    font-size: 5.6px;
+    line-height: 1.1;
+    letter-spacing: 0;
+  }
+}
