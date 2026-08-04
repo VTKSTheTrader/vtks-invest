@@ -1,4 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { Link } from "react-router-dom";
 
 import {
@@ -8,7 +12,7 @@ import {
 
 import "./FundPreview.css";
 
-const MAX_HOME_TRADES = 3;
+const MAX_HOME_IDEAS = 3;
 
 const normalize = (value) =>
   String(value || "")
@@ -21,10 +25,10 @@ export default function FundPreview() {
   const [loadError, setLoadError] = useState("");
 
   useEffect(() => {
-    loadTrades();
+    loadIdeas();
   }, []);
 
-  const loadTrades = async () => {
+  const loadIdeas = async () => {
     try {
       setLoading(true);
       setLoadError("");
@@ -42,7 +46,7 @@ export default function FundPreview() {
 
       setLoadError(
         error?.message ||
-          "Failed to load portfolio trades."
+          "Failed to load market ideas."
       );
     } finally {
       setLoading(false);
@@ -51,7 +55,9 @@ export default function FundPreview() {
 
   const getStatus = (holding) => {
     const manualStatus = String(
-      holding.tradeStatus || ""
+      holding.tradeStatus ||
+        holding.trade_status ||
+        ""
     ).trim();
 
     const fixedStatuses = [
@@ -100,16 +106,170 @@ export default function FundPreview() {
     return manualStatus || "Active";
   };
 
-  const getReturn = (holding) => {
+  const isCompletedIdea = (holding) =>
+    [
+      "Booked Profit",
+      "SL Hit",
+      "Target 1 Hit",
+      "Target 2 Hit",
+      "Target 3 Hit",
+    ].includes(getStatus(holding));
+
+  const getExitPrice = (holding) => {
+    const savedExitPrice = Number(
+      holding.exitPrice ??
+        holding.exit_price ??
+        0
+    );
+
+    if (
+      Number.isFinite(savedExitPrice) &&
+      savedExitPrice > 0
+    ) {
+      return savedExitPrice;
+    }
+
+    const status = getStatus(holding);
+
+    if (status === "Target 1 Hit") {
+      return Number(
+        holding.target1 ||
+          holding.cmp ||
+          holding.entry ||
+          0
+      );
+    }
+
+    if (status === "Target 2 Hit") {
+      return Number(
+        holding.target2 ||
+          holding.cmp ||
+          holding.entry ||
+          0
+      );
+    }
+
+    if (status === "Target 3 Hit") {
+      return Number(
+        holding.target3 ||
+          holding.cmp ||
+          holding.entry ||
+          0
+      );
+    }
+
+    if (status === "SL Hit") {
+      return Number(
+        holding.stopLoss ||
+          holding.cmp ||
+          holding.entry ||
+          0
+      );
+    }
+
+    return Number(
+      holding.cmp ||
+        holding.entry ||
+        0
+    );
+  };
+
+  const getDisplayReturn = (holding) => {
     const entry = Number(holding.entry || 0);
-    const cmp = Number(holding.cmp || 0);
 
     if (!entry) return 0;
+
+    if (isCompletedIdea(holding)) {
+      const savedRealisedReturn =
+        holding.realisedReturn ??
+        holding.realised_return;
+
+      if (
+        savedRealisedReturn !== null &&
+        savedRealisedReturn !== undefined &&
+        savedRealisedReturn !== ""
+      ) {
+        const realisedReturn = Number(
+          savedRealisedReturn
+        );
+
+        if (Number.isFinite(realisedReturn)) {
+          return realisedReturn;
+        }
+      }
+
+      const exitPrice = getExitPrice(holding);
+
+      return (
+        ((exitPrice - entry) / entry) *
+        100
+      );
+    }
+
+    const cmp = Number(
+      holding.cmp || entry
+    );
 
     return ((cmp - entry) / entry) * 100;
   };
 
-  const latestTrades = useMemo(() => {
+  const getStatusClass = (status) => {
+    if (status === "Booked Profit") {
+      return [
+        "fund-preview-status",
+        "fund-preview-status-booked",
+      ].join(" ");
+    }
+
+    if (
+      status === "Target 1 Hit" ||
+      status === "Target 2 Hit" ||
+      status === "Target 3 Hit"
+    ) {
+      return [
+        "fund-preview-status",
+        "fund-preview-status-target",
+      ].join(" ");
+    }
+
+    if (status === "SL Hit") {
+      return [
+        "fund-preview-status",
+        "fund-preview-status-sl",
+      ].join(" ");
+    }
+
+    return [
+      "fund-preview-status",
+      "fund-preview-status-active",
+    ].join(" ");
+  };
+
+  const getStatusLabel = (status) => {
+    if (status === "Booked Profit") {
+      return "💰 Booked Profit";
+    }
+
+    if (status === "Target 1 Hit") {
+      return "🎯 Target 1 Hit";
+    }
+
+    if (status === "Target 2 Hit") {
+      return "🚀 Target 2 Hit";
+    }
+
+    if (status === "Target 3 Hit") {
+      return "🏆 Target 3 Hit";
+    }
+
+    if (status === "SL Hit") {
+      return "🛑 SL Hit";
+    }
+
+    return "🟢 Active";
+  };
+
+  const latestIdeas = useMemo(() => {
     return holdings
       .filter((holding) => {
         const visibility = normalize(
@@ -117,29 +277,18 @@ export default function FundPreview() {
         );
 
         const publishStatus = normalize(
-          holding.publishStatus
+          holding.publishStatus ||
+            holding.publish_status
         );
 
-        /*
-          Home page rule:
-
-          Public trades are shown.
-
-          Revealed subscriber/community trades
-          are shown only when accuracyBlur is false.
-
-          Protected subscriber trades are not shown
-          on the home preview.
-
-          Private, Draft, Cancelled and
-          accuracyShow false are hidden.
-        */
         const isPublic =
           visibility === "public";
 
         const isRevealedSubscriber =
-          (visibility === "subscriber" ||
-            visibility === "community") &&
+          (
+            visibility === "subscriber" ||
+            visibility === "community"
+          ) &&
           holding.accuracyBlur === false;
 
         return (
@@ -154,12 +303,14 @@ export default function FundPreview() {
         const firstDate = new Date(
           first.recommendationDate ||
             first.createdAt ||
+            first.created_at ||
             0
         ).getTime();
 
         const secondDate = new Date(
           second.recommendationDate ||
             second.createdAt ||
+            second.created_at ||
             0
         ).getTime();
 
@@ -167,10 +318,12 @@ export default function FundPreview() {
           return secondDate - firstDate;
         }
 
-        return Number(second.id || 0) -
-          Number(first.id || 0);
+        return (
+          Number(second.id || 0) -
+          Number(first.id || 0)
+        );
       })
-      .slice(0, MAX_HOME_TRADES);
+      .slice(0, MAX_HOME_IDEAS);
   }, [holdings]);
 
   const formatPrice = (value) =>
@@ -185,7 +338,7 @@ export default function FundPreview() {
     return (
       <section className="fund-preview-section">
         <p className="fund-preview-message">
-          Loading latest portfolio trades...
+          Loading latest market ideas...
         </p>
       </section>
     );
@@ -196,7 +349,7 @@ export default function FundPreview() {
       <section className="fund-preview-section">
         <div className="fund-preview-empty">
           <h3>
-            Unable to load portfolio trades
+            Unable to load market ideas
           </h3>
 
           <p>{loadError}</p>
@@ -209,44 +362,57 @@ export default function FundPreview() {
     <section className="fund-preview-section">
       <div className="fund-preview-heading">
         <span className="fund-preview-badge">
-          📊 Live VTKS Fund
+          📊 VTKS Market Insights
         </span>
 
-        <h2>Latest Portfolio Trades</h2>
+        <h2>Latest Insights</h2>
 
         <p>
-          Discover the latest publicly revealed
-          VTKS trades backed by structured analysis
-          and disciplined portfolio management.
+          Discover recently published and publicly
+          revealed VTKS ideas backed by structured
+          analysis and disciplined portfolio
+          management.
         </p>
       </div>
 
-      {latestTrades.length === 0 ? (
+      {latestIdeas.length === 0 ? (
         <div className="fund-preview-empty">
-          <h3>No public trades available</h3>
+          <h3>No public ideas available</h3>
 
           <p>
-            Newly published and revealed trades
-            will appear here.
+            Newly published and revealed ideas will
+            appear here.
           </p>
         </div>
       ) : (
         <div className="fund-preview-grid">
-          {latestTrades.map((holding) => {
-            const roi = getReturn(holding);
+          {latestIdeas.map((holding) => {
             const status = getStatus(holding);
+            const completedIdea =
+              isCompletedIdea(holding);
+
+            const displayReturn =
+              getDisplayReturn(holding);
+
+            const displayPrice = completedIdea
+              ? getExitPrice(holding)
+              : Number(holding.cmp || 0);
 
             return (
               <Link
                 key={holding.id}
                 to={`/trade/${holding.id}`}
-                className="fund-preview-card"
+                className={`fund-preview-card ${
+                  status === "Booked Profit"
+                    ? "fund-preview-card-booked"
+                    : ""
+                }`}
               >
                 <div className="fund-preview-card-top">
                   <div>
                     <h3>
                       {holding.stock ||
-                        "VTKS Trade"}
+                        "VTKS Idea"}
                     </h3>
 
                     <p>
@@ -256,25 +422,37 @@ export default function FundPreview() {
                   </div>
 
                   <span
-                    className={
-                      status === "Active"
-                        ? "fund-preview-status fund-preview-status-active"
-                        : "fund-preview-status"
-                    }
+                    className={getStatusClass(
+                      status
+                    )}
                   >
-                    {status}
+                    {getStatusLabel(status)}
                   </span>
                 </div>
 
                 <div
                   className={
-                    roi >= 0
-                      ? "fund-preview-return fund-preview-return-positive"
+                    displayReturn >= 0
+                      ? `fund-preview-return fund-preview-return-positive ${
+                          completedIdea
+                            ? "fund-preview-return-realised"
+                            : ""
+                        }`
                       : "fund-preview-return fund-preview-return-negative"
                   }
                 >
-                  {roi >= 0 ? "+" : ""}
-                  {roi.toFixed(2)}%
+                  {completedIdea && (
+                    <small className="fund-preview-return-label">
+                      Realised Return
+                    </small>
+                  )}
+
+                  <span>
+                    {displayReturn >= 0
+                      ? "+"
+                      : ""}
+                    {displayReturn.toFixed(2)}%
+                  </span>
                 </div>
 
                 <div className="fund-preview-meta">
@@ -287,17 +465,26 @@ export default function FundPreview() {
                     </strong>
                   </span>
 
-                  <span>
-                    CMP{" "}
+                  <span
+                    className={
+                      completedIdea
+                        ? "fund-preview-exit-pill"
+                        : ""
+                    }
+                  >
+                    {completedIdea
+                      ? "Exit"
+                      : "CMP"}{" "}
                     <strong>
                       {formatPrice(
-                        holding.cmp
+                        displayPrice
                       )}
                     </strong>
                   </span>
 
                   <span>
                     {holding.tradeType ||
+                      holding.trade_type ||
                       "Swing"}
                   </span>
                 </div>

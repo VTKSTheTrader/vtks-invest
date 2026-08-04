@@ -356,9 +356,76 @@ export default function FundList() {
           (holding.sector || "General") ===
             sector;
 
+        const currentStatus = getStatus(holding);
+
+        const exitPrice = Number(
+          holding.exitPrice ??
+            holding.exit_price ??
+            holding.cmp ??
+            0
+        );
+
+        const target1 = Number(
+          holding.target1 || 0
+        );
+
+        const target2 = Number(
+          holding.target2 || 0
+        );
+
+        const target3 = Number(
+          holding.target3 || 0
+        );
+
+        const hasReachedTarget1 =
+          currentStatus === "Target 1 Hit" ||
+          currentStatus === "Target 2 Hit" ||
+          currentStatus === "Target 3 Hit" ||
+          (
+            currentStatus === "Booked Profit" &&
+            target1 > 0 &&
+            exitPrice >= target1
+          );
+
+        const hasReachedTarget2 =
+          currentStatus === "Target 2 Hit" ||
+          currentStatus === "Target 3 Hit" ||
+          (
+            currentStatus === "Booked Profit" &&
+            target2 > 0 &&
+            exitPrice >= target2
+          );
+
+        const hasReachedTarget3 =
+          currentStatus === "Target 3 Hit" ||
+          (
+            currentStatus === "Booked Profit" &&
+            target3 > 0 &&
+            exitPrice >= target3
+          );
+
         const matchesStatus =
           status === "All" ||
-          getStatus(holding) === status;
+          (
+            status === "Target 1 Hit" &&
+            hasReachedTarget1
+          ) ||
+          (
+            status === "Target 2 Hit" &&
+            hasReachedTarget2
+          ) ||
+          (
+            status === "Target 3 Hit" &&
+            hasReachedTarget3
+          ) ||
+          (
+            ![
+              "Target 1 Hit",
+              "Target 2 Hit",
+              "Target 3 Hit",
+            ].includes(status) &&
+            currentStatus === status
+          );
 
         return (
           matchesSearch &&

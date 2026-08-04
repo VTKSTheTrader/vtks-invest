@@ -185,23 +185,174 @@ export default function Home() {
     return manualStatus || "Active";
   };
 
+  const isCompletedIdea = (holding) =>
+    [
+      "Booked Profit",
+      "SL Hit",
+      "Target 1 Hit",
+      "Target 2 Hit",
+      "Target 3 Hit",
+    ].includes(getStatus(holding));
+
+  const getExitPrice = (holding) => {
+    const savedExitPrice = Number(
+      holding.exitPrice ??
+        holding.exit_price ??
+        0
+    );
+
+    if (
+      Number.isFinite(savedExitPrice) &&
+      savedExitPrice > 0
+    ) {
+      return savedExitPrice;
+    }
+
+    const status = getStatus(holding);
+
+    if (status === "Target 1 Hit") {
+      return Number(
+        holding.target1 ||
+          holding.cmp ||
+          holding.entry ||
+          0
+      );
+    }
+
+    if (status === "Target 2 Hit") {
+      return Number(
+        holding.target2 ||
+          holding.cmp ||
+          holding.entry ||
+          0
+      );
+    }
+
+    if (status === "Target 3 Hit") {
+      return Number(
+        holding.target3 ||
+          holding.cmp ||
+          holding.entry ||
+          0
+      );
+    }
+
+    if (status === "SL Hit") {
+      return Number(
+        holding.stopLoss ||
+          holding.cmp ||
+          holding.entry ||
+          0
+      );
+    }
+
+    return Number(
+      holding.cmp ||
+        holding.entry ||
+        0
+    );
+  };
+
   const getReturn = (holding) => {
     const entry = Number(
       holding.entry || 0
-    );
-
-    const cmp = Number(
-      holding.cmp || 0
     );
 
     if (!entry) {
       return 0;
     }
 
+    if (isCompletedIdea(holding)) {
+      const savedRealisedReturn =
+        holding.realisedReturn ??
+        holding.realised_return;
+
+      if (
+        savedRealisedReturn !== null &&
+        savedRealisedReturn !== undefined &&
+        savedRealisedReturn !== ""
+      ) {
+        const realisedReturn = Number(
+          savedRealisedReturn
+        );
+
+        if (Number.isFinite(realisedReturn)) {
+          return realisedReturn;
+        }
+      }
+
+      const exitPrice = getExitPrice(holding);
+
+      return (
+        ((exitPrice - entry) / entry) *
+        100
+      );
+    }
+
+    const cmp = Number(
+      holding.cmp || entry
+    );
+
     return (
       ((cmp - entry) / entry) *
       100
     );
+  };
+
+  const getStatusStyle = (status) => {
+    if (status === "Booked Profit") {
+      return {
+        background: "#dcfce7",
+        color: "#166534",
+        border: "1px solid #22c55e",
+      };
+    }
+
+    if (status === "SL Hit") {
+      return {
+        background: "#fee2e2",
+        color: "#b91c1c",
+        border: "1px solid #fecaca",
+      };
+    }
+
+    if (status.includes("Target")) {
+      return {
+        background: "#ede9fe",
+        color: "#6d28d9",
+        border: "1px solid #c4b5fd",
+      };
+    }
+
+    return {
+      background: "#f1f5f9",
+      color: "#334155",
+      border: "1px solid #e2e8f0",
+    };
+  };
+
+  const getStatusLabel = (status) => {
+    if (status === "Booked Profit") {
+      return "💰 Booked Profit";
+    }
+
+    if (status === "SL Hit") {
+      return "🛑 SL Hit";
+    }
+
+    if (status === "Target 1 Hit") {
+      return "🎯 Target 1 Hit";
+    }
+
+    if (status === "Target 2 Hit") {
+      return "🚀 Target 2 Hit";
+    }
+
+    if (status === "Target 3 Hit") {
+      return "🏆 Target 3 Hit";
+    }
+
+    return "Active";
   };
 
   const latestTrades = useMemo(() => {
@@ -465,7 +616,7 @@ export default function Home() {
 
         {loading ? (
           <p className="home-trade-message">
-            Loading latest trades...
+            Loading latest ideas...
           </p>
         ) : latestTrades.length > 0 ? (
           <div className="trade-grid">
@@ -477,6 +628,14 @@ export default function Home() {
                 const status =
                   getStatus(holding);
 
+                const completedIdea =
+                  isCompletedIdea(holding);
+
+                const displayPrice =
+                  completedIdea
+                    ? getExitPrice(holding)
+                    : holding.cmp;
+
                 return (
                   <Link
                     key={holding.id}
@@ -486,7 +645,7 @@ export default function Home() {
                     <div>
                       <h3>
                         {holding.stock ||
-                          "VTKS Trade"}
+                          "VTKS Idea"}
                       </h3>
 
                       <p>
@@ -501,11 +660,41 @@ export default function Home() {
                           ? "trade-return positive-return"
                           : "trade-return negative-return"
                       }
+                      style={
+                        completedIdea &&
+                        roi >= 0
+                          ? {
+                              display: "inline-flex",
+                              flexDirection: "column",
+                              alignItems: "flex-start",
+                              gap: "2px",
+                              background:
+                                "linear-gradient(135deg, #16a34a, #22c55e)",
+                              color: "#ffffff",
+                            }
+                          : undefined
+                      }
                     >
-                      {roi >= 0
-                        ? "+"
-                        : ""}
-                      {roi.toFixed(2)}%
+                      {completedIdea && (
+                        <small
+                          style={{
+                            color:
+                              "rgba(255,255,255,0.85)",
+                            fontSize: "9px",
+                            fontWeight: 800,
+                            lineHeight: 1,
+                            letterSpacing: "0.35px",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          Realised Return
+                        </small>
+                      )}
+
+                      <span>
+                        {roi >= 0 ? "+" : ""}
+                        {roi.toFixed(2)}%
+                      </span>
                     </div>
 
                     <div className="trade-meta">
@@ -516,15 +705,46 @@ export default function Home() {
                         )}
                       </span>
 
-                      <span>
-                        CMP{" "}
+                      <span
+                        style={
+                          completedIdea
+                            ? {
+                                background: "#dcfce7",
+                                color: "#166534",
+                                border:
+                                  "1px solid #86efac",
+                              }
+                            : undefined
+                        }
+                      >
+                        {completedIdea
+                          ? "Exit"
+                          : "CMP"}{" "}
                         {formatPrice(
-                          holding.cmp
+                          displayPrice
                         )}
                       </span>
 
-                      <span>
-                        {status}
+                      <span
+                        style={{
+                          ...getStatusStyle(
+                            status
+                          ),
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          minHeight: "34px",
+                          padding: "7px 12px",
+                          borderRadius: "999px",
+                          fontSize: "12px",
+                          fontWeight: 800,
+                          whiteSpace: "nowrap",
+                          boxSizing: "border-box",
+                        }}
+                      >
+                        {getStatusLabel(
+                          status
+                        )}
                       </span>
                     </div>
 
@@ -538,7 +758,7 @@ export default function Home() {
           </div>
         ) : (
           <p className="home-trade-message">
-            No public trades are currently
+            No public ideas are currently
             available.
           </p>
         )}

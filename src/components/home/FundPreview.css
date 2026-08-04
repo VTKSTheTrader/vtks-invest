@@ -221,3 +221,135 @@
     padding: 26px;
   }
 }
+/* =========================================================
+   IDEA STATUS COLOURS
+========================================================= */
+
+.fund-preview-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 36px;
+  padding: 7px 12px;
+
+  border: 1px solid transparent;
+  border-radius: 999px;
+
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.fund-preview-status-active {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+  color: #334155;
+}
+
+.fund-preview-status-booked {
+  background: linear-gradient(
+    135deg,
+    #dcfce7,
+    #bbf7d0
+  );
+
+  border-color: #22c55e;
+  color: #166534;
+
+  box-shadow:
+    0 8px 18px rgba(34, 197, 94, 0.16);
+}
+
+.fund-preview-status-target {
+  background: #ede9fe;
+  border-color: #c4b5fd;
+  color: #6d28d9;
+}
+
+.fund-preview-status-sl {
+  background: #fee2e2;
+  border-color: #fecaca;
+  color: #b91c1c;
+}
+
+/* =========================================================
+   BOOKED IDEA CARD
+========================================================= */
+
+.fund-preview-card-booked {
+  border-color: #86efac;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(240, 253, 244, 0.8),
+      #ffffff 42%
+    );
+
+  box-shadow:
+    0 16px 38px rgba(22, 163, 74, 0.1);
+}
+
+.fund-preview-card-booked:hover {
+  border-color: #22c55e;
+
+  box-shadow:
+    0 20px 45px rgba(22, 163, 74, 0.17);
+}
+
+/* =========================================================
+   REALISED RETURN
+========================================================= */
+
+.fund-preview-return-realised {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+
+  background: linear-gradient(
+    135deg,
+    #16a34a,
+    #22c55e
+  );
+
+  color: #ffffff;
+}
+
+.fund-preview-return-realised span {
+  color: #ffffff;
+}
+
+.fund-preview-return-label {
+  color: rgba(255, 255, 255, 0.84);
+
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.35px;
+  text-transform: uppercase;
+}
+
+.fund-preview-exit-pill {
+  background: #dcfce7 !important;
+  border: 1px solid #86efac;
+  color: #166534 !important;
+}
+
+/* =========================================================
+   RESPONSIVE STATUS
+========================================================= */
+
+@media (max-width: 600px) {
+  .fund-preview-card-top {
+    align-items: flex-start;
+  }
+
+  .fund-preview-status {
+    min-height: 34px;
+    padding: 7px 10px;
+    font-size: 11px;
+  }
+}
