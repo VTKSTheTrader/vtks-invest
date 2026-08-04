@@ -443,7 +443,7 @@ export default function TradeDetails() {
           >
             {isSubscriberView
               ? "Back to Dashboard"
-              : "Back to Portfolio"}
+              : "Back to Ideas"}
           </Link>
         </div>
       </main>
@@ -580,7 +580,7 @@ export default function TradeDetails() {
           ←{" "}
           {isSubscriberView
             ? "Back to Dashboard"
-            : "Back to Portfolio"}
+            : "Back to Ideas"}
         </Link>
 
         <section className="trade-hero-card">
@@ -608,8 +608,8 @@ export default function TradeDetails() {
                   : normalize(
                         trade.visibility
                       ) === "private"
-                    ? "🔒 Private Trade"
-                    : "🌐 Public Trade"}
+                    ? "🔒 Members-Only Market Study"
+                    : "🌐 Published Market Study"}
               </span>
 
               <span className="trade-market-category-badge">
