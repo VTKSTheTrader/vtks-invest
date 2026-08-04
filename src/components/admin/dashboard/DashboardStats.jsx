@@ -130,6 +130,67 @@ export default function DashboardStats({
     return "active";
   };
 
+  const getHighestTargetReached = (holding) => {
+    const status = getHoldingStatus(holding);
+
+    if (
+      status === "target 1 hit" ||
+      status === "target 2 hit" ||
+      status === "target 3 hit"
+    ) {
+      return status;
+    }
+
+    if (status !== "booked profit") {
+      return null;
+    }
+
+    const exitPrice = Number(
+      holding.exitPrice ??
+        holding.exit_price ??
+        0
+    );
+
+    if (
+      !Number.isFinite(exitPrice) ||
+      exitPrice <= 0
+    ) {
+      return null;
+    }
+
+    const target1 = Number(
+      holding.target1 ??
+        holding.target_1 ??
+        0
+    );
+
+    const target2 = Number(
+      holding.target2 ??
+        holding.target_2 ??
+        0
+    );
+
+    const target3 = Number(
+      holding.target3 ??
+        holding.target_3 ??
+        0
+    );
+
+    if (target3 > 0 && exitPrice >= target3) {
+      return "target 3 hit";
+    }
+
+    if (target2 > 0 && exitPrice >= target2) {
+      return "target 2 hit";
+    }
+
+    if (target1 > 0 && exitPrice >= target1) {
+      return "target 1 hit";
+    }
+
+    return null;
+  };
+
   const calculateReturn = (holding) => {
     const entry = Number(holding.entry || 0);
     const cmp = Number(holding.cmp || 0);
@@ -290,33 +351,20 @@ const realisedAverageReturn =
     : "0.00";
 
   const target1HitCount = holdings.filter(
-    (holding) => {
-      const status = getHoldingStatus(holding);
-
-      return [
-        "target 1 hit",
-        "target 2 hit",
-        "target 3 hit",
-        "booked profit",
-      ].includes(status);
-    }
+    (holding) =>
+      getHighestTargetReached(holding) ===
+      "target 1 hit"
   ).length;
 
   const target2HitCount = holdings.filter(
-    (holding) => {
-      const status = getHoldingStatus(holding);
-
-      return [
-        "target 2 hit",
-        "target 3 hit",
-        "booked profit",
-      ].includes(status);
-    }
+    (holding) =>
+      getHighestTargetReached(holding) ===
+      "target 2 hit"
   ).length;
 
   const target3HitCount = holdings.filter(
     (holding) =>
-      getHoldingStatus(holding) ===
+      getHighestTargetReached(holding) ===
       "target 3 hit"
   ).length;
 
@@ -328,18 +376,26 @@ const realisedAverageReturn =
 
   const slHitCount = holdings.filter(
     (holding) =>
-      getHoldingStatus(holding) === "sl hit"
+      getHoldingStatus(holding) ===
+      "sl hit"
   ).length;
 
-  /*
-   * Target 1 or any higher successful outcome is
-   * counted as a winning trade.
-   *
-   * target1HitCount already contains Target 1,
-   * Target 2, Target 3 and Booked Profit, so it
-   * must be used directly to avoid double-counting.
-   */
-  const winningTrades = target1HitCount;
+  const winningTrades = holdings.filter(
+    (holding) => {
+      const status =
+        getHoldingStatus(holding);
+
+      const highestTarget =
+        getHighestTargetReached(holding);
+
+      return (
+        status === "booked profit" ||
+        highestTarget === "target 1 hit" ||
+        highestTarget === "target 2 hit" ||
+        highestTarget === "target 3 hit"
+      );
+    }
+  ).length;
 
   const completedTrades =
     winningTrades + slHitCount;
@@ -351,10 +407,6 @@ const realisedAverageReturn =
           100
         ).toFixed(1)
       : "0.0";
-      
-
-  
-
 
   const summaryCards = [
     {
@@ -370,7 +422,7 @@ const realisedAverageReturn =
       icon: "✅",
     },
     {
-      title: "Active Holdings",
+      title: "Active Studies",
       value: activeHoldings,
       tone: "blue",
       icon: "📊",
@@ -412,7 +464,7 @@ const realisedAverageReturn =
   icon: "💰",
 },
 {
-  title: "Realised Trades",
+  title: "Realised Studies",
   value: realisedTrades,
   tone: "blue",
   icon: "✅",
@@ -475,7 +527,7 @@ const realisedAverageReturn =
       <section className="dashboard-performance-panel">
         <div className="dashboard-performance-header">
           <div>
-            <h2>Trade Performance</h2>
+            <h2>Study Performance</h2>
 
             <p>
               Target achievements, booked profits and
@@ -483,7 +535,7 @@ const realisedAverageReturn =
             </p>
           </div>
 
-          <span>{holdings.length} Trades</span>
+          <span>{holdings.length} Studies</span>
         </div>
 
         <div className="dashboard-performance-grid">

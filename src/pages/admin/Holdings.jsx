@@ -216,6 +216,53 @@ export default function Holdings() {
     return manualStatus || "Active";
   };
 
+  const getHighestTargetReached = (row) => {
+    const currentStatus = getDisplayStatus(row);
+
+    if (
+      currentStatus === "Target 1 Hit" ||
+      currentStatus === "Target 2 Hit" ||
+      currentStatus === "Target 3 Hit"
+    ) {
+      return currentStatus;
+    }
+
+    if (currentStatus !== "Booked Profit") {
+      return null;
+    }
+
+    const exitPrice = Number(
+      row.exitPrice ??
+        row.exit_price ??
+        0
+    );
+
+    if (
+      !Number.isFinite(exitPrice) ||
+      exitPrice <= 0
+    ) {
+      return null;
+    }
+
+    const target1 = Number(row.target1 || 0);
+    const target2 = Number(row.target2 || 0);
+    const target3 = Number(row.target3 || 0);
+
+    if (target3 > 0 && exitPrice >= target3) {
+      return "Target 3 Hit";
+    }
+
+    if (target2 > 0 && exitPrice >= target2) {
+      return "Target 2 Hit";
+    }
+
+    if (target1 > 0 && exitPrice >= target1) {
+      return "Target 1 Hit";
+    }
+
+    return null;
+  };
+
   const getAchievedReturn = (row) => {
     const entry = Number(row.entry || 0);
 
@@ -512,42 +559,49 @@ export default function Holdings() {
       getDisplayStatus(holding) === "Active"
   ).length;
 
-  const t1HitCount = data.filter((holding) => {
-    const currentStatus =
-      getDisplayStatus(holding);
+  const t1HitCount = data.filter(
+    (holding) =>
+      getHighestTargetReached(holding) ===
+      "Target 1 Hit"
+  ).length;
 
-    return [
-      "Target 1 Hit",
-      "Target 2 Hit",
-      "Target 3 Hit",
-      "Booked Profit",
-    ].includes(currentStatus);
-  }).length;
+  const t2HitCount = data.filter(
+    (holding) =>
+      getHighestTargetReached(holding) ===
+      "Target 2 Hit"
+  ).length;
 
-  const t2HitCount = data.filter((holding) => {
-    const currentStatus =
-      getDisplayStatus(holding);
+  const t3HitCount = data.filter(
+    (holding) =>
+      getHighestTargetReached(holding) ===
+      "Target 3 Hit"
+  ).length;
 
-    return [
-      "Target 2 Hit",
-      "Target 3 Hit",
-      "Booked Profit",
-    ].includes(currentStatus);
-  }).length;
+  const bookedProfitCount = data.filter(
+    (holding) =>
+      getDisplayStatus(holding) ===
+      "Booked Profit"
+  ).length;
 
   const slHitCount = data.filter(
     (holding) =>
       getDisplayStatus(holding) === "SL Hit"
   ).length;
 
-  /*
-   * A trade is counted as a win once it reaches Target 1,
-   * Target 2, Target 3, or is manually marked Booked Profit.
-   *
-   * t1HitCount already includes all of those winning statuses,
-   * so using it directly avoids double-counting higher targets.
-   */
-  const winningTrades = t1HitCount;
+  const winningTrades = data.filter((holding) => {
+    const currentStatus =
+      getDisplayStatus(holding);
+
+    const highestTarget =
+      getHighestTargetReached(holding);
+
+    return (
+      currentStatus === "Booked Profit" ||
+      highestTarget === "Target 1 Hit" ||
+      highestTarget === "Target 2 Hit" ||
+      highestTarget === "Target 3 Hit"
+    );
+  }).length;
 
   const closedTrades =
     winningTrades + slHitCount;
@@ -596,9 +650,34 @@ export default function Holdings() {
         visibilityFilter === "All" ||
         item.visibility === visibilityFilter;
 
+      const currentStatus =
+        getDisplayStatus(item);
+
+      const targetAchievement =
+        getHighestTargetReached(item);
+
       const matchesStatus =
         statusFilter === "All" ||
-        getDisplayStatus(item) === statusFilter;
+        (
+          statusFilter === "Target 1 Hit" &&
+          targetAchievement === "Target 1 Hit"
+        ) ||
+        (
+          statusFilter === "Target 2 Hit" &&
+          targetAchievement === "Target 2 Hit"
+        ) ||
+        (
+          statusFilter === "Target 3 Hit" &&
+          targetAchievement === "Target 3 Hit"
+        ) ||
+        (
+          ![
+            "Target 1 Hit",
+            "Target 2 Hit",
+            "Target 3 Hit",
+          ].includes(statusFilter) &&
+          currentStatus === statusFilter
+        );
 
       return (
         matchesSearch &&
@@ -962,8 +1041,8 @@ export default function Holdings() {
   return (
     <section className="holdings-page">
       <PageHeader
-        title="VTKS Holdings"
-        subtitle="Manage, monitor, and optimize every VTKS portfolio recommendation from one centralized dashboard."
+        title="VTKS Market Studies"
+        subtitle="Manage, monitor and review every VTKS market study from one centralized dashboard."
         action={
           <div className="holdings-header-actions">
             <button
@@ -989,10 +1068,12 @@ export default function Holdings() {
 
       <div className="holdings-stats-grid">
         {[
-          [totalHoldings, "Total Trades"],
+          [totalHoldings, "Total Studies"],
           [activeCount, "Active"],
           [t1HitCount, "T1 Hit"],
           [t2HitCount, "T2 Hit"],
+          [t3HitCount, "T3 Hit"],
+          [bookedProfitCount, "Booked Profit"],
           [slHitCount, "SL Hit"],
           [`${winRate}%`, "Win Rate"],
         ].map(([value, label]) => (
