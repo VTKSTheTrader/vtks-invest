@@ -132,12 +132,113 @@ export default function Dashboard() {
     membershipStatus === "inactive" ||
     getDaysLeft() <= 0;
 
+  const getTradeStatus = (holding) =>
+    String(
+      holding.tradeStatus ||
+        holding.trade_status ||
+        "Active"
+    ).trim();
+
+  const isClosedTrade = (holding) =>
+    [
+      "Booked Profit",
+      "Target 1 Hit",
+      "Target 2 Hit",
+      "Target 3 Hit",
+      "SL Hit",
+    ].includes(getTradeStatus(holding));
+
+  const getExitPrice = (holding) => {
+    const savedExitPrice = Number(
+      holding.exitPrice ??
+        holding.exit_price ??
+        0
+    );
+
+    if (
+      Number.isFinite(savedExitPrice) &&
+      savedExitPrice > 0
+    ) {
+      return savedExitPrice;
+    }
+
+    const status = getTradeStatus(holding);
+
+    if (status === "Target 1 Hit") {
+      return Number(
+        holding.target1 ||
+          holding.cmp ||
+          holding.entry ||
+          0
+      );
+    }
+
+    if (status === "Target 2 Hit") {
+      return Number(
+        holding.target2 ||
+          holding.cmp ||
+          holding.entry ||
+          0
+      );
+    }
+
+    if (status === "Target 3 Hit") {
+      return Number(
+        holding.target3 ||
+          holding.cmp ||
+          holding.entry ||
+          0
+      );
+    }
+
+    if (status === "SL Hit") {
+      return Number(
+        holding.stopLoss ||
+          holding.cmp ||
+          holding.entry ||
+          0
+      );
+    }
+
+    return Number(
+      holding.cmp ||
+        holding.entry ||
+        0
+    );
+  };
+
   const calculateReturn = (holding) => {
     const entry = Number(holding.entry || 0);
-    const cmp = Number(holding.cmp || 0);
 
     if (!entry) return 0;
-    return ((cmp - entry) / entry) * 100;
+
+    const savedRealisedReturn =
+      holding.realisedReturn ??
+      holding.realised_return;
+
+    if (
+      isClosedTrade(holding) &&
+      savedRealisedReturn !== null &&
+      savedRealisedReturn !== undefined &&
+      savedRealisedReturn !== ""
+    ) {
+      const realisedReturn = Number(
+        savedRealisedReturn
+      );
+
+      if (Number.isFinite(realisedReturn)) {
+        return realisedReturn;
+      }
+    }
+
+    const calculationPrice = isClosedTrade(holding)
+      ? getExitPrice(holding)
+      : Number(holding.cmp || entry);
+
+    return (
+      ((calculationPrice - entry) / entry) *
+      100
+    );
   };
 
   const formatDate = (date) => {
@@ -443,6 +544,13 @@ export default function Dashboard() {
                 <div className="subscriber-trade-grid">
                   {paginatedHoldings.map((holding) => {
                     const roi = calculateReturn(holding);
+                    const tradeStatus =
+                      getTradeStatus(holding);
+                    const closedTrade =
+                      isClosedTrade(holding);
+                    const exitPrice =
+                      getExitPrice(holding);
+
                     const visibility = normalize(
                       holding.visibility
                     );
@@ -466,17 +574,49 @@ export default function Dashboard() {
                             </p>
                           </div>
 
-                          <span
-                            className={
-                              isSubscriberTrade
-                                ? "subscriber-access-badge premium"
-                                : "subscriber-access-badge public"
-                            }
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "flex-end",
+                              flexWrap: "wrap",
+                              gap: "8px",
+                            }}
                           >
-                            {isSubscriberTrade
-                              ? "⭐ Subscriber"
-                              : "🌐 Public"}
-                          </span>
+                            <span
+                              className={
+                                isSubscriberTrade
+                                  ? "subscriber-access-badge premium"
+                                  : "subscriber-access-badge public"
+                              }
+                            >
+                              {isSubscriberTrade
+                                ? "⭐ Subscriber"
+                                : "🌐 Public"}
+                            </span>
+
+                            <span
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                padding: "7px 11px",
+                                borderRadius: "999px",
+                                background: closedTrade
+                                  ? "#fef3c7"
+                                  : "#dcfce7",
+                                color: closedTrade
+                                  ? "#92400e"
+                                  : "#166534",
+                                fontSize: "12px",
+                                fontWeight: 800,
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {closedTrade
+                                ? `💰 ${tradeStatus}`
+                                : "🟢 Active"}
+                            </span>
+                          </div>
                         </div>
 
                         <div className="subscriber-values-grid">
@@ -485,15 +625,32 @@ export default function Dashboard() {
                             value={formatPrice(holding.entry)}
                           />
                           <ValueItem
-                            label="CMP"
-                            value={formatPrice(holding.cmp)}
+                            label={
+                              closedTrade
+                                ? "Exit Price"
+                                : "CMP"
+                            }
+                            value={formatPrice(
+                              closedTrade
+                                ? exitPrice
+                                : holding.cmp
+                            )}
                           />
+
                           <ValueItem
-                            label="ROI"
+                            label={
+                              closedTrade
+                                ? "Realised ROI"
+                                : "ROI"
+                            }
                             value={`${
                               roi >= 0 ? "+" : ""
                             }${roi.toFixed(2)}%`}
-                            tone={roi >= 0 ? "green" : "red"}
+                            tone={
+                              roi >= 0
+                                ? "green"
+                                : "red"
+                            }
                           />
                         </div>
 
@@ -537,7 +694,7 @@ export default function Dashboard() {
               title="📊 Market Outlook"
               subtitle="Technical support, resistance, charts and technical outlook."
               link="/dashboard/monthly-levels"
-              emptyMessage="No monthly market outlook available."
+              emptyMessage="No market outlook available."
               items={latestMonthlyLevels.map((item) => ({
                 id: item.id,
                 title: item.instrument || "Market Outlook",
