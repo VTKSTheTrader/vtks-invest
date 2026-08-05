@@ -547,25 +547,27 @@ export default function TradeDetails() {
       icon: "2️⃣",
     },
     {
-      label: "Target 3",
-      value: formatCurrency(
-        trade.target3
-      ),
-      icon: "3️⃣",
-    },
-    {
-      label:
-        "Recommendation Date",
+      label: "Study Date",
       value: formatDate(
-        trade.recommendationDate
+        trade.recommendationDate ||
+          trade.recommendation_date
       ),
       icon: "📅",
     },
     {
-      label: "Trade Type",
+      label: "Closure Date",
+      value: formatDate(
+        trade.exitDate ||
+          trade.exit_date
+      ),
+      icon: "📆",
+    },
+    {
+      label: "Study Type",
       value:
         trade.tradeType ||
-        "Trade",
+        trade.trade_type ||
+        "Swing",
       icon: "📊",
     },
   ];
