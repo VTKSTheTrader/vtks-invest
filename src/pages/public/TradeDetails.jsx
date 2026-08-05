@@ -547,7 +547,7 @@ export default function TradeDetails() {
       icon: "2️⃣",
     },
     {
-      label: "Study Date",
+      label: "Study Published",
       value: formatDate(
         trade.recommendationDate ||
           trade.recommendation_date
@@ -555,7 +555,7 @@ export default function TradeDetails() {
       icon: "📅",
     },
     {
-      label: "Closure Date",
+      label: "Study Closed",
       value: formatDate(
         trade.exitDate ||
           trade.exit_date
