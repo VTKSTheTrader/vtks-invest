@@ -53,6 +53,9 @@ export default function Accuracy() {
   const [currentPage, setCurrentPage] =
     useState(1);
 
+  const [roiSort, setRoiSort] =
+    useState("default");
+
   const requestInProgressRef = useRef(false);
   const mountedRef = useRef(true);
 
@@ -330,10 +333,39 @@ const realisedAverageReturn =
         ]
       : null;
 
+  const sortedAccuracyHoldings = useMemo(
+    () => {
+      const rows = [...accuracyHoldings];
+
+      if (roiSort === "high-to-low") {
+        return rows.sort(
+          (first, second) =>
+            getROI(second) -
+            getROI(first)
+        );
+      }
+
+      if (roiSort === "low-to-high") {
+        return rows.sort(
+          (first, second) =>
+            getROI(first) -
+            getROI(second)
+        );
+      }
+
+      return rows;
+    },
+    [
+      accuracyHoldings,
+      roiSort,
+      getROI,
+    ]
+  );
+
   const totalPages = Math.max(
     1,
     Math.ceil(
-      accuracyHoldings.length /
+      sortedAccuracyHoldings.length /
         ITEMS_PER_PAGE
     )
   );
@@ -352,15 +384,19 @@ const realisedAverageReturn =
         (currentPage - 1) *
         ITEMS_PER_PAGE;
 
-      return accuracyHoldings.slice(
+      return sortedAccuracyHoldings.slice(
         startIndex,
         startIndex +
           ITEMS_PER_PAGE
       );
     }, [
-      accuracyHoldings,
+      sortedAccuracyHoldings,
       currentPage,
     ]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [roiSort]);
 
   const isBlurred = (holding) =>
     Boolean(
@@ -746,7 +782,7 @@ const realisedAverageReturn =
 
             <p>
               Showing {ITEMS_PER_PAGE}{" "}
-              trades per page. Subscriber
+              studies per page. Subscriber
               stock identity and price
               levels remain blurred until
               the admin chooses to reveal
@@ -754,22 +790,70 @@ const realisedAverageReturn =
             </p>
           </div>
 
-          <span className="accuracy-protection-note">
-            🔒 Protected subscriber
-            details
-          </span>
+          <div
+            className="accuracy-table-actions"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-end",
+              flexWrap: "wrap",
+              gap: "12px",
+            }}
+          >
+            <span className="accuracy-protection-note">
+              🔒 Protected subscriber
+              details
+            </span>
+
+            <select
+              className="accuracy-roi-sort"
+              value={roiSort}
+              onChange={(event) =>
+                setRoiSort(
+                  event.target.value
+                )
+              }
+              aria-label="Sort market studies by ROI"
+              style={{
+                minHeight: "42px",
+                padding:
+                  "9px 38px 9px 13px",
+                border:
+                  "1px solid #cbd5e1",
+                borderRadius: "10px",
+                background: "#ffffff",
+                color: "#0f172a",
+                font: "inherit",
+                fontSize: "13px",
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              <option value="default">
+                Sort by ROI
+              </option>
+
+              <option value="high-to-low">
+                ROI: High to Low
+              </option>
+
+              <option value="low-to-high">
+                ROI: Low to High
+              </option>
+            </select>
+          </div>
         </div>
 
         {accuracyHoldings.length ===
         0 ? (
           <div className="accuracy-empty-state">
             <h3>
-              No performance trades
+              No performance studies
               available
             </h3>
 
             <p>
-              Published trades selected
+              Published studies selected
               for the Accuracy page will
               appear here.
             </p>
