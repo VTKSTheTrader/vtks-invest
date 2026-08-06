@@ -367,6 +367,49 @@ const realisedAverageReturn =
       holding.accuracyBlur
     );
 
+    const getTargetIndicator = (
+  holding,
+  type
+) => {
+  const status = getStatus(holding);
+
+  switch (type) {
+    case "t1":
+      return [
+        "Target 1 Hit",
+        "Target 2 Hit",
+        "Target 3 Hit",
+        "Booked Profit",
+      ].includes(status)
+        ? " ✅"
+        : "";
+
+    case "t2":
+      return [
+        "Target 2 Hit",
+        "Target 3 Hit",
+        "Booked Profit",
+      ].includes(status)
+        ? " 🚀"
+        : "";
+
+    case "t3":
+      return [
+        "Target 3 Hit",
+        "Booked Profit",
+      ].includes(status)
+        ? " 🏆"
+        : "";
+
+    case "sl":
+      return status === "SL Hit"
+        ? " 🛑"
+        : "";
+
+    default:
+      return "";
+  }
+};
   const formatPrice = (value) =>
     `₹${Number(
       value || 0
@@ -817,25 +860,40 @@ const realisedAverageReturn =
                           </td>
 
                           <td>
-                            {renderProtectedPrice(
-                              holding.stopLoss,
-                              holding
-                            )}
-                          </td>
+  {renderProtectedPrice(
+    holding.stopLoss,
+    holding
+  )}
+  {!isBlurred(holding) &&
+    getTargetIndicator(
+      holding,
+      "sl"
+    )}
+</td>
 
                           <td>
-                            {renderProtectedPrice(
-                              holding.target1,
-                              holding
-                            )}
-                          </td>
+  {renderProtectedPrice(
+    holding.target1,
+    holding
+  )}
+  {!isBlurred(holding) &&
+    getTargetIndicator(
+      holding,
+      "t1"
+    )}
+</td>
 
                           <td>
-                            {renderProtectedPrice(
-                              holding.target2,
-                              holding
-                            )}
-                          </td>
+  {renderProtectedPrice(
+    holding.target2,
+    holding
+  )}
+  {!isBlurred(holding) &&
+    getTargetIndicator(
+      holding,
+      "t2"
+    )}
+</td>
 
                           <td>
                             <StatusBadge
