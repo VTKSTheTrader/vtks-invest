@@ -431,7 +431,6 @@ const realisedAverageReturn =
         "Target 1 Hit",
         "Target 2 Hit",
         "Target 3 Hit",
-        "Booked Profit",
       ].includes(status)
         ? " ✅"
         : "";
@@ -440,16 +439,12 @@ const realisedAverageReturn =
       return [
         "Target 2 Hit",
         "Target 3 Hit",
-        "Booked Profit",
       ].includes(status)
         ? " 🚀"
         : "";
 
     case "t3":
-      return [
-        "Target 3 Hit",
-        "Booked Profit",
-      ].includes(status)
+      return status === "Target 3 Hit"
         ? " 🏆"
         : "";
 
