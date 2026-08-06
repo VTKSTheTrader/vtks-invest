@@ -210,57 +210,50 @@ export default function FundList() {
     if (!entry) return 0;
 
     const tradeStatus = getStatus(holding);
+    const isBookedProfit =
+      tradeStatus === "Booked Profit";
 
-    const completedStatuses = [
-      "Booked Profit",
-      "SL Hit",
-      "Target 1 Hit",
-      "Target 2 Hit",
-      "Target 3 Hit",
-    ];
-
-    const isCompletedTrade =
-      completedStatuses.includes(tradeStatus);
-
-    const savedRealisedReturn =
-      holding.realisedReturn ??
-      holding.realised_return;
-
-    if (
-      isCompletedTrade &&
-      savedRealisedReturn !== null &&
-      savedRealisedReturn !== undefined &&
-      savedRealisedReturn !== ""
-    ) {
-      const realisedReturn = Number(
-        savedRealisedReturn
-      );
-
-      if (Number.isFinite(realisedReturn)) {
-        return realisedReturn;
-      }
-    }
-
-    const savedExitPrice =
-      holding.exitPrice ??
-      holding.exit_price;
-
-    if (
-      isCompletedTrade &&
-      savedExitPrice !== null &&
-      savedExitPrice !== undefined &&
-      savedExitPrice !== ""
-    ) {
-      const exitPrice = Number(savedExitPrice);
+    if (isBookedProfit) {
+      const savedRealisedReturn =
+        holding.realisedReturn ??
+        holding.realised_return;
 
       if (
-        Number.isFinite(exitPrice) &&
-        exitPrice > 0
+        savedRealisedReturn !== null &&
+        savedRealisedReturn !== undefined &&
+        savedRealisedReturn !== ""
       ) {
-        return (
-          ((exitPrice - entry) / entry) *
-          100
+        const realisedReturn = Number(
+          savedRealisedReturn
         );
+
+        if (Number.isFinite(realisedReturn)) {
+          return realisedReturn;
+        }
+      }
+
+      const savedExitPrice =
+        holding.exitPrice ??
+        holding.exit_price;
+
+      if (
+        savedExitPrice !== null &&
+        savedExitPrice !== undefined &&
+        savedExitPrice !== ""
+      ) {
+        const exitPrice = Number(
+          savedExitPrice
+        );
+
+        if (
+          Number.isFinite(exitPrice) &&
+          exitPrice > 0
+        ) {
+          return (
+            ((exitPrice - entry) / entry) *
+            100
+          );
+        }
       }
     }
 
@@ -476,18 +469,25 @@ export default function FundList() {
   const activeCount =
     visibleHoldings.filter(
       (holding) =>
-        getStatus(holding) === "Active"
+        [
+          "Active",
+          "Target 1 Hit",
+          "Target 2 Hit",
+          "Target 3 Hit",
+        ].includes(
+          getStatus(holding)
+        )
     ).length;
 
   const completedCount =
-    visibleHoldings.filter((holding) =>
-      [
-        "Target 1 Hit",
-        "Target 2 Hit",
-        "Target 3 Hit",
-        "Booked Profit",
-        "SL Hit",
-      ].includes(getStatus(holding))
+    visibleHoldings.filter(
+      (holding) =>
+        [
+          "Booked Profit",
+          "SL Hit",
+        ].includes(
+          getStatus(holding)
+        )
     ).length;
 
   const formatPrice = (value) =>
@@ -784,32 +784,27 @@ function PortfolioCard({
     isSubscriberTrade &&
     Boolean(holding.accuracyBlur);
 
-  const completedStatuses = [
-    "Booked Profit",
-    "SL Hit",
-    "Target 1 Hit",
-    "Target 2 Hit",
-    "Target 3 Hit",
-  ];
-
-  const isCompletedTrade =
-    completedStatuses.includes(status);
+  const isBookedProfit =
+    status === "Booked Profit";
 
   const savedExitPrice =
     holding.exitPrice ??
     holding.exit_price;
 
-  const displayPrice = isCompletedTrade
-    ? savedExitPrice || holding.cmp
-    : holding.cmp;
+  const displayPrice =
+    isBookedProfit && savedExitPrice
+      ? savedExitPrice
+      : holding.cmp;
 
-  const displayPriceLabel = isCompletedTrade
-    ? "Exit Price"
-    : "Live CMP";
+  const displayPriceLabel =
+    isBookedProfit
+      ? "Exit Price"
+      : "Live CMP";
 
-  const returnLabel = isCompletedTrade
-    ? "Realised ROI"
-    : "ROI";
+  const returnLabel =
+    isBookedProfit
+      ? "Realised ROI"
+      : "Live ROI";
 
   const protectedValue = (value) => {
     if (!protectedTrade) {
