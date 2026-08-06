@@ -518,6 +518,29 @@ export const deleteHolding = async (
 
   return true;
 };
+export async function removeHoldingResearchPdf({
+  holdingId,
+  pdfUrl,
+}) {
+  if (pdfUrl) {
+    const filePath = pdfUrl.split("/library-files/")[1];
+
+    if (filePath) {
+      await supabase.storage
+        .from("library-files")
+        .remove([filePath]);
+    }
+  }
+
+  const { error } = await supabase
+    .from("holdings")
+    .update({
+      research_pdf_url: null,
+    })
+    .eq("id", holdingId);
+
+  if (error) throw error;
+}
 /* =========================================================
    REMOVE HOLDING CHART
 ========================================================= */

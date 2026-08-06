@@ -163,112 +163,107 @@ export default function Holdings() {
   };
 
   const getDisplayStatus = (row) => {
-    const manualStatus = String(
-      row.tradeStatus || ""
-    ).trim();
+  const manualStatus = String(
+    row.tradeStatus || row.trade_status || ""
+  ).trim();
 
-    if (manualStatus === "Booked Profit") {
-      return "Booked Profit";
-    }
+  if (
+    manualStatus === "Booked Profit" ||
+    manualStatus === "Cancelled"
+  ) {
+    return manualStatus;
+  }
 
-    if (manualStatus === "Cancelled") {
-      return "Cancelled";
-    }
+  const highestPrice = Number(
+    row.highestPrice ??
+    row.highest_price ??
+    row.cmp ??
+    0
+  );
 
-    if (manualStatus === "SL Hit") {
-      return "SL Hit";
-    }
+  const lowestPrice = Number(
+    row.lowestPrice ??
+    row.lowest_price ??
+    row.cmp ??
+    0
+  );
 
-    if (manualStatus === "Target 3 Hit") {
-      return "Target 3 Hit";
-    }
+  const stopLoss = Number(row.stopLoss || 0);
+  const target1 = Number(row.target1 || 0);
+  const target2 = Number(row.target2 || 0);
+  const target3 = Number(row.target3 || 0);
 
-    if (manualStatus === "Target 2 Hit") {
-      return "Target 2 Hit";
-    }
+  // Stop Loss
+  if (
+    stopLoss > 0 &&
+    lowestPrice <= stopLoss
+  ) {
+    return "SL Hit";
+  }
 
-    if (manualStatus === "Target 1 Hit") {
-      return "Target 1 Hit";
-    }
+  // Highest Target Achieved
+  if (
+    target3 > 0 &&
+    highestPrice >= target3
+  ) {
+    return "Target 3 Hit";
+  }
 
-    const cmp = Number(row.cmp || 0);
-    const stopLoss = Number(row.stopLoss || 0);
-    const target1 = Number(row.target1 || 0);
-    const target2 = Number(row.target2 || 0);
-    const target3 = Number(row.target3 || 0);
+  if (
+    target2 > 0 &&
+    highestPrice >= target2
+  ) {
+    return "Target 2 Hit";
+  }
 
-    if (stopLoss && cmp <= stopLoss) {
-      return "SL Hit";
-    }
+  if (
+    target1 > 0 &&
+    highestPrice >= target1
+  ) {
+    return "Target 1 Hit";
+  }
 
-    if (target3 && cmp >= target3) {
-      return "Target 3 Hit";
-    }
-
-    if (target2 && cmp >= target2) {
-      return "Target 2 Hit";
-    }
-
-    if (target1 && cmp >= target1) {
-      return "Target 1 Hit";
-    }
-
-    return manualStatus || "Active";
-  };
+  return "Active";
+};
 
   const getHighestTargetReached = (row) => {
-    const currentStatus = getDisplayStatus(row);
+  const highestPrice = Number(
+    row.highestPrice ??
+    row.highest_price ??
+    row.cmp ??
+    0
+  );
 
-    if (
-      currentStatus === "Target 1 Hit" ||
-      currentStatus === "Target 2 Hit" ||
-      currentStatus === "Target 3 Hit"
-    ) {
-      return currentStatus;
-    }
+  const target1 = Number(row.target1 || 0);
+  const target2 = Number(row.target2 || 0);
+  const target3 = Number(row.target3 || 0);
 
-    if (currentStatus !== "Booked Profit") {
-      return null;
-    }
+  if (target3 > 0 && highestPrice >= target3)
+    return "Target 3 Hit";
 
-    const exitPrice = Number(
-      row.exitPrice ??
-        row.exit_price ??
-        0
-    );
+  if (target2 > 0 && highestPrice >= target2)
+    return "Target 2 Hit";
 
-    if (
-      !Number.isFinite(exitPrice) ||
-      exitPrice <= 0
-    ) {
-      return null;
-    }
+  if (target1 > 0 && highestPrice >= target1)
+    return "Target 1 Hit";
 
-    const target1 = Number(row.target1 || 0);
-    const target2 = Number(row.target2 || 0);
-    const target3 = Number(row.target3 || 0);
-
-    if (target3 > 0 && exitPrice >= target3) {
-      return "Target 3 Hit";
-    }
-
-    if (target2 > 0 && exitPrice >= target2) {
-      return "Target 2 Hit";
-    }
-
-    if (target1 > 0 && exitPrice >= target1) {
-      return "Target 1 Hit";
-    }
-
-    return null;
-  };
-
+  return null;
+};
   const getAchievedReturn = (row) => {
     const entry = Number(row.entry || 0);
 
     if (!entry) return "0.00";
 
-    const currentStatus = getDisplayStatus(row);
+    const currentStatus =
+      getDisplayStatus(row);
+
+    /*
+      Realised ROI is shown only after
+      the study is marked Booked Profit.
+    */
+    if (currentStatus !== "Booked Profit") {
+      return getReturn(row);
+    }
 
     const savedRealisedReturn =
       row.realisedReturn ??
@@ -297,7 +292,9 @@ export default function Holdings() {
       savedExitPrice !== undefined &&
       savedExitPrice !== ""
     ) {
-      const exitPrice = Number(savedExitPrice);
+      const exitPrice = Number(
+        savedExitPrice
+      );
 
       if (
         Number.isFinite(exitPrice) &&
@@ -310,36 +307,12 @@ export default function Holdings() {
       }
     }
 
-    let fallbackExitPrice = Number(
+    const cmp = Number(
       row.cmp || entry
     );
 
-    if (currentStatus === "Target 1 Hit") {
-      fallbackExitPrice = Number(
-        row.target1 || row.cmp || entry
-      );
-    }
-
-    if (currentStatus === "Target 2 Hit") {
-      fallbackExitPrice = Number(
-        row.target2 || row.cmp || entry
-      );
-    }
-
-    if (currentStatus === "Target 3 Hit") {
-      fallbackExitPrice = Number(
-        row.target3 || row.cmp || entry
-      );
-    }
-
-    if (currentStatus === "SL Hit") {
-      fallbackExitPrice = Number(
-        row.stopLoss || row.cmp || entry
-      );
-    }
-
     return (
-      ((fallbackExitPrice - entry) / entry) *
+      ((cmp - entry) / entry) *
       100
     ).toFixed(2);
   };
@@ -794,8 +767,7 @@ export default function Holdings() {
           getDisplayStatus(row);
 
         const isCompleted =
-          currentStatus !== "Active" &&
-          currentStatus !== "Cancelled";
+          currentStatus === "Booked Profit";
 
         const displayedReturn = isCompleted
           ? achievedReturn
@@ -856,8 +828,7 @@ export default function Holdings() {
           getDisplayStatus(row);
 
         const isCompleted =
-          currentStatus !== "Active" &&
-          currentStatus !== "Cancelled";
+          currentStatus === "Booked Profit";
 
         if (!isCompleted) {
           return "₹—";

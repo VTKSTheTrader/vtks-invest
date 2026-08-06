@@ -4,6 +4,7 @@ import InstrumentSearch from "../InstrumentSearch";
 import {
   fetchSelectedInstrumentCMP,
   removeHoldingChart,
+  removeHoldingResearchPdf,
 } from "../../../services/holdingService";
 const today = new Date().toISOString().split("T")[0];
 
@@ -140,6 +141,7 @@ const [chartMessage, setChartMessage] =
 
 const [chartToRemove, setChartToRemove] =
   useState(null);
+  const [removingPdf, setRemovingPdf] = useState(false);
 
   useEffect(() => {
     setForm(initialForm);
@@ -452,7 +454,40 @@ const confirmRemoveChart = async () => {
     setRemovingChart("");
   }
 };
+const handleRemoveResearchPdf = async () => {
+  if (!editingHolding?.id) return;
 
+  if (!window.confirm("Delete existing research PDF?")) return;
+
+  try {
+    setRemovingPdf(true);
+
+    await removeHoldingResearchPdf({
+      holdingId: editingHolding.id,
+      pdfUrl: form.researchPdfUrl,
+    });
+
+    setForm((prev) => ({
+      ...prev,
+      researchPdf: null,
+      researchPdfUrl: "",
+    }));
+
+    setChartMessage({
+      type: "success",
+      text: "Research PDF removed successfully.",
+    });
+  } catch (err) {
+    console.error(err);
+
+    setChartMessage({
+      type: "error",
+      text: "Unable to remove Research PDF.",
+    });
+  } finally {
+    setRemovingPdf(false);
+  }
+};
   const handleSubmit = async () => {
     if (saving || fetchingCMP) return;
 
@@ -1035,21 +1070,44 @@ realisedReturn:
               placeholder="Example: Result after target achievement"
             />
           </Field>
+<Field label="Research PDF">
+  <input
+    type="file"
+    name="researchPdf"
+    accept="application/pdf"
+    onChange={handleChange}
+    disabled={saving || removingPdf}
+  />
 
-          <Field label="Research PDF">
-            <input
-              type="file"
-              name="researchPdf"
-              accept="application/pdf"
-              onChange={handleChange}
-            />
+  {form.researchPdf && (
+    <small className="holding-selected-file">
+      Selected: {form.researchPdf.name}
+    </small>
+  )}
 
-            {form.researchPdfUrl && !form.researchPdf && (
-              <a href={form.researchPdfUrl} target="_blank" rel="noreferrer">
-                View existing PDF
-              </a>
-            )}
-          </Field>
+  {form.researchPdfUrl && !form.researchPdf && (
+    <div className="holding-existing-file-actions">
+      <a
+        href={form.researchPdfUrl}
+        target="_blank"
+        rel="noreferrer"
+      >
+        View existing PDF
+      </a>
+
+      <button
+        type="button"
+        className="holding-remove-file-button"
+        onClick={handleRemoveResearchPdf}
+        disabled={removingPdf}
+      >
+        {removingPdf
+          ? "Removing..."
+          : "🗑 Remove PDF"}
+      </button>
+    </div>
+  )}
+</Field>
 
           <div className="holding-field holding-field-full">
             <label>Trade Thesis / Notes</label>
