@@ -171,68 +171,84 @@ export default function Accuracy() {
   }, [loadAccuracy]);
 
   const getStatus = useCallback(
-    (holding) => {
-      const manualStatus = String(
-        holding.tradeStatus || ""
-      ).trim();
+  (holding) => {
+    const manualStatus = String(
+      holding.tradeStatus ||
+      holding.trade_status ||
+      ""
+    ).trim();
 
-      const lockedStatuses = [
-        "Booked Profit",
-        "Cancelled",
-        "SL Hit",
-        "Target 1 Hit",
-        "Target 2 Hit",
-        "Target 3 Hit",
-      ];
+    if (
+      manualStatus === "Booked Profit" ||
+      manualStatus === "Cancelled"
+    ) {
+      return manualStatus;
+    }
 
-      if (
-        lockedStatuses.includes(
-          manualStatus
-        )
-      ) {
-        return manualStatus;
-      }
+    const highestPrice = Number(
+      holding.highestPrice ??
+      holding.highest_price ??
+      holding.cmp ??
+      0
+    );
 
-      const cmp = Number(
-        holding.cmp || 0
-      );
+    const lowestPrice = Number(
+      holding.lowestPrice ??
+      holding.lowest_price ??
+      holding.cmp ??
+      0
+    );
 
-      const stopLoss = Number(
-        holding.stopLoss || 0
-      );
+    const stopLoss = Number(
+      holding.stopLoss ??
+      holding.stop_loss ??
+      0
+    );
 
-      const target1 = Number(
-        holding.target1 || 0
-      );
+    const target1 = Number(
+      holding.target1 ?? 0
+    );
 
-      const target2 = Number(
-        holding.target2 || 0
-      );
+    const target2 = Number(
+      holding.target2 ?? 0
+    );
 
-      const target3 = Number(
-        holding.target3 || 0
-      );
+    const target3 = Number(
+      holding.target3 ?? 0
+    );
 
-      if (stopLoss && cmp <= stopLoss) {
-        return "SL Hit";
-      }
+    if (
+      stopLoss > 0 &&
+      lowestPrice <= stopLoss
+    ) {
+      return "SL Hit";
+    }
 
-      if (target3 && cmp >= target3) {
-        return "Target 3 Hit";
-      }
+    if (
+      target3 > 0 &&
+      highestPrice >= target3
+    ) {
+      return "Target 3 Hit";
+    }
 
-      if (target2 && cmp >= target2) {
-        return "Target 2 Hit";
-      }
+    if (
+      target2 > 0 &&
+      highestPrice >= target2
+    ) {
+      return "Target 2 Hit";
+    }
 
-      if (target1 && cmp >= target1) {
-        return "Target 1 Hit";
-      }
+    if (
+      target1 > 0 &&
+      highestPrice >= target1
+    ) {
+      return "Target 1 Hit";
+    }
 
-      return manualStatus || "Active";
-    },
-    []
-  );
+    return "Active";
+  },
+  []
+);
 
   const getROI = useCallback(
   (holding) =>
@@ -1094,11 +1110,21 @@ function StatusBadge({ status }) {
     .toLowerCase()
     .replace(/\s+/g, "-");
 
+  const labels = {
+    Active: "🟢 Active",
+    "Target 1 Hit": "✅ Target 1 Hit",
+    "Target 2 Hit": "🚀 Target 2 Hit",
+    "Target 3 Hit": "🏆 Target 3 Hit",
+    "Booked Profit": "💰 Booked Profit",
+    "SL Hit": "🛑 SL Hit",
+    Cancelled: "⚪ Cancelled",
+  };
+
   return (
     <span
       className={`accuracy-status accuracy-status-${normalizedStatus}`}
     >
-      {status || "Active"}
+      {labels[status] || status || "🟢 Active"}
     </span>
   );
 }

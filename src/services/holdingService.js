@@ -192,7 +192,19 @@ export const buildHoldingPayload = (
   cmp: Number(
     form.cmp || 0
   ),
+highest_price: nullableNumber(
+  form.highestPrice ??
+    form.highest_price ??
+    form.cmp ??
+    form.entry
+),
 
+lowest_price: nullableNumber(
+  form.lowestPrice ??
+    form.lowest_price ??
+    form.cmp ??
+    form.entry
+),
   stop_loss: Number(
     form.stopLoss || 0
   ),
@@ -886,6 +898,21 @@ export const mapHoldingFromDB = (
     cmp: Number(
       holding.cmp || 0
     ),
+    highestPrice: Number(
+  holding.highest_price ??
+    holding.highestPrice ??
+    holding.cmp ??
+    holding.entry ??
+    0
+),
+
+lowestPrice: Number(
+  holding.lowest_price ??
+    holding.lowestPrice ??
+    holding.cmp ??
+    holding.entry ??
+    0
+),
 
     stopLoss: Number(
       holding.stop_loss ??
