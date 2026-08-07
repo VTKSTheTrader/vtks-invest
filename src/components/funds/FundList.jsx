@@ -38,6 +38,7 @@ export default function FundList() {
   const [search, setSearch] = useState("");
   const [sector, setSector] = useState("All");
   const [status, setStatus] = useState("All");
+  const [roiSort, setRoiSort] = useState("default");
   const [currentPage, setCurrentPage] = useState(1);
 
   const loadFund = useCallback(
@@ -154,55 +155,81 @@ export default function FundList() {
   }, [loadFund]);
 
   const getStatus = (holding) => {
-    const manualStatus = String(
-      holding.tradeStatus || ""
-    ).trim();
+  const manualStatus = String(
+    holding.tradeStatus ||
+      holding.trade_status ||
+      ""
+  ).trim();
 
-    const fixedStatuses = [
-      "Booked Profit",
-      "Cancelled",
-      "SL Hit",
-      "Target 1 Hit",
-      "Target 2 Hit",
-      "Target 3 Hit",
-    ];
+  if (
+    manualStatus === "Booked Profit" ||
+    manualStatus === "Cancelled"
+  ) {
+    return manualStatus;
+  }
 
-    if (fixedStatuses.includes(manualStatus)) {
-      return manualStatus;
-    }
+  const highestPrice = Number(
+    holding.highestPrice ??
+      holding.highest_price ??
+      holding.cmp ??
+      0
+  );
 
-    const cmp = Number(holding.cmp || 0);
-    const stopLoss = Number(
-      holding.stopLoss || 0
-    );
-    const target1 = Number(
-      holding.target1 || 0
-    );
-    const target2 = Number(
-      holding.target2 || 0
-    );
-    const target3 = Number(
-      holding.target3 || 0
-    );
+  const lowestPrice = Number(
+    holding.lowestPrice ??
+      holding.lowest_price ??
+      holding.cmp ??
+      0
+  );
 
-    if (stopLoss && cmp <= stopLoss) {
-      return "SL Hit";
-    }
+  const stopLoss = Number(
+    holding.stopLoss ??
+      holding.stop_loss ??
+      0
+  );
 
-    if (target3 && cmp >= target3) {
-      return "Target 3 Hit";
-    }
+  const target1 = Number(
+    holding.target1 || 0
+  );
 
-    if (target2 && cmp >= target2) {
-      return "Target 2 Hit";
-    }
+  const target2 = Number(
+    holding.target2 || 0
+  );
 
-    if (target1 && cmp >= target1) {
-      return "Target 1 Hit";
-    }
+  const target3 = Number(
+    holding.target3 || 0
+  );
 
-    return manualStatus || "Active";
-  };
+  if (
+    stopLoss > 0 &&
+    lowestPrice <= stopLoss
+  ) {
+    return "SL Hit";
+  }
+
+  if (
+    target3 > 0 &&
+    highestPrice >= target3
+  ) {
+    return "Target 3 Hit";
+  }
+
+  if (
+    target2 > 0 &&
+    highestPrice >= target2
+  ) {
+    return "Target 2 Hit";
+  }
+
+  if (
+    target1 > 0 &&
+    highestPrice >= target1
+  ) {
+    return "Target 1 Hit";
+  }
+
+  return "Active";
+};
 
   const getReturn = (holding) => {
     const entry = Number(holding.entry || 0);
@@ -434,14 +461,36 @@ export default function FundList() {
     status,
   ]);
 
+  const sortedHoldings = useMemo(() => {
+    const rows = [...filteredHoldings];
+
+    if (roiSort === "high") {
+      rows.sort(
+        (a, b) =>
+          Number(getReturn(b)) -
+          Number(getReturn(a))
+      );
+    }
+
+    if (roiSort === "low") {
+      rows.sort(
+        (a, b) =>
+          Number(getReturn(a)) -
+          Number(getReturn(b))
+      );
+    }
+
+    return rows;
+  }, [filteredHoldings, roiSort]);
+
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, sector, status]);
+  }, [search, sector, status, roiSort]);
 
   const totalPages = Math.max(
     1,
     Math.ceil(
-      filteredHoldings.length /
+      sortedHoldings.length /
         ITEMS_PER_PAGE
     )
   );
@@ -457,12 +506,12 @@ export default function FundList() {
       (currentPage - 1) *
       ITEMS_PER_PAGE;
 
-    return filteredHoldings.slice(
+    return sortedHoldings.slice(
       startIndex,
       startIndex + ITEMS_PER_PAGE
     );
   }, [
-    filteredHoldings,
+    sortedHoldings,
     currentPage,
   ]);
 
@@ -556,7 +605,7 @@ export default function FundList() {
 
         <div style={headerActionsStyle}>
           <span style={countBadgeStyle}>
-            {filteredHoldings.length} Ideas
+            {sortedHoldings.length} Ideas
           </span>
 
           <button
@@ -672,9 +721,29 @@ export default function FundList() {
             SL Hit
           </option>
         </select>
+
+        <select
+          value={roiSort}
+          onChange={(event) =>
+            setRoiSort(event.target.value)
+          }
+          style={selectStyle}
+        >
+          <option value="default">
+            📈 Sort by ROI
+          </option>
+
+          <option value="high">
+            📈 ROI High → Low
+          </option>
+
+          <option value="low">
+            📉 ROI Low → High
+          </option>
+        </select>
       </div>
 
-      {filteredHoldings.length === 0 ? (
+      {sortedHoldings.length === 0 ? (
         <div style={emptyStateStyle}>
           <h3>No portfolio trades found</h3>
 
@@ -894,18 +963,53 @@ function PortfolioCard({
         <Detail
           label="Target 1"
           value={protectedValue(
-            holding.target1
-              ? formatPrice(holding.target1)
-              : "₹—"
+            holding.target1 ? (
+              <>
+                {formatPrice(holding.target1)}
+                {[
+                  "Target 1 Hit",
+                  "Target 2 Hit",
+                  "Target 3 Hit",
+                ].includes(status) && (
+                  <span
+                    style={{
+                      marginLeft: "6px",
+                      fontSize: "16px",
+                    }}
+                  >
+                    ✅
+                  </span>
+                )}
+              </>
+            ) : (
+              "₹—"
+            )
           )}
         />
 
         <Detail
           label="Target 2"
           value={protectedValue(
-            holding.target2
-              ? formatPrice(holding.target2)
-              : "₹—"
+            holding.target2 ? (
+              <>
+                {formatPrice(holding.target2)}
+                {[
+                  "Target 2 Hit",
+                  "Target 3 Hit",
+                ].includes(status) && (
+                  <span
+                    style={{
+                      marginLeft: "6px",
+                      fontSize: "16px",
+                    }}
+                  >
+                    🚀
+                  </span>
+                )}
+              </>
+            ) : (
+              "₹—"
+            )
           )}
         />
 

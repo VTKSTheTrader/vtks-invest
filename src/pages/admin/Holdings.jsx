@@ -528,9 +528,13 @@ export default function Holdings() {
 
   const totalHoldings = data.length;
 
-  const activeCount = data.filter(
-    (holding) =>
-      getDisplayStatus(holding) === "Active"
+  const activeCount = data.filter((holding) =>
+    [
+      "Active",
+      "Target 1 Hit",
+      "Target 2 Hit",
+      "Target 3 Hit",
+    ].includes(getDisplayStatus(holding))
   ).length;
 
   const t1HitCount = data.filter(

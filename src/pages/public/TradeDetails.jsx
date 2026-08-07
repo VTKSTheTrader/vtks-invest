@@ -247,18 +247,8 @@ export default function TradeDetails() {
     const tradeStatus =
       getStatus(holding);
 
-    const completedStatuses = [
-      "booked profit",
-      "sl hit",
-      "target 1 hit",
-      "target 2 hit",
-      "target 3 hit",
-    ];
-
     const isCompletedTrade =
-      completedStatuses.includes(
-        tradeStatus
-      );
+      tradeStatus === "booked profit";
 
     const realisedReturn =
       holding.realisedReturn ??
@@ -453,18 +443,8 @@ export default function TradeDetails() {
   const status =
     getStatus(trade);
 
-  const completedStatuses = [
-    "booked profit",
-    "sl hit",
-    "target 1 hit",
-    "target 2 hit",
-    "target 3 hit",
-  ];
-
   const isCompletedTrade =
-    completedStatuses.includes(
-      status
-    );
+    status === "booked profit";
 
   const savedExitPrice =
     trade.exitPrice ??
@@ -481,7 +461,7 @@ export default function TradeDetails() {
   const roiLabel =
     isCompletedTrade
       ? "Realised ROI"
-      : "Current ROI";
+      : "Live ROI";
 
   const priceLabel =
     isCompletedTrade
@@ -534,16 +514,31 @@ export default function TradeDetails() {
     },
     {
       label: "Target 1",
-      value: formatCurrency(
+      value: `${formatCurrency(
         trade.target1
-      ),
+      )}${
+        [
+          "target 1 hit",
+          "target 2 hit",
+          "target 3 hit",
+        ].includes(status)
+          ? " ✅"
+          : ""
+      }`,
       icon: "1️⃣",
     },
     {
       label: "Target 2",
-      value: formatCurrency(
+      value: `${formatCurrency(
         trade.target2
-      ),
+      )}${
+        [
+          "target 2 hit",
+          "target 3 hit",
+        ].includes(status)
+          ? " 🚀"
+          : ""
+      }`,
       icon: "2️⃣",
     },
     {
@@ -556,10 +551,13 @@ export default function TradeDetails() {
     },
     {
       label: "Study Closed",
-      value: formatDate(
-        trade.exitDate ||
-          trade.exit_date
-      ),
+      value:
+        isCompletedTrade
+          ? formatDate(
+              trade.exitDate ||
+                trade.exit_date
+            )
+          : "-",
       icon: "📆",
     },
     {
