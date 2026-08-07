@@ -796,3 +796,61 @@
   color: #166534 !important;
   border: 1px solid #86efac;
 }
+.trade-return {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+
+  gap: 4px;
+
+  min-width: 150px;
+  padding: 12px 22px;
+
+  border-radius: 18px;
+
+  font-weight: 800;
+  line-height: 1;
+}
+
+.trade-return small {
+  display: block;
+
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+
+  letter-spacing: 0.45px;
+  text-transform: uppercase;
+}
+
+.trade-return span {
+  display: block;
+
+  font-size: 25px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.positive-return {
+  background: linear-gradient(
+    135deg,
+    #16a34a,
+    #22c55e
+  );
+
+  color: #ffffff;
+}
+
+.positive-return small {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.negative-return {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.negative-return small {
+  color: #b91c1c;
+}

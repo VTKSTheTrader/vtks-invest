@@ -189,9 +189,6 @@ export default function Home() {
     [
       "Booked Profit",
       "SL Hit",
-      "Target 1 Hit",
-      "Target 2 Hit",
-      "Target 3 Hit",
     ].includes(getStatus(holding));
 
   const getExitPrice = (holding) => {
@@ -675,21 +672,25 @@ export default function Home() {
                           : undefined
                       }
                     >
-                      {completedIdea && (
-                        <small
-                          style={{
-                            color:
-                              "rgba(255,255,255,0.85)",
-                            fontSize: "9px",
-                            fontWeight: 800,
-                            lineHeight: 1,
-                            letterSpacing: "0.35px",
-                            textTransform: "uppercase",
-                          }}
-                        >
-                          Realised Return
-                        </small>
-                      )}
+                      <small
+                        style={{
+                          color:
+                            completedIdea
+                              ? "rgba(255,255,255,0.85)"
+                              : "#166534",
+                          fontSize: "9px",
+                          fontWeight: 800,
+                          lineHeight: 1,
+                          letterSpacing: "0.35px",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        {completedIdea
+                          ? roi >= 0
+                            ? "Realised Return"
+                            : "Realised Loss"
+                          : "Live Return"}
+                      </small>
 
                       <span>
                         {roi >= 0 ? "+" : ""}
