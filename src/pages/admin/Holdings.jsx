@@ -56,6 +56,7 @@ export default function Holdings() {
   const [visibilityFilter, setVisibilityFilter] =
     useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
+  const [roiSort, setRoiSort] = useState("default");
 
   const [currentPage, setCurrentPage] = useState(1);
   const [data, setData] = useState([]);
@@ -671,6 +672,28 @@ export default function Holdings() {
     statusFilter,
   ]);
 
+  const sortedFilteredData = useMemo(() => {
+    const rows = [...filteredData];
+
+    if (roiSort === "high") {
+      rows.sort(
+        (a, b) =>
+          Number(getAchievedReturn(b)) -
+          Number(getAchievedReturn(a))
+      );
+    }
+
+    if (roiSort === "low") {
+      rows.sort(
+        (a, b) =>
+          Number(getAchievedReturn(a)) -
+          Number(getAchievedReturn(b))
+      );
+    }
+
+    return rows;
+  }, [filteredData, roiSort]);
+
   useEffect(() => {
     setCurrentPage(1);
   }, [
@@ -680,12 +703,13 @@ export default function Holdings() {
     tradeFilter,
     visibilityFilter,
     statusFilter,
+    roiSort,
   ]);
 
   const totalPages = Math.max(
     1,
     Math.ceil(
-      filteredData.length / ITEMS_PER_PAGE
+      sortedFilteredData.length / ITEMS_PER_PAGE
     )
   );
 
@@ -699,14 +723,14 @@ export default function Holdings() {
     const startIndex =
       (currentPage - 1) * ITEMS_PER_PAGE;
 
-    return filteredData.slice(
+    return sortedFilteredData.slice(
       startIndex,
       startIndex + ITEMS_PER_PAGE
     );
-  }, [filteredData, currentPage]);
+  }, [sortedFilteredData, currentPage]);
 
   const firstVisibleRecord =
-    filteredData.length === 0
+    sortedFilteredData.length === 0
       ? 0
       : (currentPage - 1) *
           ITEMS_PER_PAGE +
@@ -714,7 +738,7 @@ export default function Holdings() {
 
   const lastVisibleRecord = Math.min(
     currentPage * ITEMS_PER_PAGE,
-    filteredData.length
+    sortedFilteredData.length
   );
 
   const columns = [
@@ -1006,6 +1030,7 @@ export default function Holdings() {
     setTradeFilter("All");
     setStatusFilter("All");
     setVisibilityFilter("All");
+    setRoiSort("default");
     setCurrentPage(1);
   };
 
@@ -1092,6 +1117,17 @@ export default function Holdings() {
           <option value="Cancelled">Cancelled</option>
         </select>
 
+        <select
+          value={roiSort}
+          onChange={(event) =>
+            setRoiSort(event.target.value)
+          }
+        >
+          <option value="default">📈 All ROI</option>
+          <option value="high">📈 ROI High → Low</option>
+          <option value="low">📉 ROI Low → High</option>
+        </select>
+
         <select value={visibilityFilter} onChange={(event) => setVisibilityFilter(event.target.value)}>
           <option value="All">👁 All Visibility</option>
           <option value="Public">Public</option>
@@ -1110,7 +1146,7 @@ export default function Holdings() {
       ) : (
         <>
           <div className="holdings-results-bar">
-            <span>Showing {firstVisibleRecord}–{lastVisibleRecord} of {filteredData.length} holdings</span>
+            <span>Showing {firstVisibleRecord}–{lastVisibleRecord} of {sortedFilteredData.length} holdings</span>
             <span>Page {currentPage} of {totalPages}</span>
           </div>
 
