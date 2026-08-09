@@ -2,11 +2,17 @@ import { supabase } from "../lib/supabase";
 
 const TABLE_NAME = "platform_settings";
 
+/* =========================================================
+   DEFAULT SETTINGS
+========================================================= */
+
 export const defaultSettings = {
   id: null,
 
   platform: {
-    websiteName: "VTKS HUB",
+    // FINAL BRAND - DO NOT LOAD FROM DATABASE
+    websiteName: "VTKS INVEST",
+
     supportEmail: "support@vtks.in",
     supportMobile: "",
     telegramLink: "",
@@ -131,6 +137,10 @@ const toBoolean = (
   return fallback;
 };
 
+/* =========================================================
+   MERGE SETTINGS WITH DEFAULTS
+========================================================= */
+
 const mergeWithDefaults = (
   settings = {}
 ) => ({
@@ -140,6 +150,9 @@ const mergeWithDefaults = (
   platform: {
     ...defaultSettings.platform,
     ...(settings.platform || {}),
+
+    // Brand is permanent for VTKS INVEST
+    websiteName: "VTKS INVEST",
   },
 
   plans: {
@@ -181,9 +194,10 @@ const mapFromDatabase = (row) => {
     id: row.id,
 
     platform: {
-      websiteName:
-        row.website_name ||
-        defaultSettings.platform.websiteName,
+      // IMPORTANT:
+      // Ignore Supabase website_name because the same
+      // database is currently shared with the old HUB site.
+      websiteName: "VTKS INVEST",
 
       supportEmail:
         row.support_email ||
@@ -223,31 +237,26 @@ const mapFromDatabase = (row) => {
 
       monthlyDescription:
         row.monthly_description ||
-        defaultSettings.plans
-          .monthlyDescription,
+        defaultSettings.plans.monthlyDescription,
 
       quarterlyPrice: toNumber(
         row.quarterly_price,
-        defaultSettings.plans
-          .quarterlyPrice
+        defaultSettings.plans.quarterlyPrice
       ),
 
       quarterlyDays: toNumber(
         row.quarterly_days,
-        defaultSettings.plans
-          .quarterlyDays
+        defaultSettings.plans.quarterlyDays
       ),
 
       quarterlyEnabled: toBoolean(
         row.quarterly_enabled,
-        defaultSettings.plans
-          .quarterlyEnabled
+        defaultSettings.plans.quarterlyEnabled
       ),
 
       quarterlyDescription:
         row.quarterly_description ||
-        defaultSettings.plans
-          .quarterlyDescription,
+        defaultSettings.plans.quarterlyDescription,
 
       annualPrice: toNumber(
         row.annual_price,
@@ -266,8 +275,7 @@ const mapFromDatabase = (row) => {
 
       annualDescription:
         row.annual_description ||
-        defaultSettings.plans
-          .annualDescription,
+        defaultSettings.plans.annualDescription,
 
       featuredPlan:
         row.featured_plan ||
@@ -275,8 +283,11 @@ const mapFromDatabase = (row) => {
     },
 
     payment: {
-      upiId: row.upi_id || "",
-      bankName: row.bank_name || "",
+      upiId:
+        row.upi_id || "",
+
+      bankName:
+        row.bank_name || "",
 
       accountNumber:
         row.account_number || "",
@@ -291,8 +302,7 @@ const mapFromDatabase = (row) => {
     website: {
       showIndicators: toBoolean(
         row.show_indicators,
-        defaultSettings.website
-          .showIndicators
+        defaultSettings.website.showIndicators
       ),
 
       showFunds: toBoolean(
@@ -302,8 +312,7 @@ const mapFromDatabase = (row) => {
 
       showAccuracy: toBoolean(
         row.show_accuracy,
-        defaultSettings.website
-          .showAccuracy
+        defaultSettings.website.showAccuracy
       ),
 
       showScanner: toBoolean(
@@ -313,14 +322,12 @@ const mapFromDatabase = (row) => {
 
       showTestimonial: toBoolean(
         row.show_testimonial,
-        defaultSettings.website
-          .showTestimonial
+        defaultSettings.website.showTestimonial
       ),
 
       showMonthlyLevels: toBoolean(
         row.show_monthly_levels,
-        defaultSettings.website
-          .showMonthlyLevels
+        defaultSettings.website.showMonthlyLevels
       ),
 
       showAskVTKS: toBoolean(
@@ -330,20 +337,17 @@ const mapFromDatabase = (row) => {
 
       acceptAskQueries: toBoolean(
         row.accept_ask_queries,
-        defaultSettings.website
-          .acceptAskQueries
+        defaultSettings.website.acceptAskQueries
       ),
 
       showAnsweredQueries: toBoolean(
         row.show_answered_queries,
-        defaultSettings.website
-          .showAnsweredQueries
+        defaultSettings.website.showAnsweredQueries
       ),
 
       maintenanceMode: toBoolean(
         row.maintenance_mode,
-        defaultSettings.website
-          .maintenanceMode
+        defaultSettings.website.maintenanceMode
       ),
     },
 
@@ -374,33 +378,45 @@ const mapToDatabase = (settings) => {
     mergeWithDefaults(settings);
 
   return {
-    website_name:
-      mergedSettings.platform.websiteName ||
-      "VTKS HUB",
+    /*
+     IMPORTANT:
+     website_name is intentionally NOT written here.
+
+     Reason:
+     VTKS INVEST and the old VTKS HUB currently share
+     the same Supabase project.
+
+     This protects the old live HUB site from branding
+     changes made through the VTKS INVEST admin panel.
+    */
 
     support_email:
       mergedSettings.platform.supportEmail ||
       "",
 
     support_phone:
-      mergedSettings.platform
-        .supportMobile || "",
+      mergedSettings.platform.supportMobile ||
+      "",
 
     telegram_link:
-      mergedSettings.platform
-        .telegramLink || "",
+      mergedSettings.platform.telegramLink ||
+      "",
 
     twitter_link:
-      mergedSettings.platform
-        .twitterLink || "",
+      mergedSettings.platform.twitterLink ||
+      "",
 
     instagram_link:
-      mergedSettings.platform
-        .instagramLink || "",
+      mergedSettings.platform.instagramLink ||
+      "",
 
     youtube_link:
-      mergedSettings.platform
-        .youtubeLink || "",
+      mergedSettings.platform.youtubeLink ||
+      "",
+
+    /* =========================
+       MONTHLY PLAN
+    ========================= */
 
     monthly_price: toNumber(
       mergedSettings.plans.monthlyPrice,
@@ -418,31 +434,35 @@ const mapToDatabase = (settings) => {
     ),
 
     monthly_description:
-      mergedSettings.plans
-        .monthlyDescription || "",
+      mergedSettings.plans.monthlyDescription ||
+      "",
+
+    /* =========================
+       QUARTERLY PLAN
+    ========================= */
 
     quarterly_price: toNumber(
       mergedSettings.plans.quarterlyPrice,
-      defaultSettings.plans
-        .quarterlyPrice
+      defaultSettings.plans.quarterlyPrice
     ),
 
     quarterly_days: toNumber(
       mergedSettings.plans.quarterlyDays,
-      defaultSettings.plans
-        .quarterlyDays
+      defaultSettings.plans.quarterlyDays
     ),
 
     quarterly_enabled: toBoolean(
-      mergedSettings.plans
-        .quarterlyEnabled,
-      defaultSettings.plans
-        .quarterlyEnabled
+      mergedSettings.plans.quarterlyEnabled,
+      defaultSettings.plans.quarterlyEnabled
     ),
 
     quarterly_description:
-      mergedSettings.plans
-        .quarterlyDescription || "",
+      mergedSettings.plans.quarterlyDescription ||
+      "",
+
+    /* =========================
+       ANNUAL PLAN
+    ========================= */
 
     annual_price: toNumber(
       mergedSettings.plans.annualPrice,
@@ -460,32 +480,43 @@ const mapToDatabase = (settings) => {
     ),
 
     annual_description:
-      mergedSettings.plans
-        .annualDescription || "",
+      mergedSettings.plans.annualDescription ||
+      "",
 
     featured_plan:
       mergedSettings.plans.featuredPlan ||
       "Quarterly",
 
+    /* =========================
+       PAYMENT
+    ========================= */
+
     upi_id:
-      mergedSettings.payment.upiId || "",
+      mergedSettings.payment.upiId ||
+      "",
 
     bank_name:
-      mergedSettings.payment.bankName || "",
+      mergedSettings.payment.bankName ||
+      "",
 
     account_number:
-      mergedSettings.payment
-        .accountNumber || "",
+      mergedSettings.payment.accountNumber ||
+      "",
 
     ifsc_code:
-      mergedSettings.payment.ifscCode || "",
+      mergedSettings.payment.ifscCode ||
+      "",
 
     payment_qr:
-      mergedSettings.payment.qrUrl || "",
+      mergedSettings.payment.qrUrl ||
+      "",
+
+    /* =========================
+       WEBSITE CONTROLS
+    ========================= */
 
     show_indicators: toBoolean(
-      mergedSettings.website
-        .showIndicators,
+      mergedSettings.website.showIndicators,
       true
     ),
 
@@ -505,14 +536,12 @@ const mapToDatabase = (settings) => {
     ),
 
     show_testimonial: toBoolean(
-      mergedSettings.website
-        .showTestimonial,
+      mergedSettings.website.showTestimonial,
       true
     ),
 
     show_monthly_levels: toBoolean(
-      mergedSettings.website
-        .showMonthlyLevels,
+      mergedSettings.website.showMonthlyLevels,
       true
     ),
 
@@ -522,22 +551,23 @@ const mapToDatabase = (settings) => {
     ),
 
     accept_ask_queries: toBoolean(
-      mergedSettings.website
-        .acceptAskQueries,
+      mergedSettings.website.acceptAskQueries,
       true
     ),
 
     show_answered_queries: toBoolean(
-      mergedSettings.website
-        .showAnsweredQueries,
+      mergedSettings.website.showAnsweredQueries,
       true
     ),
 
     maintenance_mode: toBoolean(
-      mergedSettings.website
-        .maintenanceMode,
+      mergedSettings.website.maintenanceMode,
       false
     ),
+
+    /* =========================
+       ANNOUNCEMENT
+    ========================= */
 
     announcement:
       mergedSettings.announcement.text ||
@@ -548,8 +578,13 @@ const mapToDatabase = (settings) => {
       true
     ),
 
+    /* =========================
+       ADMIN
+    ========================= */
+
     admin_email:
-      mergedSettings.admin.email || "",
+      mergedSettings.admin.email ||
+      "",
 
     updated_at:
       new Date().toISOString(),
@@ -595,11 +630,18 @@ export const saveSettings = async (
   const payload =
     mapToDatabase(mergedSettings);
 
+  /*
+   Existing settings row
+  */
+
   if (mergedSettings.id) {
     const { data, error } = await supabase
       .from(TABLE_NAME)
       .update(payload)
-      .eq("id", mergedSettings.id)
+      .eq(
+        "id",
+        mergedSettings.id
+      )
       .select("*")
       .single();
 
@@ -615,9 +657,15 @@ export const saveSettings = async (
     return mapFromDatabase(data);
   }
 
+  /*
+   No settings row yet
+  */
+
   const { data, error } = await supabase
     .from(TABLE_NAME)
-    .insert([payload])
+    .insert([
+      payload,
+    ])
     .select("*")
     .single();
 
@@ -641,7 +689,8 @@ export const getAllPlans = async () => {
   const settings =
     await loadSettings();
 
-  const plans = settings.plans;
+  const plans =
+    settings.plans;
 
   return [
     {
@@ -664,10 +713,12 @@ export const getAllPlans = async () => {
       ),
 
       description:
-        plans.monthlyDescription || "",
+        plans.monthlyDescription ||
+        "",
 
       featured:
-        plans.featuredPlan === "Monthly",
+        plans.featuredPlan ===
+        "Monthly",
     },
 
     {
@@ -676,24 +727,22 @@ export const getAllPlans = async () => {
 
       price: toNumber(
         plans.quarterlyPrice,
-        defaultSettings.plans
-          .quarterlyPrice
+        defaultSettings.plans.quarterlyPrice
       ),
 
       days: toNumber(
         plans.quarterlyDays,
-        defaultSettings.plans
-          .quarterlyDays
+        defaultSettings.plans.quarterlyDays
       ),
 
       enabled: toBoolean(
         plans.quarterlyEnabled,
-        defaultSettings.plans
-          .quarterlyEnabled
+        defaultSettings.plans.quarterlyEnabled
       ),
 
       description:
-        plans.quarterlyDescription || "",
+        plans.quarterlyDescription ||
+        "",
 
       featured:
         plans.featuredPlan ===
@@ -720,13 +769,19 @@ export const getAllPlans = async () => {
       ),
 
       description:
-        plans.annualDescription || "",
+        plans.annualDescription ||
+        "",
 
       featured:
-        plans.featuredPlan === "Annual",
+        plans.featuredPlan ===
+        "Annual",
     },
   ];
 };
+
+/* =========================================================
+   ENABLED PLANS
+========================================================= */
 
 export const getEnabledPlans =
   async () => {
@@ -739,17 +794,22 @@ export const getEnabledPlans =
     );
   };
 
+/* =========================================================
+   GET PLAN BY NAME
+========================================================= */
+
 export const getPlanByName = async (
   planName
 ) => {
   const plans =
     await getAllPlans();
 
-  const normalizedPlanName = String(
-    planName || ""
-  )
-    .trim()
-    .toLowerCase();
+  const normalizedPlanName =
+    String(
+      planName || ""
+    )
+      .trim()
+      .toLowerCase();
 
   return (
     plans.find(

@@ -5,7 +5,7 @@ import SEO from "../../components/common/SEO";
     title="VTKS INVEST | About Us."
     description="Professional stock market education platform, Built by Traders - Designed for Traders"
     keywords="VTKS, Swing Trading, Technical Analysis, Stock Market"
-    canonical="https://vtks-hub.vercel.app/about"
+    canonical="https://www.vtksinvest.com/about"
   />
 
   {/* Existing page content */}

@@ -824,3 +824,98 @@ transform:translateY(-2px);
     width: 100%;
   }
 }
+/* =========================================================
+   VTKS INVEST SUBSCRIBER DASHBOARD LOGO
+========================================================= */
+
+.subscriber-hero-brand {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.subscriber-logo-wrapper {
+  width: 82px;
+  height: 82px;
+
+  flex: 0 0 82px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+  overflow: hidden;
+
+  background: #050505;
+
+  border: 1px solid rgba(212, 175, 55, 0.75);
+
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.18),
+    0 0 12px rgba(212, 175, 55, 0.18);
+}
+
+.subscriber-logo {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: cover;
+  object-position: center;
+
+  border-radius: 50%;
+}
+
+.subscriber-hero-text {
+  min-width: 0;
+}
+
+
+/* Tablet */
+
+@media (max-width: 768px) {
+
+  .subscriber-hero-brand {
+    gap: 14px;
+  }
+
+  .subscriber-logo-wrapper {
+    width: 68px;
+    height: 68px;
+
+    flex-basis: 68px;
+  }
+}
+
+
+/* Mobile */
+
+@media (max-width: 560px) {
+
+  .subscriber-hero {
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .subscriber-hero-brand {
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .subscriber-logo-wrapper {
+    width: 58px;
+    height: 58px;
+
+    flex-basis: 58px;
+  }
+
+  .subscriber-hero-text h1 {
+    font-size: 24px;
+  }
+
+  .subscriber-hero-text p {
+    word-break: break-word;
+  }
+}

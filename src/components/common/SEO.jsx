@@ -5,7 +5,7 @@ function SEO({
   description,
   keywords = "",
   canonical = "",
-  image = "https://vtks-hub.vercel.app/og-image.png",
+  image = "https://www.vtksinvest.com/og-image.png",
 }) {
   return (
     <Helmet>

@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+
 import {
   FaTelegramPlane,
   FaInstagram,
@@ -7,23 +8,33 @@ import {
 } from "react-icons/fa";
 
 import { FaXTwitter } from "react-icons/fa6";
+
 import {
   defaultSettings,
   loadSettings,
 } from "../../services/settingsService";
 
+import vtksLogo from "../../pages/public/vtks-invest-logo.png";
+
 import "./Footer.css";
 
 export default function Footer() {
-  const [settings, setSettings] = useState(defaultSettings);
+  const [settings, setSettings] =
+    useState(defaultSettings);
 
   useEffect(() => {
     const fetchSettings = async () => {
       try {
         const data = await loadSettings();
-        setSettings(data || defaultSettings);
+
+        setSettings(
+          data || defaultSettings
+        );
       } catch (error) {
-        console.error("Footer settings error:", error);
+        console.error(
+          "Footer settings error:",
+          error
+        );
       }
     };
 
@@ -31,93 +42,171 @@ export default function Footer() {
   }, []);
 
   const platform =
-    settings?.platform || defaultSettings.platform;
+    settings?.platform ||
+    defaultSettings.platform;
 
   const socialLinks = [
-  {
-    label: "Telegram",
-    icon: <FaTelegramPlane />,
-    url: platform.telegramLink,
-  },
-  {
-    label: "Instagram",
-    icon: <FaInstagram />,
-    url: platform.instagramLink,
-  },
-  {
-    label: "X / Twitter",
-    icon: <FaXTwitter />,
-    url: platform.twitterLink,
-  },
-  {
-    label: "YouTube",
-    icon: <FaYoutube />,
-    url: platform.youtubeLink,
-  },
-].filter((item) => item.url);
+    {
+      label: "Telegram",
+      icon: <FaTelegramPlane />,
+      url: platform.telegramLink,
+    },
+    {
+      label: "Instagram",
+      icon: <FaInstagram />,
+      url: platform.instagramLink,
+    },
+    {
+      label: "X / Twitter",
+      icon: <FaXTwitter />,
+      url: platform.twitterLink,
+    },
+    {
+      label: "YouTube",
+      icon: <FaYoutube />,
+      url: platform.youtubeLink,
+    },
+  ].filter((item) => item.url);
+
   return (
-    <footer className="public-footer">
+    <footer className="footer">
       <div className="footer-container">
+
+        {/* =================================
+            VTKS INVEST BRAND
+        ================================= */}
         <section className="footer-brand">
-          <div className="footer-logo">
-            { "VTKS INVEST"}
-          </div>
 
-          <h2>
-            Trade with Structure.
-            <br />
-            Invest with Conviction.
-          </h2>
+  <div className="vtks-footer-brand-row">
 
-          <p>
-            A structured trading and investment learning
-            platform focused on education, discipline,
-            risk management and independent decision-making.
-          </p>
-        </section>
+    <div className="vtks-footer-logo-box">
+      <img
+        src={vtksLogo}
+        alt="VTKS INVEST"
+        className="vtks-footer-logo-img"
+      />
+    </div>
 
+    <div className="footer-brand-badge">
+      VTKS INVEST
+    </div>
+
+  </div>
+
+  <h2>
+    Trade with Structure.
+    <br />
+    Invest with Conviction.
+  </h2>
+
+  <p>
+    A structured trading and investment learning
+    platform focused on education, discipline,
+    risk management and independent decision-making.
+  </p>
+
+</section>
+
+
+        {/* =================================
+            QUICK LINKS
+        ================================= */}
         <section className="footer-column">
           <h3>Quick Links</h3>
 
-          <Link to="/">Home</Link>
-          <Link to="/funds">Public Fund</Link>
-          <Link to="/indicators">Indicators</Link>
-          <Link to="/pricing">Pricing</Link>
-          <Link to="/resources">Resources</Link>
-          <Link to="/accuracy">Accuracy</Link>
-          <Link to="/about">About</Link>
-          <Link to="/contact">Contact</Link>
+          <Link to="/">
+            Home
+          </Link>
+
+          <Link to="/funds">
+            Public Fund
+          </Link>
+
+          <Link to="/indicators">
+            Indicators
+          </Link>
+
+          <Link to="/pricing">
+            Pricing
+          </Link>
+
+          <Link to="/resources">
+            Resources
+          </Link>
+
+          <Link to="/accuracy">
+            Accuracy
+          </Link>
+
+          <Link to="/about">
+            About
+          </Link>
+
+          <Link to="/contact">
+            Contact
+          </Link>
         </section>
 
+
+        {/* =================================
+            PLATFORM
+        ================================= */}
         <section className="footer-column">
           <h3>Platform</h3>
 
-          <Link to="/resources">Learning Resources</Link>
-          <Link to="/indicators">Trading Indicators</Link>
-          <Link to="/funds">Portfolio Tracking</Link>
-          <Link to="/accuracy">Performance Analytics</Link>
-          <Link to="/pricing">Membership Plans</Link>
+          <Link to="/resources">
+            Learning Resources
+          </Link>
+
+          <Link to="/indicators">
+            Trading Indicators
+          </Link>
+
+          <Link to="/funds">
+            Portfolio Tracking
+          </Link>
+
+          <Link to="/accuracy">
+            Performance Analytics
+          </Link>
+
+          <Link to="/pricing">
+            Membership Plans
+          </Link>
         </section>
 
+
+        {/* =================================
+            CONTACT
+        ================================= */}
         <section className="footer-column">
           <h3>Contact</h3>
 
           {platform.supportEmail && (
-            <a href={`mailto:${platform.supportEmail}`}>
+            <a
+              href={`mailto:${platform.supportEmail}`}
+            >
               ✉️ {platform.supportEmail}
             </a>
           )}
 
           {platform.supportMobile && (
-            <a href={`tel:${platform.supportMobile}`}>
+            <a
+              href={`tel:${platform.supportMobile}`}
+            >
               📞 {platform.supportMobile}
             </a>
           )}
 
-          <Link to="/contact">Contact Us</Link>
+          <Link to="/contact">
+            Contact Us
+          </Link>
 
+
+          {/* SOCIAL LINKS */}
           {socialLinks.length > 0 && (
             <div className="footer-social-links">
+
               {socialLinks.map((item) => (
                 <a
                   key={item.label}
@@ -130,22 +219,34 @@ export default function Footer() {
                   {item.icon}
                 </a>
               ))}
+
             </div>
           )}
+
         </section>
+
       </div>
 
+
+      {/* =================================
+          FOOTER BOTTOM
+      ================================= */}
       <div className="footer-bottom">
+
         <p>
-  © {new Date().getFullYear()} VTKS INVEST. All rights reserved.
-</p>
+          © {new Date().getFullYear()}{" "}
+          VTKS INVEST. All rights reserved.
+        </p>
 
         <p className="footer-disclaimer">
-          VTKS is an educational platform and does not provide
-          trading calls, personalised investment advice or
-          guaranteed returns. Please conduct your own research.
+          VTKS is an educational platform and does
+          not provide trading calls, personalised
+          investment advice or guaranteed returns.
+          Please conduct your own research.
         </p>
+
       </div>
+
     </footer>
   );
 }

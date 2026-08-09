@@ -2,19 +2,30 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 
 import { registerUser } from "../../services/authService";
+import vtksLogo from "./vtks-invest-logo.png";
 
 import "./Register.css";
 
 const isValidEmail = (value) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
-    String(value || "").trim().toLowerCase()
+    String(value || "")
+      .trim()
+      .toLowerCase()
   );
 
 export default function Register() {
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [mobile, setMobile] = useState("");
-  const [password, setPassword] = useState("");
+  const [fullName, setFullName] =
+    useState("");
+
+  const [email, setEmail] =
+    useState("");
+
+  const [mobile, setMobile] =
+    useState("");
+
+  const [password, setPassword] =
+    useState("");
+
   const [confirmPassword, setConfirmPassword] =
     useState("");
 
@@ -24,20 +35,27 @@ export default function Register() {
   const [registrationComplete, setRegistrationComplete] =
     useState(false);
 
-  const [loading, setLoading] = useState(false);
-  const [formError, setFormError] = useState("");
+  const [loading, setLoading] =
+    useState(false);
+
+  const [formError, setFormError] =
+    useState("");
 
   const handleRegister = async (event) => {
     event.preventDefault();
 
     setFormError("");
 
-    const normalizedFullName = fullName.trim();
-    const normalizedEmail = email
-      .trim()
-      .toLowerCase();
+    const normalizedFullName =
+      fullName.trim();
 
-    const normalizedMobile = mobile.trim();
+    const normalizedEmail =
+      email
+        .trim()
+        .toLowerCase();
+
+    const normalizedMobile =
+      mobile.trim();
 
     if (
       !normalizedFullName ||
@@ -48,6 +66,7 @@ export default function Register() {
       setFormError(
         "Please fill in all required fields."
       );
+
       return;
     }
 
@@ -55,6 +74,7 @@ export default function Register() {
       setFormError(
         "Please enter a valid email address."
       );
+
       return;
     }
 
@@ -62,6 +82,7 @@ export default function Register() {
       setFormError(
         "Password must contain at least 6 characters."
       );
+
       return;
     }
 
@@ -69,6 +90,7 @@ export default function Register() {
       setFormError(
         "Password and confirm password do not match."
       );
+
       return;
     }
 
@@ -82,8 +104,13 @@ export default function Register() {
         password,
       });
 
-      setRegisteredEmail(normalizedEmail);
-      setRegistrationComplete(true);
+      setRegisteredEmail(
+        normalizedEmail
+      );
+
+      setRegistrationComplete(
+        true
+      );
 
       setFullName("");
       setEmail("");
@@ -91,30 +118,45 @@ export default function Register() {
       setPassword("");
       setConfirmPassword("");
     } catch (error) {
-      console.error("Registration error:", error);
+      console.error(
+        "Registration error:",
+        error
+      );
 
       const message = String(
         error?.message || ""
       ).toLowerCase();
 
       if (
-        message.includes("already registered") ||
-        message.includes("already exists") ||
-        message.includes("user already")
+        message.includes(
+          "already registered"
+        ) ||
+        message.includes(
+          "already exists"
+        ) ||
+        message.includes(
+          "user already"
+        )
       ) {
         setFormError(
           "An account may already exist with this email address. Please log in or use Forgot Password."
         );
+
         return;
       }
 
       if (
-        message.includes("invalid email") ||
-        message.includes("email address is invalid")
+        message.includes(
+          "invalid email"
+        ) ||
+        message.includes(
+          "email address is invalid"
+        )
       ) {
         setFormError(
           "Please enter a valid email address."
         );
+
         return;
       }
 
@@ -125,16 +167,22 @@ export default function Register() {
         setFormError(
           "Please use a stronger password containing at least 6 characters."
         );
+
         return;
       }
 
       if (
-        message.includes("rate limit") ||
-        message.includes("too many requests")
+        message.includes(
+          "rate limit"
+        ) ||
+        message.includes(
+          "too many requests"
+        )
       ) {
         setFormError(
           "Too many registration attempts. Please wait a few minutes and try again."
         );
+
         return;
       }
 
@@ -151,6 +199,16 @@ export default function Register() {
     return (
       <main className="register-page">
         <section className="register-card register-success-card">
+
+          {/* VTKS INVEST LOGO */}
+          <div className="register-logo-wrapper register-logo-success">
+            <img
+              src={vtksLogo}
+              alt="VTKS INVEST"
+              className="register-logo"
+            />
+          </div>
+
           <div className="register-success-icon">
             ✉️
           </div>
@@ -170,7 +228,9 @@ export default function Register() {
               Registration Submitted
             </span>
 
-            <h1>Verify Your Email</h1>
+            <h1>
+              Verify Your Email
+            </h1>
 
             <p>
               A verification email has been sent to:
@@ -181,7 +241,9 @@ export default function Register() {
             </div>
 
             <div className="register-next-steps">
-              <h2>Next Steps</h2>
+              <h2>
+                Next Steps
+              </h2>
 
               <div className="register-step">
                 <span>1</span>
@@ -252,6 +314,17 @@ export default function Register() {
   return (
     <main className="register-page">
       <section className="register-card">
+
+        {/* VTKS INVEST LOGO */}
+        <div className="register-logo-wrapper">
+          <img
+            src={vtksLogo}
+            alt="VTKS INVEST"
+            className="register-logo"
+          />
+        </div>
+
+        {/* BRAND */}
         <div className="register-brand">
           <span className="register-brand-vtks">
             VTKS
@@ -267,7 +340,9 @@ export default function Register() {
             🚀 Join VTKS Community
           </span>
 
-          <h1>Create Account</h1>
+          <h1>
+            Create Account
+          </h1>
 
           <p>
             Register to access VTKS indicators,
@@ -303,7 +378,9 @@ export default function Register() {
               autoComplete="name"
               disabled={loading}
               onChange={(event) =>
-                setFullName(event.target.value)
+                setFullName(
+                  event.target.value
+                )
               }
             />
           </div>
@@ -322,7 +399,9 @@ export default function Register() {
               inputMode="email"
               disabled={loading}
               onChange={(event) =>
-                setEmail(event.target.value)
+                setEmail(
+                  event.target.value
+                )
               }
             />
           </div>
@@ -341,7 +420,9 @@ export default function Register() {
               inputMode="tel"
               disabled={loading}
               onChange={(event) =>
-                setMobile(event.target.value)
+                setMobile(
+                  event.target.value
+                )
               }
             />
           </div>
@@ -359,7 +440,9 @@ export default function Register() {
               autoComplete="new-password"
               disabled={loading}
               onChange={(event) =>
-                setPassword(event.target.value)
+                setPassword(
+                  event.target.value
+                )
               }
             />
 
@@ -400,7 +483,9 @@ export default function Register() {
         </form>
 
         <div className="register-links">
-          <span>Already have an account?</span>
+          <span>
+            Already have an account?
+          </span>
 
           <Link to="/login">
             Login
@@ -408,12 +493,15 @@ export default function Register() {
         </div>
 
         <div className="register-links">
-          <span>Forgot your password?</span>
+          <span>
+            Forgot your password?
+          </span>
 
           <Link to="/forgot-password">
             Reset Password
           </Link>
         </div>
+
       </section>
     </main>
   );

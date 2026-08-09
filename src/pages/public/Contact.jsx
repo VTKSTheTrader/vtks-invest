@@ -16,10 +16,10 @@ const contactDetails = {
 
 export default function Contact() {
    <SEO
-    title="VTKS Hub | Contact US."
+    title="VTKS Invest | Contact US."
     description="Professional stock market education platform focused on technical analysis, swing trading, investment research, and disciplined trading."
     keywords="VTKS, Swing Trading, Technical Analysis, Stock Market, VTKS Contact"
-    canonical="https://vtks-hub.vercel.app/contact"
+    canonical="https://www.vtksinvest.com/contact"
   />
   const handleSubmit = (event) => {
     event.preventDefault();

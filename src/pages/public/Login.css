@@ -290,3 +290,52 @@
     font-size: 28px;
   }
 }
+/* =========================================================
+   VTKS INVEST LOGIN LOGO
+========================================================= */
+
+.login-logo-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin: 0 auto 16px;
+}
+
+.login-logo {
+  width: 112px;
+  height: 112px;
+
+  display: block;
+
+  object-fit: cover;
+  object-position: center;
+
+  border-radius: 50%;
+
+  background: #050505;
+
+  border: 1px solid rgba(212, 175, 55, 0.7);
+
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.18),
+    0 0 12px rgba(212, 175, 55, 0.18);
+}
+
+
+/* Tablet */
+@media (max-width: 768px) {
+  .login-logo {
+    width: 96px;
+    height: 96px;
+  }
+}
+
+
+/* Mobile */
+@media (max-width: 480px) {
+  .login-logo {
+    width: 82px;
+    height: 82px;
+  }
+}

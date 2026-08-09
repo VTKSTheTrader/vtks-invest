@@ -560,3 +560,69 @@
     width: 100%;
   }
 }
+/* =========================================================
+   VTKS INVEST REGISTER LOGO
+========================================================= */
+
+.register-logo-wrapper {
+  width: 118px;
+  height: 118px;
+
+  margin: 0 auto 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  overflow: hidden;
+
+  background: #050505;
+
+  border: 1px solid rgba(212, 175, 55, 0.75);
+
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.18),
+    0 0 12px rgba(212, 175, 55, 0.18);
+}
+
+.register-logo {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: cover;
+  object-position: center;
+
+  border-radius: 50%;
+}
+
+.register-logo-success {
+  margin-bottom: 14px;
+}
+
+
+/* Tablet */
+
+@media (max-width: 768px) {
+  .register-logo-wrapper {
+    width: 100px;
+    height: 100px;
+
+    margin-bottom: 14px;
+  }
+}
+
+
+/* Mobile */
+
+@media (max-width: 480px) {
+  .register-logo-wrapper {
+    width: 86px;
+    height: 86px;
+
+    margin-bottom: 12px;
+  }
+}

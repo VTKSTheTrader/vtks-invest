@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
+import vtksLogo from "../../pages/public/vtks-invest-logo.png";
 import "./Navbar.css";
 
 export default function Navbar({ settings }) {
@@ -15,33 +16,55 @@ export default function Navbar({ settings }) {
   const website = settings?.website || {};
 
   return (
-    <header className="navbar-wrapper">
+    <header className="navbar-header">
       <nav className="navbar">
-        {/* Brand */}
+
+        {/* ================= BRAND ================= */}
         <NavLink
           to="/"
-          className="brand-logo"
+          className="navbar-brand"
           onClick={closeMenu}
-          aria-label="VTKS INVEST Home"
         >
-          <div className="brand-content">
-            <div className="brand-logo-main">
-              <span className="brand-vtks">
-                VTKS
-              </span>
+          <div className="brand-main-row">
 
-              <span className="brand-hub">
-                INVEST
-              </span>
+            {/* SMALL CIRCULAR LOGO + HOVER PREVIEW */}
+            <div className="brand-logo-wrapper">
+
+              <img
+                src={vtksLogo}
+                alt="VTKS Invest Logo"
+                className="brand-logo"
+              />
+
+              <div className="logo-hover-preview">
+                <img
+                  src={vtksLogo}
+                  alt="VTKS Invest Full Logo"
+                />
+              </div>
+
             </div>
 
-            <span className="brand-philosophy">
-              Research • Knowledge • Strategy
+            {/* VTKS */}
+            <span className="brand-vtks">
+              VTKS
             </span>
+
+            {/* INVEST */}
+            <span className="brand-hub">
+              INVEST
+            </span>
+
           </div>
+
+          {/* PHILOSOPHY */}
+          <span className="brand-philosophy">
+            Research • Knowledge • Strategy
+          </span>
         </NavLink>
 
-        {/* Mobile menu button */}
+
+        {/* ================= MOBILE MENU ================= */}
         <button
           type="button"
           className="mobile-menu-button"
@@ -54,7 +77,8 @@ export default function Navbar({ settings }) {
           {menuOpen ? "✕" : "☰"}
         </button>
 
-        {/* Navigation */}
+
+        {/* ================= NAVIGATION ================= */}
         <div
           className={
             menuOpen
@@ -62,6 +86,7 @@ export default function Navbar({ settings }) {
               : "nav-links"
           }
         >
+
           <NavLink
             to="/"
             className={getNavClass}
@@ -69,6 +94,7 @@ export default function Navbar({ settings }) {
           >
             Home
           </NavLink>
+
 
           {website.showFunds && (
             <NavLink
@@ -80,16 +106,19 @@ export default function Navbar({ settings }) {
             </NavLink>
           )}
 
+
           {website.showMonthlyLevels && (
-  <NavLink
-    to="/monthly-levels"
-    className={getNavClass}
-    onClick={closeMenu}
-  >
-    Market Outlook
-  </NavLink>
-)}
-{website.showAccuracy && (
+            <NavLink
+              to="/monthly-levels"
+              className={getNavClass}
+              onClick={closeMenu}
+            >
+              Market Outlook
+            </NavLink>
+          )}
+
+
+          {website.showAccuracy && (
             <NavLink
               to="/accuracy"
               className={getNavClass}
@@ -98,6 +127,8 @@ export default function Navbar({ settings }) {
               Accuracy
             </NavLink>
           )}
+
+
           {website.showIndicators && (
             <NavLink
               to="/indicators"
@@ -108,6 +139,7 @@ export default function Navbar({ settings }) {
             </NavLink>
           )}
 
+
           <NavLink
             to="/pricing"
             className={getNavClass}
@@ -116,7 +148,6 @@ export default function Navbar({ settings }) {
             Pricing
           </NavLink>
 
-          
 
           {website.showScanner && (
             <NavLink
@@ -128,6 +159,7 @@ export default function Navbar({ settings }) {
             </NavLink>
           )}
 
+
           {website.showTestimonial && (
             <NavLink
               to="/testimonials"
@@ -138,6 +170,7 @@ export default function Navbar({ settings }) {
             </NavLink>
           )}
 
+
           <NavLink
             to="/about"
             className={getNavClass}
@@ -145,6 +178,7 @@ export default function Navbar({ settings }) {
           >
             About
           </NavLink>
+
 
           <NavLink
             to="/contact"
@@ -154,8 +188,10 @@ export default function Navbar({ settings }) {
             Contact
           </NavLink>
 
-          {/* Mobile authentication buttons */}
+
+          {/* ================= MOBILE AUTH ================= */}
           <div className="mobile-auth-buttons">
+
             <NavLink
               to="/register"
               className="register-btn"
@@ -171,11 +207,15 @@ export default function Navbar({ settings }) {
             >
               Login
             </NavLink>
+
           </div>
+
         </div>
 
-        {/* Desktop authentication buttons */}
+
+        {/* ================= DESKTOP AUTH ================= */}
         <div className="desktop-auth-buttons">
+
           <NavLink
             to="/register"
             className="register-btn"
@@ -189,7 +229,9 @@ export default function Navbar({ settings }) {
           >
             Login
           </NavLink>
+
         </div>
+
       </nav>
     </header>
   );

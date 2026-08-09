@@ -188,7 +188,7 @@ export default function RouteSEO() {
   const origin =
     typeof window !== "undefined"
       ? window.location.origin
-      : "https://vtks-hub.vercel.app";
+      : "https://www.vtksinvest.com";
 
   const canonicalUrl =
     cleanPath === "/"

@@ -5,17 +5,15 @@ import {
 } from "react-router-dom";
 
 import { loginUser } from "../../services/authService";
+import vtksLogo from "./vtks-invest-logo.png";
 import "./Login.css";
 
 export default function Login() {
   const navigate = useNavigate();
 
-  const [email, setEmail] =
-    useState("");
-
+  const [email, setEmail] = useState("");
   const [password, setPassword] =
     useState("");
-
   const [loading, setLoading] =
     useState(false);
 
@@ -51,7 +49,8 @@ export default function Login() {
 
       localStorage.setItem(
         "vtks_user_email",
-        profile.email || email.trim()
+        profile.email ||
+          email.trim()
       );
 
       localStorage.setItem(
@@ -82,6 +81,17 @@ export default function Login() {
   return (
     <main className="login-page">
       <section className="login-card">
+
+        {/* VTKS INVEST LOGO */}
+        <div className="login-logo-wrapper">
+          <img
+            src={vtksLogo}
+            alt="VTKS INVEST"
+            className="login-logo"
+          />
+        </div>
+
+        {/* BRAND */}
         <div className="login-brand">
           <span className="login-brand-vtks">
             VTKS
@@ -176,6 +186,7 @@ export default function Login() {
           🔒 Your account information is
           securely protected.
         </p>
+
       </section>
     </main>
   );
