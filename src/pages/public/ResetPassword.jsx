@@ -44,7 +44,7 @@ export default function ResetPassword() {
 
         <div className="reset-logo">
           <span className="reset-vtks">VTKS</span>
-          <span className="reset-hub">HUB</span>
+          <span className="reset-hub">INVEST</span>
         </div>
 
         <span className="reset-badge">

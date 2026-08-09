@@ -629,3 +629,57 @@
     letter-spacing: 0;
   }
 }
+/* =========================================================
+   VTKS INVEST IMAGE LOGO
+========================================================= */
+
+.brand-logo {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+
+  text-decoration: none;
+}
+
+.brand-invest-logo {
+  display: block;
+
+  width: 220px;
+  height: 72px;
+
+  object-fit: contain;
+
+  object-position: left center;
+}
+
+/* Medium desktop */
+@media (max-width: 1400px) {
+  .brand-invest-logo {
+    width: 190px;
+    height: 64px;
+  }
+}
+
+/* Tablet */
+@media (max-width: 1180px) {
+  .brand-invest-logo {
+    width: 170px;
+    height: 58px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .brand-invest-logo {
+    width: 145px;
+    height: 52px;
+  }
+}
+
+/* Very small phone */
+@media (max-width: 380px) {
+  .brand-invest-logo {
+    width: 128px;
+    height: 48px;
+  }
+}

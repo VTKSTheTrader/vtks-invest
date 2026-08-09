@@ -59,7 +59,7 @@ export default function PublicLayout() {
     return (
       <div className="public-settings-loader">
         <div className="public-loader-spinner" />
-        <p>Loading VTKS Hub...</p>
+        <p>Loading VTKS INVEST...</p>
       </div>
     );
   }
@@ -91,7 +91,7 @@ export default function PublicLayout() {
 
         <MaintenanceScreen
           websiteName={
-            settings.platform?.websiteName || "VTKS HUB"
+            settings.platform?.websiteName || "VTKS INVEST"
           }
           supportEmail={
             settings.platform?.supportEmail || ""

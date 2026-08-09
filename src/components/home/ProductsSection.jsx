@@ -32,7 +32,7 @@ export default function ProductsSection() {
         <h2>One Platform. Multiple VTKS Tools.</h2>
 
         <p>
-          VTKS Hub brings portfolio, indicators, scanner, learning and community
+          VTKS INVEST brings portfolio, indicators, scanner, learning and community
           into one structured trading ecosystem.
         </p>
 

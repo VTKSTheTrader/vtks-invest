@@ -16,7 +16,7 @@ export default function Hero() {
         </h1>
 
         <p>
-          VTKS Hub combines portfolio management, rule-based investing,
+          VTKS INVEST combines portfolio management, rule-based investing,
           professional trading indicators and performance analytics
           into one powerful platform.
         </p>

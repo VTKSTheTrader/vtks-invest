@@ -161,7 +161,7 @@ export default function Register() {
             </span>
 
             <span className="register-brand-hub">
-              HUB
+              INVEST
             </span>
           </div>
 
@@ -205,7 +205,7 @@ export default function Register() {
 
                 <p>
                   Click the verification link sent
-                  by VTKS HUB.
+                  by VTKS INVEST.
                 </p>
               </div>
 
@@ -213,7 +213,7 @@ export default function Register() {
                 <span>4</span>
 
                 <p>
-                  Return to VTKS HUB and log in.
+                  Return to VTKS INVEST and log in.
                 </p>
               </div>
             </div>
@@ -258,7 +258,7 @@ export default function Register() {
           </span>
 
           <span className="register-brand-hub">
-            HUB
+            INVEST
           </span>
         </div>
 

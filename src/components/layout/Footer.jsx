@@ -60,7 +60,7 @@ export default function Footer() {
       <div className="footer-container">
         <section className="footer-brand">
           <div className="footer-logo">
-            {platform.websiteName || "VTKS HUB"}
+            { "VTKS INVEST"}
           </div>
 
           <h2>
@@ -137,9 +137,8 @@ export default function Footer() {
 
       <div className="footer-bottom">
         <p>
-          © {new Date().getFullYear()}{" "}
-          {platform.websiteName || "VTKS HUB"}. All rights reserved.
-        </p>
+  © {new Date().getFullYear()} VTKS INVEST. All rights reserved.
+</p>
 
         <p className="footer-disclaimer">
           VTKS is an educational platform and does not provide

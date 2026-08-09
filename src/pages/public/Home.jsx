@@ -447,7 +447,7 @@ export default function Home() {
         </h1>
 
         <p>
-          VTKS HUB combines structured
+          VTKS INVEST combines structured
           trading education, portfolio
           tracking, rule-based indicators,
           market scanners and performance
@@ -473,7 +473,7 @@ export default function Home() {
       <section className="why-section">
         <div className="section-title">
           <span>
-            Why VTKS HUB?
+            Why VTKS INVEST?
           </span>
 
           <h2>

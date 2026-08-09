@@ -1,10 +1,20 @@
 import "./About.css";
+import SEO from "../../components/common/SEO";
+<>
+  <SEO
+    title="VTKS INVEST | About Us."
+    description="Professional stock market education platform, Built by Traders - Designed for Traders"
+    keywords="VTKS, Swing Trading, Technical Analysis, Stock Market"
+    canonical="https://vtks-hub.vercel.app/about"
+  />
 
+  {/* Existing page content */}
+</>
 export default function About() {
   return (
     <main className="about-page">
       <section className="about-hero">
-        <span className="about-badge">About VTKS HUB</span>
+        <span className="about-badge">About VTKS INVEST</span>
 
         <h1>
           Trade with Structure.
@@ -13,7 +23,7 @@ export default function About() {
         </h1>
 
         <p>
-          VTKS HUB is a structured trading and investment learning platform
+          VTKS INVEST is a structured trading and investment learning platform
   built around rule-based analysis, disciplined execution, risk
   management and transparent performance tracking.
         </p>
@@ -23,7 +33,7 @@ export default function About() {
         <h2>Our Story</h2>
 
         <p>
-          VTKS HUB was created with one mission: To help traders and investors
+          VTKS INVEST was created with one mission: To help traders and investors
           move away from guesswork and build confidence through structured
           analysis.
         </p>
@@ -41,7 +51,7 @@ export default function About() {
         <h2>Built by Traders. Designed for Traders.</h2>
 
         <p className="founder-intro">
-          VTKS HUB is built around one philosophy — Helping traders become
+          VTKS INVEST is built around one philosophy — Helping traders become
           independent through structured analysis, disciplined execution and
           continuous learning.
         </p>

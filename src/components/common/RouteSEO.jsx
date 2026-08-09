@@ -1,17 +1,17 @@
 import { Helmet } from "react-helmet-async";
 import { useLocation } from "react-router-dom";
 
-const SITE_NAME = "VTKS Hub";
+const SITE_NAME = "VTKS INVEST";
 
 const DEFAULT_DESCRIPTION =
-  "VTKS Hub provides structured stock market education, technical analysis tools, portfolio insights and disciplined trading resources.";
+  "VTKS INVEST provides structured stock market education, technical analysis tools, portfolio insights and disciplined trading resources.";
 
 const seoConfig = {
   "/": {
     title:
-      "VTKS Hub | Stock Market Education, Swing Trading & Technical Analysis",
+      "VTKS INVEST | Stock Market Education, Swing Trading & Technical Analysis",
     description:
-      "VTKS Hub provides structured stock market education, swing trading frameworks, technical analysis tools, portfolio insights and disciplined investing resources.",
+      "VTKS INVEST provides structured stock market education, swing trading frameworks, technical analysis tools, portfolio insights and disciplined investing resources.",
     indexable: true,
   },
 
@@ -58,65 +58,65 @@ const seoConfig = {
   },
 
   "/about": {
-    title: "About VTKS Hub | Our Trading Education Mission",
+    title: "About VTKS INVEST | Our Trading Education Mission",
     description:
-      "Learn about VTKS Hub and its mission to build disciplined, knowledgeable and independent stock market participants.",
+      "Learn about VTKS INVEST and its mission to build disciplined, knowledgeable and independent stock market participants.",
     indexable: true,
   },
 
   "/contact": {
-    title: "Contact VTKS Hub | Membership & Support",
+    title: "Contact VTKS INVEST | Membership & Support",
     description:
-      "Contact VTKS Hub for membership information, educational resources, platform assistance and general enquiries.",
+      "Contact VTKS INVEST for membership information, educational resources, platform assistance and general enquiries.",
     indexable: true,
   },
 
   "/payment": {
-    title: "Payment | VTKS Hub",
+    title: "Payment | VTKS INVEST",
     description:
-      "Complete your VTKS Hub membership payment using the available payment options.",
+      "Complete your VTKS INVEST membership payment using the available payment options.",
     indexable: false,
   },
 
   "/login": {
-    title: "Login | VTKS Hub",
-    description: "Log in securely to your VTKS Hub account.",
+    title: "Login | VTKS INVEST",
+    description: "Log in securely to your VTKS INVEST account.",
     indexable: false,
   },
 
   "/register": {
-    title: "Create Account | VTKS Hub",
-    description: "Create your VTKS Hub account.",
+    title: "Create Account | VTKS INVEST",
+    description: "Create your VTKS INVEST account.",
     indexable: false,
   },
 
   "/forgot-password": {
-    title: "Forgot Password | VTKS Hub",
-    description: "Recover access to your VTKS Hub account.",
+    title: "Forgot Password | VTKS INVEST",
+    description: "Recover access to your VTKS INVEST account.",
     indexable: false,
   },
 
   "/reset-password": {
-    title: "Reset Password | VTKS Hub",
-    description: "Create a new password for your VTKS Hub account.",
+    title: "Reset Password | VTKS INVEST",
+    description: "Create a new password for your VTKS INVEST account.",
     indexable: false,
   },
 
   "/dashboard": {
-    title: "Subscriber Dashboard | VTKS Hub",
-    description: "Access your VTKS Hub subscriber dashboard.",
+    title: "Subscriber Dashboard | VTKS INVEST",
+    description: "Access your VTKS INVEST subscriber dashboard.",
     indexable: false,
   },
 
   "/subscriber/scanner": {
-    title: "Subscriber Scanners | VTKS Hub",
-    description: "Access VTKS Hub subscriber market scanners.",
+    title: "Subscriber Scanners | VTKS INVEST",
+    description: "Access VTKS INVEST subscriber market scanners.",
     indexable: false,
   },
 
   "/subscriber/library": {
-    title: "Subscriber Library | VTKS Hub",
-    description: "Access VTKS Hub subscriber learning resources.",
+    title: "Subscriber Library | VTKS INVEST",
+    description: "Access VTKS INVEST subscriber learning resources.",
     indexable: false,
   },
 };
@@ -140,7 +140,7 @@ const getPageConfig = (pathname) => {
   */
   if (cleanPath.startsWith("/trade/")) {
     return {
-      title: "Trade Details | VTKS Hub",
+      title: "Trade Details | VTKS INVEST",
       description:
         "View VTKS trade details including entry, current price, targets, stop-loss, thesis and performance.",
       indexable: false,
@@ -152,8 +152,8 @@ const getPageConfig = (pathname) => {
   */
   if (cleanPath.startsWith("/admin")) {
     return {
-      title: "Admin Panel | VTKS Hub",
-      description: "VTKS Hub administration panel.",
+      title: "Admin Panel | VTKS INVEST",
+      description: "VTKS INVEST administration panel.",
       indexable: false,
     };
   }
@@ -163,8 +163,8 @@ const getPageConfig = (pathname) => {
   */
   if (cleanPath.startsWith("/subscriber")) {
     return {
-      title: "Subscriber Area | VTKS Hub",
-      description: "VTKS Hub subscriber area.",
+      title: "Subscriber Area | VTKS INVEST",
+      description: "VTKS INVEST subscriber area.",
       indexable: false,
     };
   }
@@ -226,7 +226,7 @@ export default function RouteSEO() {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: SITE_NAME,
-    alternateName: ["VTKS", "VTKS Hub"],
+    alternateName: ["VTKS", "VTKS INVEST"],
     url: `${origin}/`,
     description: DEFAULT_DESCRIPTION,
     publisher: {
@@ -314,7 +314,7 @@ export default function RouteSEO() {
 
       <meta
         property="og:image:alt"
-        content="VTKS Hub – Stock Market Education, Swing Trading and Technical Analysis"
+        content="VTKS INVEST – Stock Market Education, Swing Trading and Technical Analysis"
       />
 
       {/* Twitter/X Card */}
@@ -340,7 +340,7 @@ export default function RouteSEO() {
 
       <meta
         name="twitter:image:alt"
-        content="VTKS Hub – Stock Market Education, Swing Trading and Technical Analysis"
+        content="VTKS INVEST – Stock Market Education, Swing Trading and Technical Analysis"
       />
 
       {/* Add brand schemas only on the homepage */}

@@ -161,7 +161,7 @@ export default function AnsweredQueries() {
       document.title;
 
     document.title =
-      "Answered Stock Queries | VTKS Hub";
+      "Answered Stock Queries | VTKS INVEST";
 
     return () => {
       document.title =

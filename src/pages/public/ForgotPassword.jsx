@@ -50,7 +50,7 @@ export default function ForgotPassword() {
           </span>
 
           <span className="forgot-brand-hub">
-            HUB
+            INVEST
           </span>
         </div>
 

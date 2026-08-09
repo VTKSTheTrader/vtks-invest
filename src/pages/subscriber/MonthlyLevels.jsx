@@ -63,7 +63,7 @@ export default function SubscriberMonthlyLevels() {
 
   useEffect(() => {
     document.title =
-      "Subscriber Market Outlook | VTKS Hub";
+      "Subscriber Market Outlook | VTKS INVEST";
   }, []);
 
   useEffect(() => {

@@ -239,7 +239,7 @@ export default function Indicators() {
           Discover how the complete VTKS ecosystem can help you trade with
           structure and invest with conviction.
         </p>
-        <a href="/login">Join VTKS HUB</a>
+        <a href="/login">Join VTKS INVEST</a>
       </section>
     </main>
   );

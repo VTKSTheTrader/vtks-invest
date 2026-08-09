@@ -22,7 +22,7 @@ export default function Navbar({ settings }) {
           to="/"
           className="brand-logo"
           onClick={closeMenu}
-          aria-label="VTKS HUB Home"
+          aria-label="VTKS INVEST Home"
         >
           <div className="brand-content">
             <div className="brand-logo-main">
@@ -31,12 +31,12 @@ export default function Navbar({ settings }) {
               </span>
 
               <span className="brand-hub">
-                HUB
+                INVEST
               </span>
             </div>
 
             <span className="brand-philosophy">
-              Vision • Trend • Knowledge • Strategy
+              Research • Knowledge • Strategy
             </span>
           </div>
         </NavLink>

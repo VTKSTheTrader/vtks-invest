@@ -88,7 +88,7 @@ export default function Login() {
           </span>
 
           <span className="login-brand-hub">
-            HUB
+            INVEST
           </span>
         </div>
 
@@ -155,7 +155,7 @@ export default function Login() {
           >
             {loading
               ? "Logging in..."
-              : "Login to VTKS HUB"}
+              : "Login to VTKS INVEST"}
           </button>
         </form>
 

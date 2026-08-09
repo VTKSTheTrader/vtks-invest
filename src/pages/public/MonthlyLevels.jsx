@@ -61,7 +61,7 @@ export default function MonthlyLevels() {
     useState(1);
 
      useEffect(() => {
-    document.title = "Monthly Market Intelligence | VTKS Hub";
+    document.title = "Monthly Market Intelligence | VTKS INVEST";
   }, []); 
 
   useEffect(() => {

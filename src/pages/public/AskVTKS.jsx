@@ -41,7 +41,7 @@ export default function AskVTKS() {
 
     return () => {
       document.title =
-        "VTKS Hub | Trade with Structure. Invest with Conviction.";
+        "VTKS INVEST | Trade with Structure. Invest with Conviction.";
     };
   }, []);
 
