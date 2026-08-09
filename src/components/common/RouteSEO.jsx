@@ -2,121 +2,145 @@ import { Helmet } from "react-helmet-async";
 import { useLocation } from "react-router-dom";
 
 const SITE_NAME = "VTKS INVEST";
+const SITE_URL = "https://www.vtksinvest.com";
 
 const DEFAULT_DESCRIPTION =
-  "VTKS INVEST provides structured stock market education, technical analysis tools, portfolio insights and disciplined trading resources.";
+  "VTKS INVEST is a stock market education and research platform focused on technical analysis, swing trading, market studies, indicators, disciplined risk management and structured decision-making.";
 
 const seoConfig = {
   "/": {
     title:
-      "VTKS INVEST | Stock Market Education, Swing Trading & Technical Analysis",
+      "VTKS INVEST | Stock Market Education & Technical Analysis",
     description:
-      "VTKS INVEST provides structured stock market education, swing trading frameworks, technical analysis tools, portfolio insights and disciplined investing resources.",
+      "VTKS INVEST is a stock market education and research platform focused on technical analysis, swing trading, market studies, indicators, disciplined risk management and structured decision-making.",
     indexable: true,
   },
 
   "/funds": {
-    title: "VTKS Public Fund | Portfolio & Investment Ideas",
+    title:
+      "VTKS Market Analysis | Stock Research & Investment Studies",
     description:
-      "Explore publicly shared VTKS investment ideas, portfolio performance and structured stock market analysis.",
+      "Explore VTKS market studies, publicly shared stock research, investment analysis and structured educational case studies.",
+    indexable: true,
+  },
+
+  "/monthly-levels": {
+    title:
+      "VTKS Market Outlook | Nifty, Bank Nifty & Market Levels",
+    description:
+      "Explore VTKS educational market outlook, index levels and structured technical analysis for Nifty, Bank Nifty and broader markets.",
     indexable: true,
   },
 
   "/indicators": {
-    title: "VTKS Indicators | Technical Analysis Tools",
+    title:
+      "VTKS Indicators | Technical Analysis Tools",
     description:
-      "Explore VTKS indicators designed for trend analysis, swing trading, support and resistance and structured decision-making.",
+      "Explore VTKS technical indicators for trend analysis, swing trading, support and resistance and structured market decision-making.",
     indexable: true,
   },
 
   "/accuracy": {
-    title: "VTKS Performance & Accuracy | Trade Analytics",
+    title:
+      "VTKS Performance & Accuracy | Market Study Analytics",
     description:
-      "Review VTKS portfolio performance, completed setups, target achievements and transparent trade analytics.",
+      "Review VTKS historical market studies, completed setups, performance statistics and transparent educational analysis.",
     indexable: true,
   },
 
   "/resources": {
-    title: "VTKS Learning Resources | Videos, PDFs & Scanners",
+    title:
+      "VTKS Learning Resources | Videos, PDFs & Market Scanners",
     description:
-      "Explore free VTKS learning resources including educational videos, trading PDFs, technical studies and public market scanners.",
+      "Explore VTKS educational videos, trading PDFs, technical studies, learning resources and public market scanners.",
     indexable: true,
   },
 
   "/testimonials": {
-    title: "VTKS Member Testimonials | Trading Experiences",
+    title:
+      "VTKS Testimonials | Community Experiences",
     description:
-      "Read genuine VTKS member experiences related to structured trading, technical analysis, risk management and disciplined investing.",
+      "Read VTKS community experiences related to structured market learning, technical analysis, discipline and risk management.",
     indexable: true,
   },
 
   "/pricing": {
-    title: "VTKS Membership Plans | Education & Resources",
+    title:
+      "VTKS Membership Plans | Education & Learning Resources",
     description:
-      "Compare VTKS membership plans for access to educational resources, market scanners, technical studies and subscriber tools.",
+      "Compare VTKS membership plans for educational resources, market scanners, technical studies and subscriber learning tools.",
     indexable: true,
   },
 
   "/about": {
-    title: "About VTKS INVEST | Our Trading Education Mission",
+    title:
+      "About VTKS INVEST | Research, Knowledge & Strategy",
     description:
-      "Learn about VTKS INVEST and its mission to build disciplined, knowledgeable and independent stock market participants.",
+      "Learn about VTKS INVEST and its educational approach to structured market research, knowledge, discipline and independent decision-making.",
     indexable: true,
   },
 
   "/contact": {
-    title: "Contact VTKS INVEST | Membership & Support",
+    title:
+      "Contact VTKS INVEST | Membership & Platform Support",
     description:
-      "Contact VTKS INVEST for membership information, educational resources, platform assistance and general enquiries.",
+      "Contact VTKS INVEST for membership information, educational resources, platform support and general enquiries.",
     indexable: true,
   },
 
   "/payment": {
     title: "Payment | VTKS INVEST",
     description:
-      "Complete your VTKS INVEST membership payment using the available payment options.",
+      "Complete your VTKS INVEST membership payment.",
     indexable: false,
   },
 
   "/login": {
     title: "Login | VTKS INVEST",
-    description: "Log in securely to your VTKS INVEST account.",
+    description:
+      "Log in securely to your VTKS INVEST account.",
     indexable: false,
   },
 
   "/register": {
     title: "Create Account | VTKS INVEST",
-    description: "Create your VTKS INVEST account.",
+    description:
+      "Create your VTKS INVEST account.",
     indexable: false,
   },
 
   "/forgot-password": {
     title: "Forgot Password | VTKS INVEST",
-    description: "Recover access to your VTKS INVEST account.",
+    description:
+      "Recover access to your VTKS INVEST account.",
     indexable: false,
   },
 
   "/reset-password": {
     title: "Reset Password | VTKS INVEST",
-    description: "Create a new password for your VTKS INVEST account.",
+    description:
+      "Create a new password for your VTKS INVEST account.",
     indexable: false,
   },
 
   "/dashboard": {
     title: "Subscriber Dashboard | VTKS INVEST",
-    description: "Access your VTKS INVEST subscriber dashboard.",
+    description:
+      "Access your VTKS INVEST subscriber dashboard.",
     indexable: false,
   },
 
   "/subscriber/scanner": {
     title: "Subscriber Scanners | VTKS INVEST",
-    description: "Access VTKS INVEST subscriber market scanners.",
+    description:
+      "Access VTKS INVEST subscriber market scanners.",
     indexable: false,
   },
 
   "/subscriber/library": {
     title: "Subscriber Library | VTKS INVEST",
-    description: "Access VTKS INVEST subscriber learning resources.",
+    description:
+      "Access VTKS INVEST subscriber learning resources.",
     indexable: false,
   },
 };
@@ -132,39 +156,29 @@ const normalizePathname = (pathname) => {
 const getPageConfig = (pathname) => {
   const cleanPath = normalizePathname(pathname);
 
-  /*
-    Trade-detail pages are intentionally noindex.
-
-    This prevents generic "Trade Details" pages from competing
-    with the VTKS homepage in Google search results.
-  */
   if (cleanPath.startsWith("/trade/")) {
     return {
-      title: "Trade Details | VTKS INVEST",
+      title: "Market Study Details | VTKS INVEST",
       description:
-        "View VTKS trade details including entry, current price, targets, stop-loss, thesis and performance.",
+        "View detailed VTKS educational market study information.",
       indexable: false,
     };
   }
 
-  /*
-    All admin routes must remain private in search engines.
-  */
   if (cleanPath.startsWith("/admin")) {
     return {
       title: "Admin Panel | VTKS INVEST",
-      description: "VTKS INVEST administration panel.",
+      description:
+        "VTKS INVEST administration panel.",
       indexable: false,
     };
   }
 
-  /*
-    All subscriber routes must remain private in search engines.
-  */
   if (cleanPath.startsWith("/subscriber")) {
     return {
       title: "Subscriber Area | VTKS INVEST",
-      description: "VTKS INVEST subscriber area.",
+      description:
+        "VTKS INVEST subscriber area.",
       indexable: false,
     };
   }
@@ -183,62 +197,44 @@ export default function RouteSEO() {
 
   const cleanPath = normalizePathname(pathname);
   const config = getPageConfig(cleanPath);
-  const isHomePage = cleanPath === "/";
 
-  const origin =
-    typeof window !== "undefined"
-      ? window.location.origin
-      : "https://www.vtksinvest.com";
+  const isHomePage = cleanPath === "/";
 
   const canonicalUrl =
     cleanPath === "/"
-      ? `${origin}/`
-      : `${origin}${cleanPath}`;
+      ? `${SITE_URL}/`
+      : `${SITE_URL}${cleanPath}`;
 
-  const socialImageUrl = `${origin}/og-image.png`;
+  const socialImageUrl =
+    `${SITE_URL}/og-image.png`;
 
-  /*
-    Public pages:
-    index, follow
+  const logoUrl =
+    `${SITE_URL}/favicon.png`;
 
-    Private and trade-detail pages:
-    noindex, follow
-
-    "follow" allows Google to continue discovering links
-    without showing the page in search results.
-  */
   const robotsContent = config.indexable
     ? "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
     : "noindex, follow";
+
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: SITE_NAME,
+    alternateName: "VTKS",
+    url: `${SITE_URL}/`,
+  };
 
   const organizationSchema = {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: SITE_NAME,
     alternateName: "VTKS",
-    url: `${origin}/`,
-    logo: `${origin}/favicon.png`,
+    url: `${SITE_URL}/`,
+    logo: logoUrl,
     description: DEFAULT_DESCRIPTION,
-    sameAs: [],
-  };
-
-  const websiteSchema = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    name: SITE_NAME,
-    alternateName: ["VTKS", "VTKS INVEST"],
-    url: `${origin}/`,
-    description: DEFAULT_DESCRIPTION,
-    publisher: {
-      "@type": "Organization",
-      name: SITE_NAME,
-    },
   };
 
   return (
     <Helmet>
-      <html lang="en-IN" />
-
       <title>{config.title}</title>
 
       <meta
@@ -276,7 +272,8 @@ export default function RouteSEO() {
         href={canonicalUrl}
       />
 
-      {/* Open Graph */}
+      {/* OPEN GRAPH */}
+
       <meta
         property="og:type"
         content="website"
@@ -314,10 +311,11 @@ export default function RouteSEO() {
 
       <meta
         property="og:image:alt"
-        content="VTKS INVEST – Stock Market Education, Swing Trading and Technical Analysis"
+        content="VTKS INVEST stock market education and technical analysis platform"
       />
 
-      {/* Twitter/X Card */}
+      {/* X / TWITTER */}
+
       <meta
         name="twitter:card"
         content="summary_large_image"
@@ -340,19 +338,20 @@ export default function RouteSEO() {
 
       <meta
         name="twitter:image:alt"
-        content="VTKS INVEST – Stock Market Education, Swing Trading and Technical Analysis"
+        content="VTKS INVEST stock market education and technical analysis platform"
       />
 
-      {/* Add brand schemas only on the homepage */}
+      {/* SITE NAME / ORGANIZATION SCHEMA */}
+
       {isHomePage && (
         <script type="application/ld+json">
-          {JSON.stringify(organizationSchema)}
+          {JSON.stringify(websiteSchema)}
         </script>
       )}
 
       {isHomePage && (
         <script type="application/ld+json">
-          {JSON.stringify(websiteSchema)}
+          {JSON.stringify(organizationSchema)}
         </script>
       )}
     </Helmet>
