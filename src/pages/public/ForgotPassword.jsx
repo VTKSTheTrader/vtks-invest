@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 
 import { sendResetEmail } from "../../services/authService";
+import vtksLogo from "./vtks-invest-logo.png";
+
 import "./ForgotPassword.css";
 
 export default function ForgotPassword() {
@@ -44,6 +46,17 @@ export default function ForgotPassword() {
   return (
     <main className="forgot-page">
       <section className="forgot-card">
+
+        {/* VTKS INVEST LOGO */}
+        <div className="forgot-logo-wrapper">
+          <img
+            src={vtksLogo}
+            alt="VTKS INVEST"
+            className="forgot-logo"
+          />
+        </div>
+
+        {/* BRAND */}
         <div className="forgot-brand">
           <span className="forgot-brand-vtks">
             VTKS
@@ -54,6 +67,7 @@ export default function ForgotPassword() {
           </span>
         </div>
 
+        {/* HEADING */}
         <div className="forgot-heading">
           <span className="forgot-badge">
             🔐 Password Recovery
@@ -67,6 +81,7 @@ export default function ForgotPassword() {
           </p>
         </div>
 
+        {/* FORM */}
         <form
           className="forgot-form"
           onSubmit={handleSubmit}
@@ -82,6 +97,7 @@ export default function ForgotPassword() {
               autoComplete="email"
               placeholder="Enter your email address"
               value={email}
+              disabled={loading}
               onChange={(event) =>
                 setEmail(event.target.value)
               }
@@ -99,15 +115,18 @@ export default function ForgotPassword() {
           </button>
         </form>
 
+        {/* LINKS */}
         <div className="forgot-links">
           <Link to="/login">
             ← Back to Login
           </Link>
         </div>
 
+        {/* SECURITY NOTE */}
         <p className="forgot-security-note">
           🔒 Your account information is securely protected.
         </p>
+
       </section>
     </main>
   );
