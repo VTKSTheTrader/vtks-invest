@@ -21,6 +21,13 @@ const normalize = (value) =>
     .trim()
     .toLowerCase();
 
+const REALISED_STATUSES = [
+  "booked profit",
+  "booked loss",
+  "breakeven",
+  "sl hit",
+];
+
 export default function TradeDetails() {
   const { id } = useParams();
   const { pathname } = useLocation();
@@ -39,9 +46,17 @@ export default function TradeDetails() {
   const [selectedChart, setSelectedChart] =
     useState(null);
 
+  /* =========================================================
+     LOAD
+  ========================================================= */
+
   useEffect(() => {
     loadTrade();
   }, [id, isSubscriberView]);
+
+  /* =========================================================
+     ESCAPE CLOSES CHART
+  ========================================================= */
 
   useEffect(() => {
     const handleEscape = (event) => {
@@ -62,6 +77,10 @@ export default function TradeDetails() {
       );
     };
   }, []);
+
+  /* =========================================================
+     LOAD TRADE
+  ========================================================= */
 
   const loadTrade = async () => {
     try {
@@ -141,6 +160,13 @@ export default function TradeDetails() {
     }
   };
 
+  /* =========================================================
+     STATUS
+
+     Final manually saved outcomes always
+     override target/CMP calculations.
+  ========================================================= */
+
   const getStatus = (holding) => {
     const manualStatus = normalize(
       holding.tradeStatus ||
@@ -154,6 +180,8 @@ export default function TradeDetails() {
       "target 2 hit",
       "target 3 hit",
       "booked profit",
+      "booked loss",
+      "breakeven",
       "sl hit",
       "cancelled",
     ];
@@ -168,8 +196,18 @@ export default function TradeDetails() {
       return manualStatus;
     }
 
-    const cmp = Number(
-      holding.cmp || 0
+    const highestPrice = Number(
+      holding.highestPrice ??
+        holding.highest_price ??
+        holding.cmp ??
+        0
+    );
+
+    const lowestPrice = Number(
+      holding.lowestPrice ??
+        holding.lowest_price ??
+        holding.cmp ??
+        0
     );
 
     const stopLoss = Number(
@@ -196,36 +234,46 @@ export default function TradeDetails() {
         0
     );
 
+    /*
+      Stop-loss uses historical low.
+    */
+    if (
+      stopLoss > 0 &&
+      lowestPrice <= stopLoss
+    ) {
+      return "sl hit";
+    }
+
+    /*
+      Target detection uses historical high.
+    */
     if (
       target3 > 0 &&
-      cmp >= target3
+      highestPrice >= target3
     ) {
       return "target 3 hit";
     }
 
     if (
       target2 > 0 &&
-      cmp >= target2
+      highestPrice >= target2
     ) {
       return "target 2 hit";
     }
 
     if (
       target1 > 0 &&
-      cmp >= target1
+      highestPrice >= target1
     ) {
       return "target 1 hit";
     }
 
-    if (
-      stopLoss > 0 &&
-      cmp <= stopLoss
-    ) {
-      return "sl hit";
-    }
-
     return "active";
   };
+
+  /* =========================================================
+     FORMAT STATUS
+  ========================================================= */
 
   const formatStatus = (value) =>
     String(value || "")
@@ -237,32 +285,47 @@ export default function TradeDetails() {
       )
       .join(" ");
 
+  /* =========================================================
+     ROI
+
+     Active / Target Hit:
+     Entry -> Live CMP
+
+     Booked Profit / Booked Loss /
+     Breakeven / SL Hit:
+     Saved Realised ROI first,
+     Entry -> Exit Price fallback.
+  ========================================================= */
+
   const getReturn = (holding) => {
     const entry = Number(
       holding.entry || 0
     );
 
-    if (!entry) return 0;
+    if (!entry) {
+      return 0;
+    }
 
     const tradeStatus =
       getStatus(holding);
 
-    const isCompletedTrade =
-      tradeStatus === "booked profit";
+    const isRealisedTrade =
+      REALISED_STATUSES.includes(
+        tradeStatus
+      );
 
     const realisedReturn =
       holding.realisedReturn ??
       holding.realised_return;
 
     if (
-      isCompletedTrade &&
+      isRealisedTrade &&
       realisedReturn !== null &&
       realisedReturn !== undefined &&
       realisedReturn !== ""
     ) {
-      const parsedReturn = Number(
-        realisedReturn
-      );
+      const parsedReturn =
+        Number(realisedReturn);
 
       if (
         Number.isFinite(
@@ -278,7 +341,7 @@ export default function TradeDetails() {
       holding.exit_price;
 
     if (
-      isCompletedTrade &&
+      isRealisedTrade &&
       exitPrice !== null &&
       exitPrice !== undefined &&
       exitPrice !== ""
@@ -310,12 +373,18 @@ export default function TradeDetails() {
     );
   };
 
+  /* =========================================================
+     CURRENCY
+  ========================================================= */
+
   const formatCurrency = (value) => {
     const number = Number(
       value || 0
     );
 
-    if (!number) return "-";
+    if (!number) {
+      return "-";
+    }
 
     return `₹${number.toLocaleString(
       "en-IN",
@@ -325,15 +394,23 @@ export default function TradeDetails() {
     )}`;
   };
 
+  /* =========================================================
+     DATE
+  ========================================================= */
+
   const formatDate = (value) => {
-    if (!value) return "-";
+    if (!value) {
+      return "-";
+    }
 
     const date = new Date(
       `${value}T00:00:00`
     );
 
     if (
-      Number.isNaN(date.getTime())
+      Number.isNaN(
+        date.getTime()
+      )
     ) {
       return value;
     }
@@ -348,14 +425,23 @@ export default function TradeDetails() {
     );
   };
 
+  /* =========================================================
+     STATUS CLASS
+  ========================================================= */
+
   const getStatusClass = (
     status
   ) => {
-    if (status === "active") {
+    if (
+      status === "active"
+    ) {
       return "trade-status-active";
     }
 
-    if (status === "sl hit") {
+    if (
+      status === "booked loss" ||
+      status === "sl hit"
+    ) {
       return "trade-status-loss";
     }
 
@@ -365,12 +451,22 @@ export default function TradeDetails() {
       return "trade-status-booked";
     }
 
-    if (status === "cancelled") {
+    if (
+      status === "breakeven"
+    ) {
+      return "trade-status-neutral";
+    }
+
+    if (
+      status === "cancelled"
+    ) {
       return "trade-status-cancelled";
     }
 
     if (
-      status.includes("target")
+      status.includes(
+        "target"
+      )
     ) {
       return "trade-status-target";
     }
@@ -378,22 +474,94 @@ export default function TradeDetails() {
     return "trade-status-neutral";
   };
 
+  /* =========================================================
+     STATUS LABEL
+  ========================================================= */
+
+  const getStatusLabel = (
+    status
+  ) => {
+    if (
+      status === "booked profit"
+    ) {
+      return "💰 Booked Profit";
+    }
+
+    if (
+      status === "booked loss"
+    ) {
+      return "📉 Booked Loss";
+    }
+
+    if (
+      status === "breakeven"
+    ) {
+      return "⚖️ Breakeven";
+    }
+
+    if (
+      status === "sl hit"
+    ) {
+      return "🛑 SL Hit";
+    }
+
+    if (
+      status === "target 1 hit"
+    ) {
+      return "🎯 Target 1 Hit";
+    }
+
+    if (
+      status === "target 2 hit"
+    ) {
+      return "🚀 Target 2 Hit";
+    }
+
+    if (
+      status === "target 3 hit"
+    ) {
+      return "🏆 Target 3 Hit";
+    }
+
+    if (
+      status === "active"
+    ) {
+      return "🟢 Active";
+    }
+
+    return formatStatus(
+      status
+    );
+  };
+
+  /* =========================================================
+     VISIBILITY
+  ========================================================= */
+
   const getVisibilityClass = (
     visibility
   ) => {
     const value =
       normalize(visibility);
 
-    if (value === "subscriber") {
+    if (
+      value === "subscriber"
+    ) {
       return "trade-visibility-subscriber";
     }
 
-    if (value === "private") {
+    if (
+      value === "private"
+    ) {
       return "trade-visibility-private";
     }
 
     return "trade-visibility-public";
   };
+
+  /* =========================================================
+     LOADING
+  ========================================================= */
 
   if (loading) {
     return (
@@ -407,11 +575,17 @@ export default function TradeDetails() {
     );
   }
 
+  /* =========================================================
+     NOT FOUND
+  ========================================================= */
+
   if (!trade) {
     return (
       <main className="trade-state-page">
         <div className="trade-not-found-card">
-          <span>📭</span>
+          <span>
+            📭
+          </span>
 
           <h1>
             Trade Not Found
@@ -440,10 +614,23 @@ export default function TradeDetails() {
     );
   }
 
+  /* =========================================================
+     DISPLAY VALUES
+  ========================================================= */
+
   const status =
     getStatus(trade);
 
-  const isCompletedTrade =
+  const isRealisedTrade =
+    REALISED_STATUSES.includes(
+      status
+    );
+
+  const isLossOutcome =
+    status === "booked loss" ||
+    status === "sl hit";
+
+  const isProfitOutcome =
     status === "booked profit";
 
   const savedExitPrice =
@@ -451,20 +638,34 @@ export default function TradeDetails() {
     trade.exit_price;
 
   const displayPrice =
-    isCompletedTrade
-      ? savedExitPrice || trade.cmp
+    isRealisedTrade
+      ? savedExitPrice ||
+        trade.cmp
       : trade.cmp;
 
-  const roi = getReturn(trade);
-  const isPositive = roi >= 0;
+  const roi =
+    getReturn(trade);
 
+  const isPositive =
+    roi >= 0;
+
+  /*
+    Main ROI label.
+  */
   const roiLabel =
-    isCompletedTrade
-      ? "Realised ROI"
-      : "Live ROI";
+    isLossOutcome
+      ? "Realised Loss"
+      : isProfitOutcome
+        ? "Realised ROI"
+        : status === "breakeven"
+          ? "Realised ROI"
+          : "Live ROI";
 
+  /*
+    Main price metric.
+  */
   const priceLabel =
-    isCompletedTrade
+    isRealisedTrade
       ? "Exit Price"
       : "Current Market Price";
 
@@ -473,13 +674,87 @@ export default function TradeDetails() {
       ? "/dashboard"
       : "/funds";
 
+  /* =========================================================
+     TARGET ACHIEVEMENTS
+
+     IMPORTANT:
+     Even after a trade is Booked Loss,
+     we retain historical target achievements.
+
+     Example:
+     TCS may have reached T2 earlier and later
+     finally closed as Booked Loss.
+  ========================================================= */
+
+  const highestPrice = Number(
+    trade.highestPrice ??
+      trade.highest_price ??
+      trade.cmp ??
+      0
+  );
+
+  const lowestPrice = Number(
+    trade.lowestPrice ??
+      trade.lowest_price ??
+      trade.cmp ??
+      0
+  );
+
+  const target1 =
+    Number(
+      trade.target1 || 0
+    );
+
+  const target2 =
+    Number(
+      trade.target2 || 0
+    );
+
+  const stopLoss =
+    Number(
+      trade.stopLoss || 0
+    );
+
+  const target1Reached =
+    target1 > 0 &&
+    (
+      highestPrice >= target1 ||
+      [
+        "target 1 hit",
+        "target 2 hit",
+        "target 3 hit",
+      ].includes(status)
+    );
+
+  const target2Reached =
+    target2 > 0 &&
+    (
+      highestPrice >= target2 ||
+      [
+        "target 2 hit",
+        "target 3 hit",
+      ].includes(status)
+    );
+
+  const stopLossReached =
+    stopLoss > 0 &&
+    (
+      lowestPrice <= stopLoss ||
+      status === "sl hit"
+    );
+
+  /* =========================================================
+     CHARTS
+  ========================================================= */
+
   const beforeChartUrl =
     trade.beforeChartUrl ||
     trade.chartImageUrl ||
     "";
 
   const afterChartUrl =
-    trade.afterChartUrl || "";
+    trade.afterChartUrl ||
+    "";
 
   const hasChartComparison =
     Boolean(
@@ -487,92 +762,152 @@ export default function TradeDetails() {
         afterChartUrl
     );
 
+  /* =========================================================
+     METRIC CARDS
+  ========================================================= */
+
   const metricCards = [
     {
       label: "Entry Price",
-      value: formatCurrency(
-        trade.entry
-      ),
+
+      value:
+        formatCurrency(
+          trade.entry
+        ),
+
       icon: "🎯",
     },
+
     {
-      label: priceLabel,
-      value: formatCurrency(
-        displayPrice
-      ),
-      icon: isCompletedTrade
-        ? "✅"
-        : "📈",
-    },
-    {
-      label: "Stop Loss",
-      value: formatCurrency(
-        trade.stopLoss
-      ),
-      icon: "🛡️",
-      tone: "loss",
-    },
-    {
-      label: "Target 1",
-      value: `${formatCurrency(
-        trade.target1
-      )}${
-        [
-          "target 1 hit",
-          "target 2 hit",
-          "target 3 hit",
-        ].includes(status)
-          ? " ✅"
-          : ""
-      }`,
-      icon: "1️⃣",
-    },
-    {
-      label: "Target 2",
-      value: `${formatCurrency(
-        trade.target2
-      )}${
-        [
-          "target 2 hit",
-          "target 3 hit",
-        ].includes(status)
-          ? " 🚀"
-          : ""
-      }`,
-      icon: "2️⃣",
-    },
-    {
-      label: "Study Published",
-      value: formatDate(
-        trade.recommendationDate ||
-          trade.recommendation_date
-      ),
-      icon: "📅",
-    },
-    {
-      label: "Study Closed",
+      label:
+        priceLabel,
+
       value:
-        isCompletedTrade
+        formatCurrency(
+          displayPrice
+        ),
+
+      icon:
+        isLossOutcome
+          ? "📉"
+          : isRealisedTrade
+            ? "✅"
+            : "📈",
+
+      tone:
+        isLossOutcome
+          ? "loss"
+          : "",
+    },
+
+    {
+      label:
+        "Stop Loss",
+
+      value:
+        `${formatCurrency(
+          trade.stopLoss
+        )}${
+          stopLossReached
+            ? " 🛑"
+            : ""
+        }`,
+
+      icon:
+        "🛡️",
+
+      tone:
+        "loss",
+    },
+
+    {
+      label:
+        "Target 1",
+
+      value:
+        `${formatCurrency(
+          trade.target1
+        )}${
+          target1Reached
+            ? " ✅"
+            : ""
+        }`,
+
+      icon:
+        "1️⃣",
+    },
+
+    {
+      label:
+        "Target 2",
+
+      value:
+        `${formatCurrency(
+          trade.target2
+        )}${
+          target2Reached
+            ? " 🚀"
+            : ""
+        }`,
+
+      icon:
+        "2️⃣",
+    },
+
+    {
+      label:
+        "Study Published",
+
+      value:
+        formatDate(
+          trade.recommendationDate ||
+            trade.recommendation_date
+        ),
+
+      icon:
+        "📅",
+    },
+
+    {
+      label:
+        "Study Closed",
+
+      value:
+        isRealisedTrade
           ? formatDate(
               trade.exitDate ||
                 trade.exit_date
             )
           : "-",
-      icon: "📆",
+
+      icon:
+        "📆",
     },
+
     {
-      label: "Study Type",
+      label:
+        "Study Type",
+
       value:
         trade.tradeType ||
         trade.trade_type ||
         "Swing",
-      icon: "📊",
+
+      icon:
+        "📊",
     },
   ];
+
+  /* =========================================================
+     UI
+  ========================================================= */
 
   return (
     <main className="trade-details-page">
       <div className="trade-details-container">
+
+        {/* BACK */}
+
         <Link
           to={backPath}
           className="trade-back-link"
@@ -583,18 +918,29 @@ export default function TradeDetails() {
             : "Back to Ideas"}
         </Link>
 
+        {/* ===================================================
+            HERO
+        =================================================== */}
+
         <section className="trade-hero-card">
+
           <div className="trade-hero-content">
+
             <div className="trade-badge-row">
+
+              {/* FINAL STATUS */}
+
               <span
                 className={`trade-status-badge ${getStatusClass(
                   status
                 )}`}
               >
-                {formatStatus(
+                {getStatusLabel(
                   status
                 )}
               </span>
+
+              {/* VISIBILITY */}
 
               <span
                 className={`trade-visibility-badge ${getVisibilityClass(
@@ -603,20 +949,26 @@ export default function TradeDetails() {
               >
                 {normalize(
                   trade.visibility
-                ) === "subscriber"
+                ) ===
+                "subscriber"
                   ? "⭐ Subscriber Trade"
                   : normalize(
                         trade.visibility
-                      ) === "private"
+                      ) ===
+                      "private"
                     ? "🔒 Members-Only Market Study"
                     : "🌐 Published Market Study"}
               </span>
+
+              {/* CATEGORY */}
 
               <span className="trade-market-category-badge">
                 {trade.marketCategory ||
                   "Other"}
               </span>
             </div>
+
+            {/* STOCK */}
 
             <h1>
               {trade.stock ||
@@ -627,14 +979,18 @@ export default function TradeDetails() {
               {trade.sector ||
                 "General"}
 
-              <span>•</span>
+              <span>
+                •
+              </span>
 
               {trade.tradeType ||
                 "Trade"}
 
               {trade.tradingviewSymbol && (
                 <>
-                  <span>•</span>
+                  <span>
+                    •
+                  </span>
 
                   {
                     trade.tradingviewSymbol
@@ -643,6 +999,19 @@ export default function TradeDetails() {
               )}
             </p>
           </div>
+
+          {/* =================================================
+              ROI CARD
+
+              Profit:
+              Realised ROI green
+
+              Loss:
+              Realised Loss red
+
+              Active:
+              Live ROI
+          ================================================= */}
 
           <div
             className={`trade-roi-card ${
@@ -656,8 +1025,14 @@ export default function TradeDetails() {
             </span>
 
             <strong>
-              {isPositive ? "+" : ""}
-              {roi.toFixed(2)}%
+              {roi > 0
+                ? "+"
+                : ""}
+
+              {roi.toFixed(
+                2
+              )}
+              %
             </strong>
 
             <small>
@@ -672,13 +1047,18 @@ export default function TradeDetails() {
           </div>
         </section>
 
+        {/* ===================================================
+            METRICS
+        =================================================== */}
+
         <section className="trade-metrics-grid">
           {metricCards.map(
             (item) => (
               <article
                 key={item.label}
                 className={`trade-metric-card ${
-                  item.tone === "loss"
+                  item.tone ===
+                  "loss"
                     ? "trade-metric-loss"
                     : ""
                 }`}
@@ -701,11 +1081,19 @@ export default function TradeDetails() {
           )}
         </section>
 
+        {/* ===================================================
+            THESIS / SUMMARY
+        =================================================== */}
+
         <section className="trade-content-grid">
+
           <article className="trade-section-card trade-thesis-card">
+
             <div className="trade-section-heading">
               <div>
-                <span>📝</span>
+                <span>
+                  📝
+                </span>
 
                 <div>
                   <h2>
@@ -714,14 +1102,14 @@ export default function TradeDetails() {
 
                   <p>
                     Setup, structure and
-                    reasoning shared by
-                    VTKS.
+                    reasoning shared by VTKS.
                   </p>
                 </div>
               </div>
             </div>
 
             <div className="trade-thesis-content">
+
               {trade.thesis ? (
                 trade.thesis
                   .split("\n")
@@ -739,17 +1127,21 @@ export default function TradeDetails() {
               ) : (
                 <p>
                   Trade thesis will be
-                  updated by the VTKS
-                  team.
+                  updated by the VTKS team.
                 </p>
               )}
             </div>
           </article>
 
+          {/* SUMMARY */}
+
           <article className="trade-section-card trade-summary-card">
+
             <div className="trade-section-heading">
               <div>
-                <span>📌</span>
+                <span>
+                  📌
+                </span>
 
                 <div>
                   <h2>
@@ -757,26 +1149,31 @@ export default function TradeDetails() {
                   </h2>
 
                   <p>
-                    Key classification
-                    and access details.
+                    Key classification and
+                    access details.
                   </p>
                 </div>
               </div>
             </div>
 
             <dl className="trade-summary-list">
+
               <div>
-                <dt>Status</dt>
+                <dt>
+                  Status
+                </dt>
 
                 <dd>
-                  {formatStatus(
+                  {getStatusLabel(
                     status
                   )}
                 </dd>
               </div>
 
               <div>
-                <dt>Visibility</dt>
+                <dt>
+                  Visibility
+                </dt>
 
                 <dd>
                   {trade.visibility ||
@@ -796,7 +1193,9 @@ export default function TradeDetails() {
               </div>
 
               <div>
-                <dt>Sector</dt>
+                <dt>
+                  Sector
+                </dt>
 
                 <dd>
                   {trade.sector ||
@@ -805,7 +1204,9 @@ export default function TradeDetails() {
               </div>
 
               <div>
-                <dt>Published</dt>
+                <dt>
+                  Published
+                </dt>
 
                 <dd>
                   {trade.publishStatus ||
@@ -814,7 +1215,9 @@ export default function TradeDetails() {
               </div>
 
               <div>
-                <dt>Featured</dt>
+                <dt>
+                  Featured
+                </dt>
 
                 <dd>
                   {trade.featured
@@ -826,22 +1229,27 @@ export default function TradeDetails() {
           </article>
         </section>
 
+        {/* ===================================================
+            CHARTS
+        =================================================== */}
+
         {hasChartComparison && (
           <section className="trade-section-card trade-chart-comparison-section">
+
             <div className="trade-section-heading">
               <div>
-                <span>📊</span>
+                <span>
+                  📊
+                </span>
 
                 <div>
                   <h2>
-                    Before & After
-                    Chart Analysis
+                    Before & After Chart Analysis
                   </h2>
 
                   <p>
-                    Compare the original
-                    setup with the later
-                    market outcome.
+                    Compare the original setup
+                    with the later market outcome.
                   </p>
                 </div>
               </div>
@@ -855,9 +1263,13 @@ export default function TradeDetails() {
                   : "trade-chart-single"
               }`}
             >
+              {/* BEFORE */}
+
               {beforeChartUrl && (
                 <article className="trade-comparison-card">
+
                   <div className="trade-comparison-card-header">
+
                     <div>
                       <span className="trade-comparison-label trade-before-label">
                         Before
@@ -872,7 +1284,9 @@ export default function TradeDetails() {
                       type="button"
                       onClick={() =>
                         setSelectedChart({
-                          url: beforeChartUrl,
+                          url:
+                            beforeChartUrl,
+
                           title:
                             "Before Chart",
                         })
@@ -896,7 +1310,9 @@ export default function TradeDetails() {
                     className="trade-comparison-image-button"
                     onClick={() =>
                       setSelectedChart({
-                        url: beforeChartUrl,
+                        url:
+                          beforeChartUrl,
+
                         title:
                           "Before Chart",
                       })
@@ -913,9 +1329,13 @@ export default function TradeDetails() {
                 </article>
               )}
 
+              {/* AFTER */}
+
               {afterChartUrl && (
                 <article className="trade-comparison-card">
+
                   <div className="trade-comparison-card-header">
+
                     <div>
                       <span className="trade-comparison-label trade-after-label">
                         After
@@ -930,7 +1350,9 @@ export default function TradeDetails() {
                       type="button"
                       onClick={() =>
                         setSelectedChart({
-                          url: afterChartUrl,
+                          url:
+                            afterChartUrl,
+
                           title:
                             "After Chart",
                         })
@@ -954,7 +1376,9 @@ export default function TradeDetails() {
                     className="trade-comparison-image-button"
                     onClick={() =>
                       setSelectedChart({
-                        url: afterChartUrl,
+                        url:
+                          afterChartUrl,
+
                         title:
                           "After Chart",
                       })
@@ -974,22 +1398,25 @@ export default function TradeDetails() {
           </section>
         )}
 
+        {/* ===================================================
+            PDF
+        =================================================== */}
+
         {trade.researchPdfUrl && (
           <section className="trade-section-card trade-research-section">
+
             <div className="trade-research-icon">
               📄
             </div>
 
             <div>
               <h2>
-                Research Report
-                Available
+                Research Report Available
               </h2>
 
               <p>
-                Open the detailed
-                research PDF shared for
-                this trade.
+                Open the detailed research PDF
+                shared for this trade.
               </p>
             </div>
 
@@ -1006,21 +1433,28 @@ export default function TradeDetails() {
           </section>
         )}
 
+        {/* ===================================================
+            DISCLAIMER
+        =================================================== */}
+
         <section className="trade-disclaimer">
           <strong>
             Educational Disclosure
           </strong>
 
           <p>
-            This trade information is
-            provided for educational and
-            research purposes. Please
-            perform your own analysis and
-            manage risk according to your
-            financial situation.
+            This trade information is provided
+            for educational and research purposes.
+            Please perform your own analysis and
+            manage risk according to your financial
+            situation.
           </p>
         </section>
       </div>
+
+      {/* =====================================================
+          CHART MODAL
+      ===================================================== */}
 
       {selectedChart && (
         <div
@@ -1030,7 +1464,9 @@ export default function TradeDetails() {
               event.target ===
               event.currentTarget
             ) {
-              setSelectedChart(null);
+              setSelectedChart(
+                null
+              );
             }
           }}
         >
@@ -1043,14 +1479,19 @@ export default function TradeDetails() {
             }
           >
             <div className="trade-chart-modal-header">
+
               <h2>
-                {selectedChart.title}
+                {
+                  selectedChart.title
+                }
               </h2>
 
               <button
                 type="button"
                 onClick={() =>
-                  setSelectedChart(null)
+                  setSelectedChart(
+                    null
+                  )
                 }
                 aria-label="Close chart"
               >
@@ -1059,8 +1500,12 @@ export default function TradeDetails() {
             </div>
 
             <img
-              src={selectedChart.url}
-              alt={selectedChart.title}
+              src={
+                selectedChart.url
+              }
+              alt={
+                selectedChart.title
+              }
             />
           </div>
         </div>

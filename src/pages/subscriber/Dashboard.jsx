@@ -136,15 +136,29 @@ export default function Dashboard() {
     String(
       holding.tradeStatus ||
         holding.trade_status ||
+        holding.status ||
         "Active"
     ).trim();
+
+  /* =========================================================
+     REALISED / CLOSED STUDIES
+
+     Target 1 / 2 / 3 Hit remain open studies.
+     They continue to use Live CMP + Live ROI until
+     a final outcome is saved by Admin.
+  ========================================================= */
 
   const isClosedTrade = (holding) =>
     [
       "Booked Profit",
-      "Target 1 Hit",
-      "Target 2 Hit",
-      "Target 3 Hit",
+      "Booked Loss",
+      "Breakeven",
+      "SL Hit",
+    ].includes(getTradeStatus(holding));
+
+  const isLossTrade = (holding) =>
+    [
+      "Booked Loss",
       "SL Hit",
     ].includes(getTradeStatus(holding));
 
@@ -164,33 +178,10 @@ export default function Dashboard() {
 
     const status = getTradeStatus(holding);
 
-    if (status === "Target 1 Hit") {
-      return Number(
-        holding.target1 ||
-          holding.cmp ||
-          holding.entry ||
-          0
-      );
-    }
-
-    if (status === "Target 2 Hit") {
-      return Number(
-        holding.target2 ||
-          holding.cmp ||
-          holding.entry ||
-          0
-      );
-    }
-
-    if (status === "Target 3 Hit") {
-      return Number(
-        holding.target3 ||
-          holding.cmp ||
-          holding.entry ||
-          0
-      );
-    }
-
+    /*
+      Fallback for older SL Hit records where an
+      explicit exit price was not stored.
+    */
     if (status === "SL Hit") {
       return Number(
         holding.stopLoss ||
@@ -210,14 +201,22 @@ export default function Dashboard() {
   const calculateReturn = (holding) => {
     const entry = Number(holding.entry || 0);
 
-    if (!entry) return 0;
+    if (
+      !Number.isFinite(entry) ||
+      entry <= 0
+    ) {
+      return 0;
+    }
+
+    const closedTrade = isClosedTrade(holding);
 
     const savedRealisedReturn =
       holding.realisedReturn ??
       holding.realised_return;
 
+    /* Closed studies use the final saved realised ROI. */
     if (
-      isClosedTrade(holding) &&
+      closedTrade &&
       savedRealisedReturn !== null &&
       savedRealisedReturn !== undefined &&
       savedRealisedReturn !== ""
@@ -231,12 +230,36 @@ export default function Dashboard() {
       }
     }
 
-    const calculationPrice = isClosedTrade(holding)
-      ? getExitPrice(holding)
-      : Number(holding.cmp || entry);
+    /*
+      If realised ROI is unavailable, calculate it
+      from Entry -> Exit Price.
+    */
+    if (closedTrade) {
+      const exitPrice = getExitPrice(holding);
+
+      if (
+        Number.isFinite(exitPrice) &&
+        exitPrice > 0
+      ) {
+        return (
+          ((exitPrice - entry) / entry) *
+          100
+        );
+      }
+    }
+
+    /* Open studies use live CMP. */
+    const cmp = Number(holding.cmp || entry);
+
+    if (
+      !Number.isFinite(cmp) ||
+      cmp <= 0
+    ) {
+      return 0;
+    }
 
     return (
-      ((calculationPrice - entry) / entry) *
+      ((cmp - entry) / entry) *
       100
     );
   };
@@ -601,20 +624,48 @@ export default function Dashboard() {
                                 alignItems: "center",
                                 padding: "7px 11px",
                                 borderRadius: "999px",
-                                background: closedTrade
-                                  ? "#fef3c7"
-                                  : "#dcfce7",
-                                color: closedTrade
-                                  ? "#92400e"
-                                  : "#166534",
+                                background:
+                                  tradeStatus === "Booked Loss" ||
+                                  tradeStatus === "SL Hit"
+                                    ? "#fee2e2"
+                                    : tradeStatus === "Booked Profit"
+                                      ? "#dcfce7"
+                                      : tradeStatus === "Breakeven"
+                                        ? "#f1f5f9"
+                                        : tradeStatus.includes("Target")
+                                          ? "#dbeafe"
+                                          : "#dcfce7",
+                                color:
+                                  tradeStatus === "Booked Loss" ||
+                                  tradeStatus === "SL Hit"
+                                    ? "#991b1b"
+                                    : tradeStatus === "Booked Profit"
+                                      ? "#166534"
+                                      : tradeStatus === "Breakeven"
+                                        ? "#475569"
+                                        : tradeStatus.includes("Target")
+                                          ? "#1d4ed8"
+                                          : "#166534",
                                 fontSize: "12px",
                                 fontWeight: 800,
                                 whiteSpace: "nowrap",
                               }}
                             >
-                              {closedTrade
-                                ? `💰 ${tradeStatus}`
-                                : "🟢 Active"}
+                              {tradeStatus === "Booked Profit"
+                                ? "💰 Booked Profit"
+                                : tradeStatus === "Booked Loss"
+                                  ? "📉 Booked Loss"
+                                  : tradeStatus === "Breakeven"
+                                    ? "⚖️ Breakeven"
+                                    : tradeStatus === "SL Hit"
+                                      ? "🛑 SL Hit"
+                                      : tradeStatus === "Target 1 Hit"
+                                        ? "🎯 Target 1 Hit"
+                                        : tradeStatus === "Target 2 Hit"
+                                          ? "🚀 Target 2 Hit"
+                                          : tradeStatus === "Target 3 Hit"
+                                            ? "🏆 Target 3 Hit"
+                                            : "🟢 Active"}
                             </span>
                           </div>
                         </div>
@@ -640,7 +691,9 @@ export default function Dashboard() {
                           <ValueItem
                             label={
                               closedTrade
-                                ? "Realised ROI"
+                                ? isLossTrade(holding)
+                                  ? "Realised Loss"
+                                  : "Realised ROI"
                                 : "ROI"
                             }
                             value={`${

@@ -1,6 +1,5 @@
 import "./DashboardStats.css";
 
-
 const normalize = (value) =>
   String(value || "")
     .trim()
@@ -24,6 +23,10 @@ export default function DashboardStats({
   resources = [],
   scanners = [],
 }) {
+  /* =========================================================
+     MEMBER STATUS
+  ========================================================= */
+
   const getMemberStatus = (member) => {
     const expiryValue =
       member.expiryDate ||
@@ -60,6 +63,10 @@ export default function DashboardStats({
     return "active";
   };
 
+  /* =========================================================
+     HOLDING STATUS
+  ========================================================= */
+
   const getHoldingStatus = (holding) => {
     const savedStatus = normalize(
       holding.tradeStatus ||
@@ -73,10 +80,18 @@ export default function DashboardStats({
       "target 2 hit",
       "target 3 hit",
       "booked profit",
+      "booked loss",
+      "breakeven",
       "sl hit",
       "cancelled",
     ];
 
+    /*
+      Respect manually saved closed statuses.
+
+      Active is allowed to continue through automatic
+      target / SL evaluation below.
+    */
     if (
       savedStatus &&
       savedStatus !== "active" &&
@@ -85,7 +100,19 @@ export default function DashboardStats({
       return savedStatus;
     }
 
-    const cmp = Number(holding.cmp || 0);
+    const highestPrice = Number(
+      holding.highestPrice ??
+        holding.highest_price ??
+        holding.cmp ??
+        0
+    );
+
+    const lowestPrice = Number(
+      holding.lowestPrice ??
+        holding.lowest_price ??
+        holding.cmp ??
+        0
+    );
 
     const stopLoss = Number(
       holding.stopLoss ??
@@ -111,24 +138,46 @@ export default function DashboardStats({
         0
     );
 
-    if (target3 > 0 && cmp >= target3) {
+    /*
+      SL is checked using lowest price.
+    */
+    if (
+      stopLoss > 0 &&
+      lowestPrice <= stopLoss
+    ) {
+      return "sl hit";
+    }
+
+    /*
+      Highest achieved target.
+    */
+    if (
+      target3 > 0 &&
+      highestPrice >= target3
+    ) {
       return "target 3 hit";
     }
 
-    if (target2 > 0 && cmp >= target2) {
+    if (
+      target2 > 0 &&
+      highestPrice >= target2
+    ) {
       return "target 2 hit";
     }
 
-    if (target1 > 0 && cmp >= target1) {
+    if (
+      target1 > 0 &&
+      highestPrice >= target1
+    ) {
       return "target 1 hit";
-    }
-
-    if (stopLoss > 0 && cmp <= stopLoss) {
-      return "sl hit";
     }
 
     return "active";
   };
+
+  /* =========================================================
+     HIGHEST TARGET REACHED
+  ========================================================= */
 
   const getHighestTargetReached = (holding) => {
     const status = getHoldingStatus(holding);
@@ -141,7 +190,17 @@ export default function DashboardStats({
       return status;
     }
 
-    if (status !== "booked profit") {
+    /*
+      For booked studies, check whether the exit price
+      was already beyond one or more targets.
+    */
+    if (
+      ![
+        "booked profit",
+        "booked loss",
+        "breakeven",
+      ].includes(status)
+    ) {
       return null;
     }
 
@@ -176,75 +235,35 @@ export default function DashboardStats({
         0
     );
 
-    if (target3 > 0 && exitPrice >= target3) {
+    if (
+      target3 > 0 &&
+      exitPrice >= target3
+    ) {
       return "target 3 hit";
     }
 
-    if (target2 > 0 && exitPrice >= target2) {
+    if (
+      target2 > 0 &&
+      exitPrice >= target2
+    ) {
       return "target 2 hit";
     }
 
-    if (target1 > 0 && exitPrice >= target1) {
+    if (
+      target1 > 0 &&
+      exitPrice >= target1
+    ) {
       return "target 1 hit";
     }
 
     return null;
   };
 
-  const calculateReturn = (holding) => {
-    const entry = Number(holding.entry || 0);
-    const cmp = Number(holding.cmp || 0);
+  /* =========================================================
+     LIVE RETURN
+  ========================================================= */
 
-    if (entry <= 0) {
-      return 0;
-    }
-
-    return ((cmp - entry) / entry) * 100;
-  };
-
-  const totalMembers = members.length;
-
-  const activeMembers = members.filter(
-    (member) =>
-      getMemberStatus(member) === "active"
-  ).length;
-
-  const activeStatuses = [
-  "active",
-  "target 1 hit",
-  "target 2 hit",
-  "target 3 hit",
-];
-
-const realisedStatuses = [
-  "booked profit",
-  "sl hit",
-];
-
-const activeTradeList = holdings.filter(
-  (holding) =>
-    activeStatuses.includes(
-      getHoldingStatus(holding)
-    )
-);
-
-const realisedTradeList = holdings.filter(
-  (holding) =>
-    realisedStatuses.includes(
-      getHoldingStatus(holding)
-    )
-);
-
-const activeHoldings =
-  activeTradeList.length;
-
-const realisedTrades =
-  realisedTradeList.length;
-
-/* Active return uses Entry → CMP */
-
-const activeReturns = activeTradeList
-  .map((holding) => {
+  const calculateLiveReturn = (holding) => {
     const entry = Number(
       holding.entry || 0
     );
@@ -266,147 +285,297 @@ const activeReturns = activeTradeList
       ((cmp - entry) / entry) *
       100
     );
-  })
-  .filter(
-    (value) =>
-      value !== null &&
-      Number.isFinite(value)
-  );
+  };
 
-const activeAverageReturn =
-  activeReturns.length > 0
-    ? (
-        activeReturns.reduce(
-          (total, value) =>
-            total + value,
-          0
-        ) / activeReturns.length
-      ).toFixed(2)
-    : "0.00";
+  /* =========================================================
+     REALISED RETURN
+  ========================================================= */
 
-/* Realised return uses saved return or Entry → Exit Price */
+  const calculateRealisedReturn = (holding) => {
+    const savedReturn =
+      holding.realisedReturn ??
+      holding.realised_return;
 
-const realisedReturns =
-  realisedTradeList
-    .map((holding) => {
-      const savedReturn =
-        holding.realisedReturn ??
-        holding.realised_return;
+    if (
+      savedReturn !== null &&
+      savedReturn !== undefined &&
+      savedReturn !== ""
+    ) {
+      const numericReturn =
+        Number(savedReturn);
 
-      if (
-        savedReturn !== null &&
-        savedReturn !== undefined &&
-        savedReturn !== ""
-      ) {
-        const numericReturn =
-          Number(savedReturn);
-
-        return Number.isFinite(
-          numericReturn
-        )
-          ? numericReturn
-          : null;
+      if (Number.isFinite(numericReturn)) {
+        return numericReturn;
       }
+    }
 
-      const entry = Number(
-        holding.entry || 0
-      );
-
-      const exitPrice = Number(
-        holding.exitPrice ??
-          holding.exit_price ??
-          0
-      );
-
-      if (
-        !Number.isFinite(entry) ||
-        !Number.isFinite(exitPrice) ||
-        entry <= 0 ||
-        exitPrice <= 0
-      ) {
-        return null;
-      }
-
-      return (
-        ((exitPrice - entry) /
-          entry) *
-        100
-      );
-    })
-    .filter(
-      (value) =>
-        value !== null &&
-        Number.isFinite(value)
+    const entry = Number(
+      holding.entry || 0
     );
 
-const realisedAverageReturn =
-  realisedReturns.length > 0
-    ? (
-        realisedReturns.reduce(
-          (total, value) =>
-            total + value,
-          0
-        ) / realisedReturns.length
-      ).toFixed(2)
-    : "0.00";
+    const exitPrice = Number(
+      holding.exitPrice ??
+        holding.exit_price ??
+        0
+    );
 
-  const target1HitCount = holdings.filter(
-    (holding) =>
-      getHighestTargetReached(holding) ===
-      "target 1 hit"
-  ).length;
+    if (
+      !Number.isFinite(entry) ||
+      !Number.isFinite(exitPrice) ||
+      entry <= 0 ||
+      exitPrice <= 0
+    ) {
+      return null;
+    }
 
-  const target2HitCount = holdings.filter(
-    (holding) =>
-      getHighestTargetReached(holding) ===
-      "target 2 hit"
-  ).length;
+    return (
+      ((exitPrice - entry) / entry) *
+      100
+    );
+  };
 
-  const target3HitCount = holdings.filter(
-    (holding) =>
-      getHighestTargetReached(holding) ===
-      "target 3 hit"
-  ).length;
+  /* =========================================================
+     MEMBER COUNTS
+  ========================================================= */
 
-  const bookedProfitCount = holdings.filter(
-    (holding) =>
-      getHoldingStatus(holding) ===
-      "booked profit"
-  ).length;
+  const totalMembers =
+    members.length;
 
-  const slHitCount = holdings.filter(
-    (holding) =>
-      getHoldingStatus(holding) ===
-      "sl hit"
-  ).length;
+  const activeMembers =
+    members.filter(
+      (member) =>
+        getMemberStatus(member) ===
+        "active"
+    ).length;
 
-  const winningTrades = holdings.filter(
-    (holding) => {
+  /* =========================================================
+     STATUS GROUPS
+  ========================================================= */
+
+  const activeStatuses = [
+    "active",
+    "target 1 hit",
+    "target 2 hit",
+    "target 3 hit",
+  ];
+
+  const realisedStatuses = [
+    "booked profit",
+    "booked loss",
+    "breakeven",
+    "sl hit",
+  ];
+
+  /* =========================================================
+     ACTIVE STUDIES
+  ========================================================= */
+
+  const activeTradeList =
+    holdings.filter((holding) =>
+      activeStatuses.includes(
+        getHoldingStatus(holding)
+      )
+    );
+
+  const activeHoldings =
+    activeTradeList.length;
+
+  /* =========================================================
+     REALISED STUDIES
+  ========================================================= */
+
+  const realisedTradeList =
+    holdings.filter((holding) =>
+      realisedStatuses.includes(
+        getHoldingStatus(holding)
+      )
+    );
+
+  const realisedTrades =
+    realisedTradeList.length;
+
+  /* =========================================================
+     ACTIVE AVG RETURN
+
+     ONLY:
+     Active
+     Target 1 Hit
+     Target 2 Hit
+     Target 3 Hit
+
+     Uses Entry → Live CMP
+  ========================================================= */
+
+  const activeReturns =
+    activeTradeList
+      .map(calculateLiveReturn)
+      .filter(
+        (value) =>
+          value !== null &&
+          Number.isFinite(value)
+      );
+
+  const activeAverageReturn =
+    activeReturns.length > 0
+      ? (
+          activeReturns.reduce(
+            (total, value) =>
+              total + value,
+            0
+          ) / activeReturns.length
+        ).toFixed(2)
+      : "0.00";
+
+  /* =========================================================
+     REALISED AVG RETURN
+
+     ONLY:
+     Booked Profit
+     Booked Loss
+     Breakeven
+     SL Hit
+
+     Uses saved realised return first.
+     Falls back to Entry → Exit Price.
+  ========================================================= */
+
+  const realisedReturns =
+    realisedTradeList
+      .map(calculateRealisedReturn)
+      .filter(
+        (value) =>
+          value !== null &&
+          Number.isFinite(value)
+      );
+
+  const realisedAverageReturn =
+    realisedReturns.length > 0
+      ? (
+          realisedReturns.reduce(
+            (total, value) =>
+              total + value,
+            0
+          ) / realisedReturns.length
+        ).toFixed(2)
+      : "0.00";
+
+  /* =========================================================
+     TARGET COUNTS
+  ========================================================= */
+
+  const target1HitCount =
+    holdings.filter(
+      (holding) =>
+        getHighestTargetReached(
+          holding
+        ) === "target 1 hit"
+    ).length;
+
+  const target2HitCount =
+    holdings.filter(
+      (holding) =>
+        getHighestTargetReached(
+          holding
+        ) === "target 2 hit"
+    ).length;
+
+  const target3HitCount =
+    holdings.filter(
+      (holding) =>
+        getHighestTargetReached(
+          holding
+        ) === "target 3 hit"
+    ).length;
+
+  /* =========================================================
+     CLOSED STATUS COUNTS
+  ========================================================= */
+
+  const bookedProfitCount =
+    holdings.filter(
+      (holding) =>
+        getHoldingStatus(holding) ===
+        "booked profit"
+    ).length;
+
+  const bookedLossCount =
+    holdings.filter(
+      (holding) =>
+        getHoldingStatus(holding) ===
+        "booked loss"
+    ).length;
+
+  const breakevenCount =
+    holdings.filter(
+      (holding) =>
+        getHoldingStatus(holding) ===
+        "breakeven"
+    ).length;
+
+  const slHitCount =
+    holdings.filter(
+      (holding) =>
+        getHoldingStatus(holding) ===
+        "sl hit"
+    ).length;
+
+  /* =========================================================
+     WIN RATE
+
+     WIN:
+     Booked Profit
+     OR Target 1 / 2 / 3 reached
+
+     LOSS:
+     Booked Loss
+     SL Hit
+
+     EXCLUDED:
+     Breakeven
+     Cancelled
+  ========================================================= */
+
+  const winningTrades =
+    holdings.filter((holding) => {
       const status =
         getHoldingStatus(holding);
 
       const highestTarget =
-        getHighestTargetReached(holding);
+        getHighestTargetReached(
+          holding
+        );
 
       return (
         status === "booked profit" ||
-        highestTarget === "target 1 hit" ||
-        highestTarget === "target 2 hit" ||
-        highestTarget === "target 3 hit"
+        highestTarget ===
+          "target 1 hit" ||
+        highestTarget ===
+          "target 2 hit" ||
+        highestTarget ===
+          "target 3 hit"
       );
-    }
-  ).length;
+    }).length;
 
-  const completedTrades =
-    winningTrades + slHitCount;
+  const losingTrades =
+    bookedLossCount +
+    slHitCount;
+
+  const completedForWinRate =
+    winningTrades +
+    losingTrades;
 
   const winRate =
-    completedTrades > 0
+    completedForWinRate > 0
       ? (
-          (winningTrades / completedTrades) *
+          (winningTrades /
+            completedForWinRate) *
           100
         ).toFixed(1)
       : "0.0";
+
+  /* =========================================================
+     SUMMARY CARDS
+  ========================================================= */
 
   const summaryCards = [
     {
@@ -415,18 +584,21 @@ const realisedAverageReturn =
       tone: "blue",
       icon: "👥",
     },
+
     {
       title: "Active Members",
       value: activeMembers,
       tone: "green",
       icon: "✅",
     },
+
     {
       title: "Active Studies",
       value: activeHoldings,
       tone: "blue",
       icon: "📊",
     },
+
     {
       title: "Win Rate",
       value: `${winRate}%`,
@@ -436,73 +608,114 @@ const realisedAverageReturn =
           : "blue",
       icon: "🎯",
     },
-    
-      {
-  title: "Active Avg Return",
-  value: `${
-    Number(activeAverageReturn) >= 0
-      ? "+"
-      : ""
-  }${activeAverageReturn}%`,
-  tone:
-    Number(activeAverageReturn) >= 0
-      ? "green"
-      : "red",
-  icon: "📈",
-},
-{
-  title: "Realised Avg Return",
-  value: `${
-    Number(realisedAverageReturn) >= 0
-      ? "+"
-      : ""
-  }${realisedAverageReturn}%`,
-  tone:
-    Number(realisedAverageReturn) >= 0
-      ? "green"
-      : "red",
-  icon: "💰",
-},
-{
-  title: "Realised Studies",
-  value: realisedTrades,
-  tone: "blue",
-  icon: "✅",
-},
+
+    {
+      title: "Active Avg Return",
+      value: `${
+        Number(activeAverageReturn) >=
+        0
+          ? "+"
+          : ""
+      }${activeAverageReturn}%`,
+      tone:
+        Number(activeAverageReturn) >=
+        0
+          ? "green"
+          : "red",
+      icon: "📈",
+    },
+
+    {
+      title: "Realised Avg Return",
+      value: `${
+        Number(
+          realisedAverageReturn
+        ) >= 0
+          ? "+"
+          : ""
+      }${realisedAverageReturn}%`,
+      tone:
+        Number(
+          realisedAverageReturn
+        ) >= 0
+          ? "green"
+          : "red",
+      icon: "💰",
+    },
+
+    {
+      title: "Realised Studies",
+      value: realisedTrades,
+      tone: "blue",
+      icon: "✅",
+    },
   ];
+
+  /* =========================================================
+     PERFORMANCE CARDS
+  ========================================================= */
 
   const performanceCards = [
     {
       title: "Target 1 Hit",
       value: target1HitCount,
-      className: "performance-t1",
+      className:
+        "performance-t1",
       icon: "🎯",
     },
+
     {
       title: "Target 2 Hit",
       value: target2HitCount,
-      className: "performance-t2",
+      className:
+        "performance-t2",
       icon: "🚀",
     },
+
     {
       title: "Target 3 Hit",
       value: target3HitCount,
-      className: "performance-t3",
+      className:
+        "performance-t3",
       icon: "🏆",
     },
+
     {
       title: "Booked Profit",
       value: bookedProfitCount,
-      className: "performance-booked",
+      className:
+        "performance-booked",
       icon: "💰",
     },
+
+    {
+      title: "Booked Loss",
+      value: bookedLossCount,
+      className:
+        "performance-loss",
+      icon: "📉",
+    },
+
+    {
+      title: "Breakeven",
+      value: breakevenCount,
+      className:
+        "performance-breakeven",
+      icon: "⚖️",
+    },
+
     {
       title: "SL Hit",
       value: slHitCount,
-      className: "performance-sl",
+      className:
+        "performance-sl",
       icon: "🛑",
     },
   ];
+
+  /* =========================================================
+     UI
+  ========================================================= */
 
   return (
     <div className="dashboard-stats-wrapper">
@@ -527,33 +740,45 @@ const realisedAverageReturn =
       <section className="dashboard-performance-panel">
         <div className="dashboard-performance-header">
           <div>
-            <h2>Study Performance</h2>
+            <h2>
+              Study Performance
+            </h2>
 
             <p>
-              Target achievements, booked profits and
-              stop-loss outcomes.
+              Target achievements,
+              booked outcomes and
+              stop-loss results.
             </p>
           </div>
 
-          <span>{holdings.length} Studies</span>
+          <span>
+            {holdings.length} Studies
+          </span>
         </div>
 
         <div className="dashboard-performance-grid">
-          {performanceCards.map((card) => (
-            <article
-              key={card.title}
-              className={`dashboard-performance-card ${card.className}`}
-            >
-              <div className="dashboard-performance-icon">
-                {card.icon}
-              </div>
+          {performanceCards.map(
+            (card) => (
+              <article
+                key={card.title}
+                className={`dashboard-performance-card ${card.className}`}
+              >
+                <div className="dashboard-performance-icon">
+                  {card.icon}
+                </div>
 
-              <div>
-                <h3>{card.value}</h3>
-                <p>{card.title}</p>
-              </div>
-            </article>
-          ))}
+                <div>
+                  <h3>
+                    {card.value}
+                  </h3>
+
+                  <p>
+                    {card.title}
+                  </p>
+                </div>
+              </article>
+            )
+          )}
         </div>
       </section>
 
@@ -564,8 +789,13 @@ const realisedAverageReturn =
           </div>
 
           <div>
-            <h2>{scanners.length}</h2>
-            <p>Scanners</p>
+            <h2>
+              {scanners.length}
+            </h2>
+
+            <p>
+              Scanners
+            </p>
           </div>
         </article>
 
@@ -575,8 +805,13 @@ const realisedAverageReturn =
           </div>
 
           <div>
-            <h2>{resources.length}</h2>
-            <p>Library Resources</p>
+            <h2>
+              {resources.length}
+            </h2>
+
+            <p>
+              Library Resources
+            </p>
           </div>
         </article>
       </section>

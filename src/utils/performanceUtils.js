@@ -7,6 +7,10 @@ export const normalizeTradeStatus = (value) =>
     .trim()
     .toLowerCase();
 
+/* =========================================================
+   STATUS GROUPS
+========================================================= */
+
 export const ACTIVE_TRADE_STATUSES = [
   "active",
   "target 1 hit",
@@ -16,17 +20,34 @@ export const ACTIVE_TRADE_STATUSES = [
 
 export const REALISED_TRADE_STATUSES = [
   "booked profit",
+  "booked loss",
+  "breakeven",
   "sl hit",
 ];
 
 export const CLOSED_TRADE_STATUSES = [
   "booked profit",
+  "booked loss",
+  "breakeven",
   "sl hit",
 ];
 
 export const WINNING_TRADE_STATUSES = [
   "booked profit",
 ];
+
+export const LOSING_TRADE_STATUSES = [
+  "booked loss",
+  "sl hit",
+];
+
+export const NEUTRAL_TRADE_STATUSES = [
+  "breakeven",
+];
+
+/* =========================================================
+   STATUS HELPERS
+========================================================= */
 
 export const getTradeStatus = (holding) =>
   normalizeTradeStatus(
@@ -55,8 +76,169 @@ export const isWinningTrade = (holding) =>
     getTradeStatus(holding)
   );
 
+export const isProfitTrade = (holding) =>
+  getTradeStatus(holding) ===
+  "booked profit";
+
+export const isLosingTrade = (holding) =>
+  LOSING_TRADE_STATUSES.includes(
+    getTradeStatus(holding)
+  );
+
+export const isLossTrade = (holding) =>
+  [
+    "booked loss",
+    "sl hit",
+  ].includes(
+    getTradeStatus(holding)
+  );
+
+export const isBreakevenTrade = (holding) =>
+  getTradeStatus(holding) ===
+  "breakeven";
+
+/* =========================================================
+   EXIT PRICE
+========================================================= */
+
+export const getTradeExitPrice = (holding) => {
+  const exitPrice = Number(
+    holding?.exitPrice ??
+      holding?.exit_price ??
+      0
+  );
+
+  if (
+    Number.isFinite(exitPrice) &&
+    exitPrice > 0
+  ) {
+    return exitPrice;
+  }
+
+  /*
+    Fallback for older SL Hit records.
+  */
+  if (
+    getTradeStatus(holding) ===
+    "sl hit"
+  ) {
+    const stopLoss = Number(
+      holding?.stopLoss ??
+        holding?.stop_loss ??
+        0
+    );
+
+    if (
+      Number.isFinite(stopLoss) &&
+      stopLoss > 0
+    ) {
+      return stopLoss;
+    }
+  }
+
+  return 0;
+};
+
+/* =========================================================
+   DISPLAY PRICE
+========================================================= */
+
+export const getTradeDisplayPrice = (holding) => {
+  if (
+    isRealisedTrade(holding)
+  ) {
+    const exitPrice =
+      getTradeExitPrice(holding);
+
+    if (exitPrice > 0) {
+      return exitPrice;
+    }
+  }
+
+  const cmp = Number(
+    holding?.cmp || 0
+  );
+
+  return Number.isFinite(cmp)
+    ? cmp
+    : 0;
+};
+
+/* =========================================================
+   DISPLAY LABELS
+========================================================= */
+
+export const getTradeReturnLabel = (holding) => {
+  const status =
+    getTradeStatus(holding);
+
+  if (
+    status === "booked loss" ||
+    status === "sl hit"
+  ) {
+    return "Realised Loss";
+  }
+
+  if (
+    REALISED_TRADE_STATUSES.includes(
+      status
+    )
+  ) {
+    return "Realised ROI";
+  }
+
+  return "Live ROI";
+};
+
+export const getTradePriceLabel = (holding) =>
+  isRealisedTrade(holding)
+    ? "Exit Price"
+    : "Live CMP";
+
+/* =========================================================
+   STATUS DISPLAY LABEL
+========================================================= */
+
+export const getTradeStatusLabel = (holding) => {
+  const status =
+    getTradeStatus(holding);
+
+  switch (status) {
+    case "active":
+      return "Active";
+
+    case "target 1 hit":
+      return "Target 1 Hit";
+
+    case "target 2 hit":
+      return "Target 2 Hit";
+
+    case "target 3 hit":
+      return "Target 3 Hit";
+
+    case "booked profit":
+      return "Booked Profit";
+
+    case "booked loss":
+      return "Booked Loss";
+
+    case "breakeven":
+      return "Breakeven";
+
+    case "sl hit":
+      return "SL Hit";
+
+    case "cancelled":
+      return "Cancelled";
+
+    default:
+      return status || "Active";
+  }
+};
+
 /* =========================================================
    ACTIVE ROI
+
    Entry Price -> Current Market Price
 ========================================================= */
 
@@ -88,8 +270,11 @@ export const calculateActiveROI = (
 
 /* =========================================================
    REALISED ROI
+
    Uses saved realised return first.
-   Falls back to Entry Price -> Exit Price.
+
+   Falls back to:
+   Entry Price -> Exit Price
 ========================================================= */
 
 export const calculateRealisedROI = (
@@ -120,11 +305,10 @@ export const calculateRealisedROI = (
     holding?.entry || 0
   );
 
-  const exitPrice = Number(
-    holding?.exitPrice ??
-      holding?.exit_price ??
-      0
-  );
+  const exitPrice =
+    getTradeExitPrice(
+      holding
+    );
 
   if (
     !Number.isFinite(entry) ||
@@ -144,14 +328,20 @@ export const calculateRealisedROI = (
 
 /* =========================================================
    DISPLAY ROI
-   Active trades use CMP.
-   Completed trades use realised return.
+
+   Active / Target Hit:
+   Entry -> CMP
+
+   Realised:
+   Saved ROI / Entry -> Exit
 ========================================================= */
 
 export const getTradeROI = (
   holding
 ) => {
-  if (isRealisedTrade(holding)) {
+  if (
+    isRealisedTrade(holding)
+  ) {
     return calculateRealisedROI(
       holding
     );
@@ -171,11 +361,14 @@ const calculateAverage = (
 ) => {
   const validValues = (
     values || []
-  ).filter((value) =>
-    Number.isFinite(value)
+  ).filter(
+    (value) =>
+      Number.isFinite(value)
   );
 
-  if (validValues.length === 0) {
+  if (
+    validValues.length === 0
+  ) {
     return 0;
   }
 
@@ -187,12 +380,21 @@ const calculateAverage = (
     );
 
   return (
-    total / validValues.length
+    total /
+    validValues.length
   );
 };
 
 /* =========================================================
    ACTIVE AVERAGE RETURN
+
+   Includes:
+   Active
+   Target 1 Hit
+   Target 2 Hit
+   Target 3 Hit
+
+   Uses live CMP.
 ========================================================= */
 
 export const calculateActiveAverageReturn = (
@@ -229,7 +431,8 @@ export const calculateActiveAverageReturn = (
       })
       .filter(
         (value) =>
-          value !== null
+          value !== null &&
+          Number.isFinite(value)
       );
 
   return calculateAverage(
@@ -239,6 +442,12 @@ export const calculateActiveAverageReturn = (
 
 /* =========================================================
    REALISED AVERAGE RETURN
+
+   Includes:
+   Booked Profit
+   Booked Loss
+   Breakeven
+   SL Hit
 ========================================================= */
 
 export const calculateRealisedAverageReturn = (
@@ -257,8 +466,9 @@ export const calculateRealisedAverageReturn = (
           holding?.realised_return;
 
         const exitPrice =
-          holding?.exitPrice ??
-          holding?.exit_price;
+          getTradeExitPrice(
+            holding
+          );
 
         const hasSavedReturn =
           savedReturn !== null &&
@@ -269,11 +479,15 @@ export const calculateRealisedAverageReturn = (
           );
 
         const hasExitPrice =
-          exitPrice !== null &&
-          exitPrice !== undefined &&
-          exitPrice !== "" &&
-          Number(exitPrice) > 0;
+          Number.isFinite(
+            exitPrice
+          ) &&
+          exitPrice > 0;
 
+        /*
+          Do not include invalid
+          closed records in the average.
+        */
         if (
           !hasSavedReturn &&
           !hasExitPrice
@@ -287,7 +501,8 @@ export const calculateRealisedAverageReturn = (
       })
       .filter(
         (value) =>
-          value !== null
+          value !== null &&
+          Number.isFinite(value)
       );
 
   return calculateAverage(
@@ -298,32 +513,45 @@ export const calculateRealisedAverageReturn = (
 /* =========================================================
    WIN RATE
 
-   Booked Profit = Win
-   SL Hit = Loss
+   WIN:
+   Booked Profit
+
+   LOSS:
+   Booked Loss
+   SL Hit
+
+   EXCLUDED:
+   Breakeven
+   Active
+   Target 1 / 2 / 3 Hit
+   Cancelled
 ========================================================= */
 
 export const calculateWinRate = (
   holdings = []
 ) => {
-  const realisedTrades =
+  const wins =
     holdings.filter(
-      isRealisedTrade
-    );
+      isWinningTrade
+    ).length;
+
+  const losses =
+    holdings.filter(
+      isLosingTrade
+    ).length;
+
+  const eligibleTrades =
+    wins + losses;
 
   if (
-    realisedTrades.length === 0
+    eligibleTrades === 0
   ) {
     return 0;
   }
 
-  const winningTrades =
-    realisedTrades.filter(
-      isWinningTrade
-    ).length;
-
   return (
-    (winningTrades /
-      realisedTrades.length) *
+    (wins /
+      eligibleTrades) *
     100
   );
 };
@@ -348,19 +576,42 @@ export const calculatePerformanceSummary = (
   const bookedProfitTrades =
     realisedTrades.filter(
       (holding) =>
-        getTradeStatus(holding) ===
+        getTradeStatus(
+          holding
+        ) ===
         "booked profit"
+    );
+
+  const bookedLossTrades =
+    realisedTrades.filter(
+      (holding) =>
+        getTradeStatus(
+          holding
+        ) ===
+        "booked loss"
+    );
+
+  const breakevenTrades =
+    realisedTrades.filter(
+      (holding) =>
+        getTradeStatus(
+          holding
+        ) ===
+        "breakeven"
     );
 
   const slHitTrades =
     realisedTrades.filter(
       (holding) =>
-        getTradeStatus(holding) ===
+        getTradeStatus(
+          holding
+        ) ===
         "sl hit"
     );
 
   return {
-    totalTrades: holdings.length,
+    totalTrades:
+      holdings.length,
 
     activeTrades:
       activeTrades.length,
@@ -373,6 +624,12 @@ export const calculatePerformanceSummary = (
 
     bookedProfitTrades:
       bookedProfitTrades.length,
+
+    bookedLossTrades:
+      bookedLossTrades.length,
+
+    breakevenTrades:
+      breakevenTrades.length,
 
     slHitTrades:
       slHitTrades.length,

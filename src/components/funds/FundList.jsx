@@ -5,6 +5,7 @@ import {
   useRef,
   useState,
 } from "react";
+
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -13,7 +14,6 @@ import {
 } from "../../services/holdingService";
 
 import Pagination from "../common/Pagination";
-
 
 const ITEMS_PER_PAGE = 6;
 const AUTO_REFRESH_INTERVAL = 60 * 1000;
@@ -40,6 +40,10 @@ export default function FundList() {
   const [status, setStatus] = useState("All");
   const [roiSort, setRoiSort] = useState("default");
   const [currentPage, setCurrentPage] = useState(1);
+
+  /* =========================================================
+     LOAD DATA
+  ========================================================= */
 
   const loadFund = useCallback(
     async ({ showInitialLoader = false } = {}) => {
@@ -81,7 +85,7 @@ export default function FundList() {
 
         setLoadError(
           error?.message ||
-            "Failed to load portfolio trades."
+            "Failed to load portfolio studies."
         );
       } finally {
         requestInProgressRef.current = false;
@@ -95,6 +99,10 @@ export default function FundList() {
     []
   );
 
+  /* =========================================================
+     AUTO REFRESH
+  ========================================================= */
+
   useEffect(() => {
     mountedRef.current = true;
 
@@ -105,8 +113,7 @@ export default function FundList() {
     const intervalId = window.setInterval(
       () => {
         if (
-          document.visibilityState ===
-          "visible"
+          document.visibilityState === "visible"
         ) {
           loadFund();
         }
@@ -116,8 +123,7 @@ export default function FundList() {
 
     const handleVisibilityChange = () => {
       if (
-        document.visibilityState ===
-        "visible"
+        document.visibilityState === "visible"
       ) {
         loadFund();
       }
@@ -154,93 +160,118 @@ export default function FundList() {
     };
   }, [loadFund]);
 
+  /* =========================================================
+     STATUS
+  ========================================================= */
+
   const getStatus = (holding) => {
-  const manualStatus = String(
-    holding.tradeStatus ||
-      holding.trade_status ||
-      ""
-  ).trim();
+    const manualStatus = String(
+      holding.tradeStatus ||
+        holding.trade_status ||
+        ""
+    ).trim();
 
-  if (
-    manualStatus === "Booked Profit" ||
-    manualStatus === "Cancelled"
-  ) {
-    return manualStatus;
-  }
+    /*
+      Respect manually closed outcomes.
+    */
+    if (
+      [
+        "Booked Profit",
+        "Booked Loss",
+        "Breakeven",
+        "Cancelled",
+      ].includes(manualStatus)
+    ) {
+      return manualStatus;
+    }
 
-  const highestPrice = Number(
-    holding.highestPrice ??
-      holding.highest_price ??
-      holding.cmp ??
-      0
-  );
+    const highestPrice = Number(
+      holding.highestPrice ??
+        holding.highest_price ??
+        holding.cmp ??
+        0
+    );
 
-  const lowestPrice = Number(
-    holding.lowestPrice ??
-      holding.lowest_price ??
-      holding.cmp ??
-      0
-  );
+    const lowestPrice = Number(
+      holding.lowestPrice ??
+        holding.lowest_price ??
+        holding.cmp ??
+        0
+    );
 
-  const stopLoss = Number(
-    holding.stopLoss ??
-      holding.stop_loss ??
-      0
-  );
+    const stopLoss = Number(
+      holding.stopLoss ??
+        holding.stop_loss ??
+        0
+    );
 
-  const target1 = Number(
-    holding.target1 || 0
-  );
+    const target1 = Number(
+      holding.target1 || 0
+    );
 
-  const target2 = Number(
-    holding.target2 || 0
-  );
+    const target2 = Number(
+      holding.target2 || 0
+    );
 
-  const target3 = Number(
-    holding.target3 || 0
-  );
+    const target3 = Number(
+      holding.target3 || 0
+    );
 
-  if (
-    stopLoss > 0 &&
-    lowestPrice <= stopLoss
-  ) {
-    return "SL Hit";
-  }
+    if (
+      stopLoss > 0 &&
+      lowestPrice <= stopLoss
+    ) {
+      return "SL Hit";
+    }
 
-  if (
-    target3 > 0 &&
-    highestPrice >= target3
-  ) {
-    return "Target 3 Hit";
-  }
+    if (
+      target3 > 0 &&
+      highestPrice >= target3
+    ) {
+      return "Target 3 Hit";
+    }
 
-  if (
-    target2 > 0 &&
-    highestPrice >= target2
-  ) {
-    return "Target 2 Hit";
-  }
+    if (
+      target2 > 0 &&
+      highestPrice >= target2
+    ) {
+      return "Target 2 Hit";
+    }
 
-  if (
-    target1 > 0 &&
-    highestPrice >= target1
-  ) {
-    return "Target 1 Hit";
-  }
+    if (
+      target1 > 0 &&
+      highestPrice >= target1
+    ) {
+      return "Target 1 Hit";
+    }
 
-  return "Active";
-};
+    return "Active";
+  };
+
+  /* =========================================================
+     ROI
+  ========================================================= */
 
   const getReturn = (holding) => {
-    const entry = Number(holding.entry || 0);
+    const entry = Number(
+      holding.entry || 0
+    );
 
-    if (!entry) return 0;
+    if (!entry) {
+      return 0;
+    }
 
-    const tradeStatus = getStatus(holding);
-    const isBookedProfit =
-      tradeStatus === "Booked Profit";
+    const tradeStatus =
+      getStatus(holding);
 
-    if (isBookedProfit) {
+    const isRealisedTrade = [
+      "Booked Profit",
+      "Booked Loss",
+      "Breakeven",
+      "SL Hit",
+    ].includes(tradeStatus);
+
+    if (isRealisedTrade) {
       const savedRealisedReturn =
         holding.realisedReturn ??
         holding.realised_return;
@@ -254,7 +285,9 @@ export default function FundList() {
           savedRealisedReturn
         );
 
-        if (Number.isFinite(realisedReturn)) {
+        if (
+          Number.isFinite(realisedReturn)
+        ) {
           return realisedReturn;
         }
       }
@@ -294,6 +327,10 @@ export default function FundList() {
     );
   };
 
+  /* =========================================================
+     PUBLIC VISIBILITY
+  ========================================================= */
+
   const visibleHoldings = useMemo(() => {
     return holdings.filter((holding) => {
       const visibility = normalize(
@@ -320,9 +357,14 @@ export default function FundList() {
     });
   }, [holdings]);
 
+  /* =========================================================
+     SECTORS
+  ========================================================= */
+
   const sectors = useMemo(() => {
     return [
       "All",
+
       ...new Set(
         visibleHoldings
           .map(
@@ -333,6 +375,10 @@ export default function FundList() {
       ),
     ];
   }, [visibleHoldings]);
+
+  /* =========================================================
+     FILTERS
+  ========================================================= */
 
   const filteredHoldings = useMemo(() => {
     const query = normalize(search);
@@ -376,7 +422,8 @@ export default function FundList() {
           (holding.sector || "General") ===
             sector;
 
-        const currentStatus = getStatus(holding);
+        const currentStatus =
+          getStatus(holding);
 
         const exitPrice = Number(
           holding.exitPrice ??
@@ -397,12 +444,21 @@ export default function FundList() {
           holding.target3 || 0
         );
 
+        /*
+          Target filter logic remains intact.
+          Target 3 is simply not displayed
+          on the public cards.
+        */
         const hasReachedTarget1 =
           currentStatus === "Target 1 Hit" ||
           currentStatus === "Target 2 Hit" ||
           currentStatus === "Target 3 Hit" ||
           (
-            currentStatus === "Booked Profit" &&
+            [
+              "Booked Profit",
+              "Booked Loss",
+              "Breakeven",
+            ].includes(currentStatus) &&
             target1 > 0 &&
             exitPrice >= target1
           );
@@ -411,7 +467,11 @@ export default function FundList() {
           currentStatus === "Target 2 Hit" ||
           currentStatus === "Target 3 Hit" ||
           (
-            currentStatus === "Booked Profit" &&
+            [
+              "Booked Profit",
+              "Booked Loss",
+              "Breakeven",
+            ].includes(currentStatus) &&
             target2 > 0 &&
             exitPrice >= target2
           );
@@ -419,7 +479,11 @@ export default function FundList() {
         const hasReachedTarget3 =
           currentStatus === "Target 3 Hit" ||
           (
-            currentStatus === "Booked Profit" &&
+            [
+              "Booked Profit",
+              "Booked Loss",
+              "Breakeven",
+            ].includes(currentStatus) &&
             target3 > 0 &&
             exitPrice >= target3
           );
@@ -461,8 +525,14 @@ export default function FundList() {
     status,
   ]);
 
+  /* =========================================================
+     SORT
+  ========================================================= */
+
   const sortedHoldings = useMemo(() => {
-    const rows = [...filteredHoldings];
+    const rows = [
+      ...filteredHoldings,
+    ];
 
     if (roiSort === "high") {
       rows.sort(
@@ -481,11 +551,27 @@ export default function FundList() {
     }
 
     return rows;
-  }, [filteredHoldings, roiSort]);
+  }, [
+    filteredHoldings,
+    roiSort,
+  ]);
+
+  /* =========================================================
+     RESET PAGE
+  ========================================================= */
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, sector, status, roiSort]);
+  }, [
+    search,
+    sector,
+    status,
+    roiSort,
+  ]);
+
+  /* =========================================================
+     PAGINATION
+  ========================================================= */
 
   const totalPages = Math.max(
     1,
@@ -496,10 +582,15 @@ export default function FundList() {
   );
 
   useEffect(() => {
-    if (currentPage > totalPages) {
+    if (
+      currentPage > totalPages
+    ) {
       setCurrentPage(totalPages);
     }
-  }, [currentPage, totalPages]);
+  }, [
+    currentPage,
+    totalPages,
+  ]);
 
   const paginatedHoldings = useMemo(() => {
     const startIndex =
@@ -514,6 +605,10 @@ export default function FundList() {
     sortedHoldings,
     currentPage,
   ]);
+
+  /* =========================================================
+     COUNTS
+  ========================================================= */
 
   const activeCount =
     visibleHoldings.filter(
@@ -533,14 +628,22 @@ export default function FundList() {
       (holding) =>
         [
           "Booked Profit",
+          "Booked Loss",
+          "Breakeven",
           "SL Hit",
         ].includes(
           getStatus(holding)
         )
     ).length;
 
+  /* =========================================================
+     FORMATTERS
+  ========================================================= */
+
   const formatPrice = (value) =>
-    `₹${Number(value || 0).toLocaleString(
+    `₹${Number(
+      value || 0
+    ).toLocaleString(
       "en-IN",
       {
         maximumFractionDigits: 2,
@@ -548,7 +651,9 @@ export default function FundList() {
     )}`;
 
   const formatUpdatedTime = (value) => {
-    if (!value) return "";
+    if (!value) {
+      return "";
+    }
 
     return value.toLocaleTimeString(
       "en-IN",
@@ -560,20 +665,35 @@ export default function FundList() {
     );
   };
 
+  /* =========================================================
+     LOADING
+  ========================================================= */
+
   if (loading) {
     return (
       <p style={loadingStyle}>
-        Loading portfolio trades...
+        Loading portfolio studies...
       </p>
     );
   }
 
-  if (loadError && holdings.length === 0) {
+  /* =========================================================
+     ERROR
+  ========================================================= */
+
+  if (
+    loadError &&
+    holdings.length === 0
+  ) {
     return (
       <section style={errorStyle}>
-        <h3>Unable to load portfolio</h3>
+        <h3>
+          Unable to load portfolio
+        </h3>
 
-        <p>{loadError}</p>
+        <p>
+          {loadError}
+        </p>
 
         <button
           type="button"
@@ -590,8 +710,14 @@ export default function FundList() {
     );
   }
 
+  /* =========================================================
+     UI
+  ========================================================= */
+
   return (
     <section style={wrapperStyle}>
+      {/* HEADER */}
+
       <div style={headerStyle}>
         <div>
           <h2 style={titleStyle}>
@@ -599,7 +725,10 @@ export default function FundList() {
           </h2>
 
           <p style={subtitleStyle}>
-            Educational market ideas are publicly available, while member-exclusive analysis details and price levels are released only after official publication.
+            Educational market ideas are publicly
+            available, while member-exclusive
+            analysis details and price levels are
+            released only after official publication.
           </p>
         </div>
 
@@ -610,14 +739,22 @@ export default function FundList() {
 
           <button
             type="button"
-            onClick={() => loadFund()}
+            onClick={() =>
+              loadFund()
+            }
             disabled={refreshing}
             style={{
               ...refreshButtonStyle,
-              cursor: refreshing
-                ? "not-allowed"
-                : "pointer",
-              opacity: refreshing ? 0.7 : 1,
+
+              cursor:
+                refreshing
+                  ? "not-allowed"
+                  : "pointer",
+
+              opacity:
+                refreshing
+                  ? 0.7
+                  : 1,
             }}
           >
             {refreshing
@@ -635,15 +772,21 @@ export default function FundList() {
         </div>
       </div>
 
+      {/* ERROR */}
+
       {loadError && (
         <div style={inlineErrorStyle}>
           {loadError}
         </div>
       )}
 
+      {/* SUMMARY */}
+
       <div style={summaryGridStyle}>
         <SummaryCard
-          value={visibleHoldings.length}
+          value={
+            visibleHoldings.length
+          }
           label="Total Tracked Studies"
         />
 
@@ -659,13 +802,17 @@ export default function FundList() {
         />
       </div>
 
+      {/* FILTERS */}
+
       <div style={filtersStyle}>
         <input
           type="search"
           placeholder="Search stock, sector or study..."
           value={search}
           onChange={(event) =>
-            setSearch(event.target.value)
+            setSearch(
+              event.target.value
+            )
           }
           style={inputStyle}
         />
@@ -673,23 +820,32 @@ export default function FundList() {
         <select
           value={sector}
           onChange={(event) =>
-            setSector(event.target.value)
+            setSector(
+              event.target.value
+            )
           }
           style={selectStyle}
         >
-          {sectors.map((item) => (
-            <option key={item} value={item}>
-              {item === "All"
-                ? "🏢 All Sectors"
-                : item}
-            </option>
-          ))}
+          {sectors.map(
+            (item) => (
+              <option
+                key={item}
+                value={item}
+              >
+                {item === "All"
+                  ? "🏢 All Sectors"
+                  : item}
+              </option>
+            )
+          )}
         </select>
 
         <select
           value={status}
           onChange={(event) =>
-            setStatus(event.target.value)
+            setStatus(
+              event.target.value
+            )
           }
           style={selectStyle}
         >
@@ -717,6 +873,14 @@ export default function FundList() {
             Booked Profit
           </option>
 
+          <option value="Booked Loss">
+            Booked Loss
+          </option>
+
+          <option value="Breakeven">
+            Breakeven
+          </option>
+
           <option value="SL Hit">
             SL Hit
           </option>
@@ -725,7 +889,9 @@ export default function FundList() {
         <select
           value={roiSort}
           onChange={(event) =>
-            setRoiSort(event.target.value)
+            setRoiSort(
+              event.target.value
+            )
           }
           style={selectStyle}
         >
@@ -743,12 +909,16 @@ export default function FundList() {
         </select>
       </div>
 
+      {/* STUDIES */}
+
       {sortedHoldings.length === 0 ? (
         <div style={emptyStateStyle}>
-          <h3>No portfolio trades found</h3>
+          <h3>
+            No portfolio studies found
+          </h3>
 
           <p>
-            No trade matches the selected filters.
+            No study matches the selected filters.
           </p>
         </div>
       ) : (
@@ -759,9 +929,15 @@ export default function FundList() {
                 <PortfolioCard
                   key={holding.id}
                   holding={holding}
-                  status={getStatus(holding)}
-                  roi={getReturn(holding)}
-                  formatPrice={formatPrice}
+                  status={getStatus(
+                    holding
+                  )}
+                  roi={getReturn(
+                    holding
+                  )}
+                  formatPrice={
+                    formatPrice
+                  }
                   onViewTrade={() =>
                     navigate(
                       `/trade/${holding.id}`
@@ -772,44 +948,99 @@ export default function FundList() {
             )}
           </div>
 
-          <>
-  <Pagination
-    currentPage={currentPage}
-    totalPages={totalPages}
-    onPageChange={setCurrentPage}
-  />
+          <Pagination
+            currentPage={
+              currentPage
+            }
+            totalPages={
+              totalPages
+            }
+            onPageChange={
+              setCurrentPage
+            }
+          />
 
-  <section style={learningDisclosureStyle}>
-    <div style={learningDisclosureIconStyle}>
-      🎓
-    </div>
+          {/* DISCLOSURE */}
 
-    <div style={learningDisclosureContentStyle}>
-      <h2 style={learningDisclosureTitleStyle}>
-        Learn Before You Invest
-      </h2>
-            <p style={learningDisclosureTextStyle}>
-              Every market study published on VTKS is intended to help you understand market structure, disciplined decision-making, and risk management through real-world examples. Our objective is to help you build knowledge and confidence—not encourage blind trade execution.
-            </p>
-      
+          <section
+            style={
+              learningDisclosureStyle
+            }
+          >
+            <div
+              style={
+                learningDisclosureIconStyle
+              }
+            >
+              🎓
+            </div>
 
-      <p style={learningDisclosureTextStyle}>
-        The content on this platform is shared solely for educational and research purposes. It should not be considered investment advice, a buy or sell recommendation, or a guarantee of future returns. Always perform your own research and manage risk according to your financial goals and risk tolerance.
-      </p>
+            <div
+              style={
+                learningDisclosureContentStyle
+              }
+            >
+              <h2
+                style={
+                  learningDisclosureTitleStyle
+                }
+              >
+                Learn Before You Invest
+              </h2>
 
-      <p style={learningDisclosureTextStyle}>
-        VTKS believes that consistent learning, disciplined execution and risk
-        management are more valuable than blindly following any single market
-        idea.
-      </p>
-    </div>
-  </section>
-</>
+              <p
+                style={
+                  learningDisclosureTextStyle
+                }
+              >
+                Every market study published on VTKS
+                is intended to help you understand
+                market structure, disciplined
+                decision-making, and risk management
+                through real-world examples. Our
+                objective is to help you build
+                knowledge and confidence—not encourage
+                blind trade execution.
+              </p>
+
+              <p
+                style={
+                  learningDisclosureTextStyle
+                }
+              >
+                The content on this platform is shared
+                solely for educational and research
+                purposes. It should not be considered
+                investment advice, a buy or sell
+                recommendation, or a guarantee of
+                future returns. Always perform your own
+                research and manage risk according to
+                your financial goals and risk
+                tolerance.
+              </p>
+
+              <p
+                style={
+                  learningDisclosureTextStyle
+                }
+              >
+                VTKS believes that consistent learning,
+                disciplined execution and risk
+                management are more valuable than
+                blindly following any single market
+                idea.
+              </p>
+            </div>
+          </section>
         </>
       )}
     </section>
   );
 }
+
+/* =========================================================
+   SUMMARY CARD
+========================================================= */
 
 function SummaryCard({
   value,
@@ -834,6 +1065,10 @@ function SummaryCard({
   );
 }
 
+/* =========================================================
+   PORTFOLIO CARD
+========================================================= */
+
 function PortfolioCard({
   holding,
   status,
@@ -851,37 +1086,53 @@ function PortfolioCard({
 
   const protectedTrade =
     isSubscriberTrade &&
-    Boolean(holding.accuracyBlur);
+    Boolean(
+      holding.accuracyBlur
+    );
 
-  const isBookedProfit =
-    status === "Booked Profit";
+  /*
+    Final outcomes use Exit Price
+    and Realised ROI.
+  */
+  const isRealisedTrade = [
+    "Booked Profit",
+    "Booked Loss",
+    "Breakeven",
+    "SL Hit",
+  ].includes(status);
 
   const savedExitPrice =
     holding.exitPrice ??
     holding.exit_price;
 
   const displayPrice =
-    isBookedProfit && savedExitPrice
+    isRealisedTrade &&
+    savedExitPrice
       ? savedExitPrice
       : holding.cmp;
 
   const displayPriceLabel =
-    isBookedProfit
+    isRealisedTrade
       ? "Exit Price"
       : "Live CMP";
 
   const returnLabel =
-    isBookedProfit
+    isRealisedTrade
       ? "Realised ROI"
       : "Live ROI";
 
   /* =====================================================
-     TARGET HIT LOGIC
+     TARGET DISPLAY LOGIC
+
+     Public card shows only Target 1 + Target 2.
+     Target 3 remains internal.
   ====================================================== */
 
   const referencePrice = Number(
-    isBookedProfit
-      ? savedExitPrice || displayPrice || 0
+    isRealisedTrade
+      ? savedExitPrice ||
+          displayPrice ||
+          0
       : holding.highestPrice ??
           holding.highest_price ??
           holding.cmp ??
@@ -894,10 +1145,6 @@ function PortfolioCard({
 
   const target2 = Number(
     holding.target2 || 0
-  );
-
-  const target3 = Number(
-    holding.target3 || 0
   );
 
   const target1Hit =
@@ -921,12 +1168,9 @@ function PortfolioCard({
       ].includes(status)
     );
 
-  const target3Hit =
-    target3 > 0 &&
-    (
-      referencePrice >= target3 ||
-      status === "Target 3 Hit"
-    );
+  /* =====================================================
+     PROTECTED VALUE
+  ====================================================== */
 
   const protectedValue = (value) => {
     if (!protectedTrade) {
@@ -936,7 +1180,7 @@ function PortfolioCard({
     return (
       <span
         style={blurredValueStyle}
-        title="Subscriber trade details are protected"
+        title="Subscriber study details are protected"
       >
         {value}
       </span>
@@ -944,13 +1188,21 @@ function PortfolioCard({
   };
 
   const handleViewTrade = () => {
-    if (protectedTrade) return;
+    if (protectedTrade) {
+      return;
+    }
 
     onViewTrade?.();
   };
 
+  /* =====================================================
+     CARD
+  ====================================================== */
+
   return (
     <article style={portfolioCardStyle}>
+      {/* TOP */}
+
       <div style={cardTopRowStyle}>
         <span
           style={
@@ -966,32 +1218,46 @@ function PortfolioCard({
               : "🌐 Published Market Study"}
         </span>
 
-        <StatusBadge status={status} />
+        <StatusBadge
+          status={status}
+        />
       </div>
+
+      {/* STOCK */}
 
       <h2 style={stockNameStyle}>
         {protectedValue(
-          holding.stock || "VTKS Trade"
+          holding.stock ||
+            "VTKS Study"
         )}
       </h2>
 
       <p style={sectorTextStyle}>
-        {holding.sector || "General"}
+        {holding.sector ||
+          "General"}
       </p>
+
+      {/* DETAILS */}
 
       <div style={detailsGridStyle}>
         <Detail
           label="Entry"
           value={protectedValue(
-            formatPrice(holding.entry)
+            formatPrice(
+              holding.entry
+            )
           )}
         />
 
         <Detail
-          label={displayPriceLabel}
+          label={
+            displayPriceLabel
+          }
           value={protectedValue(
             displayPrice
-              ? formatPrice(displayPrice)
+              ? formatPrice(
+                  displayPrice
+                )
               : "₹—"
           )}
         />
@@ -1002,24 +1268,35 @@ function PortfolioCard({
             <strong
               style={{
                 color:
-                  roi >= 0
+                  roi > 0
                     ? "#16a34a"
-                    : "#dc2626",
+                    : roi < 0
+                      ? "#dc2626"
+                      : "#64748b",
               }}
             >
-              {roi >= 0 ? "+" : ""}
-              {Number(roi || 0).toFixed(2)}%
+              {roi > 0
+                ? "+"
+                : ""}
+
+              {Number(
+                roi || 0
+              ).toFixed(2)}
+              %
             </strong>
           )}
         />
 
         {/* TARGET 1 */}
+
         <Detail
           label="Target 1"
           value={protectedValue(
             holding.target1 ? (
               <>
-                {formatPrice(holding.target1)}
+                {formatPrice(
+                  holding.target1
+                )}
 
                 {target1Hit && (
                   <span
@@ -1039,12 +1316,15 @@ function PortfolioCard({
         />
 
         {/* TARGET 2 */}
+
         <Detail
           label="Target 2"
           value={protectedValue(
             holding.target2 ? (
               <>
-                {formatPrice(holding.target2)}
+                {formatPrice(
+                  holding.target2
+                )}
 
                 {target2Hit && (
                   <span
@@ -1063,53 +1343,45 @@ function PortfolioCard({
           )}
         />
 
-        {/* TARGET 3 */}
-        {holding.target3 && (
-          <Detail
-            label="Target 3"
-            value={protectedValue(
-              <>
-                {formatPrice(holding.target3)}
-
-                {target3Hit && (
-                  <span
-                    style={{
-                      marginLeft: "6px",
-                      fontSize: "16px",
-                    }}
-                  >
-                    ✅
-                  </span>
-                )}
-              </>
-            )}
-          />
-        )}
+        {/* STOP LOSS */}
 
         <Detail
           label="Stop Loss"
           value={protectedValue(
             holding.stopLoss
-              ? formatPrice(holding.stopLoss)
+              ? formatPrice(
+                  holding.stopLoss
+                )
               : "₹—"
           )}
         />
       </div>
 
+      {/* FOOTER */}
+
       <div style={cardFooterStyle}>
         <span style={tradeTypeStyle}>
-          {holding.tradeType || "Swing"}
+          {holding.tradeType ||
+            "Swing"}
         </span>
 
         {protectedTrade ? (
-          <span style={protectedNoticeStyle}>
+          <span
+            style={
+              protectedNoticeStyle
+            }
+          >
             🔒 Details protected
           </span>
         ) : (
           <button
             type="button"
-            onClick={handleViewTrade}
-            style={viewTradeButtonStyle}
+            onClick={
+              handleViewTrade
+            }
+            style={
+              viewTradeButtonStyle
+            }
           >
             View Analysis →
           </button>
@@ -1119,21 +1391,42 @@ function PortfolioCard({
   );
 }
 
-function Detail({ label, value }) {
+/* =========================================================
+   DETAIL
+========================================================= */
+
+function Detail({
+  label,
+  value,
+}) {
   return (
     <div>
-      <span style={detailLabelStyle}>
+      <span
+        style={
+          detailLabelStyle
+        }
+      >
         {label}
       </span>
 
-      <div style={detailValueStyle}>
+      <div
+        style={
+          detailValueStyle
+        }
+      >
         {value}
       </div>
     </div>
   );
 }
 
-function StatusBadge({ status }) {
+/* =========================================================
+   STATUS BADGE
+========================================================= */
+
+function StatusBadge({
+  status,
+}) {
   const statusStyles = {
     Active: {
       background: "#dcfce7",
@@ -1160,6 +1453,16 @@ function StatusBadge({ status }) {
       color: "#166534",
     },
 
+    "Booked Loss": {
+      background: "#fee2e2",
+      color: "#991b1b",
+    },
+
+    Breakeven: {
+      background: "#f1f5f9",
+      color: "#475569",
+    },
+
     "SL Hit": {
       background: "#fee2e2",
       color: "#991b1b",
@@ -1181,6 +1484,10 @@ function StatusBadge({ status }) {
     </span>
   );
 }
+
+/* =========================================================
+   STYLES
+========================================================= */
 
 const loadingStyle = {
   textAlign: "center",
@@ -1480,6 +1787,7 @@ const emptyStateStyle = {
   color: "#64748b",
   textAlign: "center",
 };
+
 const learningDisclosureStyle = {
   display: "flex",
   alignItems: "flex-start",
@@ -1489,7 +1797,8 @@ const learningDisclosureStyle = {
   borderRadius: "22px",
   background: "#f8fbff",
   border: "1px solid #dbeafe",
-  boxShadow: "0 15px 35px rgba(15,23,42,.05)",
+  boxShadow:
+    "0 15px 35px rgba(15,23,42,.05)",
 };
 
 const learningDisclosureIconStyle = {

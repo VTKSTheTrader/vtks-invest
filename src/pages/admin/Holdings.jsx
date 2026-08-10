@@ -169,11 +169,15 @@ export default function Holdings() {
   ).trim();
 
   if (
-    manualStatus === "Booked Profit" ||
-    manualStatus === "Cancelled"
-  ) {
-    return manualStatus;
-  }
+  [
+    "Booked Profit",
+    "Booked Loss",
+    "Breakeven",
+    "Cancelled",
+  ].includes(manualStatus)
+) {
+  return manualStatus;
+}
 
   const highestPrice = Number(
     row.highestPrice ??
@@ -262,9 +266,16 @@ export default function Holdings() {
       Realised ROI is shown only after
       the study is marked Booked Profit.
     */
-    if (currentStatus !== "Booked Profit") {
-      return getReturn(row);
-    }
+    const isCompletedTrade = [
+  "Booked Profit",
+  "Booked Loss",
+  "Breakeven",
+  "SL Hit",
+].includes(currentStatus);
+
+if (!isCompletedTrade) {
+  return getReturn(row);
+}
 
     const savedRealisedReturn =
       row.realisedReturn ??
@@ -320,14 +331,18 @@ export default function Holdings() {
 
   const statusBadge = (status) => {
     const styles = {
-      Active: ["#dcfce7", "#166534", "🟢"],
-      "Target 1 Hit": ["#e0f2fe", "#075985", "🎯"],
-      "Target 2 Hit": ["#dcfce7", "#166534", "🚀"],
-      "Target 3 Hit": ["#dcfce7", "#166534", "🏆"],
-      "Booked Profit": ["#dcfce7", "#166534", "💰"],
-      "SL Hit": ["#fee2e2", "#991b1b", "🛑"],
-      Cancelled: ["#f1f5f9", "#475569", "⚪"],
-    };
+  Active: ["#dcfce7", "#166534", "🟢"],
+  "Target 1 Hit": ["#e0f2fe", "#075985", "🎯"],
+  "Target 2 Hit": ["#dcfce7", "#166534", "🚀"],
+  "Target 3 Hit": ["#dcfce7", "#166534", "🏆"],
+
+  "Booked Profit": ["#dcfce7", "#166534", "💰"],
+  "Booked Loss": ["#fee2e2", "#991b1b", "📉"],
+  Breakeven: ["#f1f5f9", "#475569", "⚖️"],
+
+  "SL Hit": ["#fee2e2", "#991b1b", "🛑"],
+  Cancelled: ["#f1f5f9", "#475569", "⚪"],
+};
 
     const [background, color, icon] =
       styles[status] || styles.Active;
@@ -566,6 +581,17 @@ export default function Holdings() {
       getDisplayStatus(holding) === "SL Hit"
   ).length;
 
+  const bookedLossCount = data.filter(
+  (holding) =>
+    getDisplayStatus(holding) === "Booked Loss"
+).length;
+
+
+const breakevenCount = data.filter(
+  (holding) =>
+    getDisplayStatus(holding) === "Breakeven"
+).length;
+
   const winningTrades = data.filter((holding) => {
     const currentStatus =
       getDisplayStatus(holding);
@@ -580,6 +606,9 @@ export default function Holdings() {
       highestTarget === "Target 3 Hit"
     );
   }).length;
+
+  const losingTrades =
+  bookedLossCount + slHitCount;
 
   const closedTrades =
     winningTrades + slHitCount;
@@ -794,9 +823,12 @@ export default function Holdings() {
         const currentStatus =
           getDisplayStatus(row);
 
-        const isCompleted =
-          currentStatus === "Booked Profit";
-
+        const isCompleted = [
+  "Booked Profit",
+  "Booked Loss",
+  "Breakeven",
+  "SL Hit",
+].includes(currentStatus);
         const displayedReturn = isCompleted
           ? achievedReturn
           : liveReturn;
@@ -1068,15 +1100,17 @@ export default function Holdings() {
 
       <div className="holdings-stats-grid">
         {[
-          [totalHoldings, "Total Studies"],
-          [activeCount, "Active"],
-          [t1HitCount, "T1 Hit"],
-          [t2HitCount, "T2 Hit"],
-          [t3HitCount, "T3 Hit"],
-          [bookedProfitCount, "Booked Profit"],
-          [slHitCount, "SL Hit"],
-          [`${winRate}%`, "Win Rate"],
-        ].map(([value, label]) => (
+  [totalHoldings, "Total Studies"],
+  [activeCount, "Active"],
+  [t1HitCount, "T1 Hit"],
+  [t2HitCount, "T2 Hit"],
+  [t3HitCount, "T3 Hit"],
+  [bookedProfitCount, "Booked Profit"],
+  [bookedLossCount, "Booked Loss"],
+  [breakevenCount, "Breakeven"],
+  [slHitCount, "SL Hit"],
+  [`${winRate}%`, "Win Rate"],
+].map(([value, label]) => (
           <article className="holdings-stat-card" key={label}>
             <strong>{value}</strong>
             <span>{label}</span>
@@ -1110,16 +1144,52 @@ export default function Holdings() {
           <option value="Investment">Investment</option>
         </select>
 
-        <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
-          <option value="All">📌 All Status</option>
-          <option value="Active">Active</option>
-          <option value="Target 1 Hit">Target 1 Hit</option>
-          <option value="Target 2 Hit">Target 2 Hit</option>
-          <option value="Target 3 Hit">Target 3 Hit</option>
-          <option value="Booked Profit">Booked Profit</option>
-          <option value="SL Hit">SL Hit</option>
-          <option value="Cancelled">Cancelled</option>
-        </select>
+        <select
+  value={statusFilter}
+  onChange={(event) =>
+    setStatusFilter(event.target.value)
+  }
+>
+  <option value="All">
+    📌 All Status
+  </option>
+
+  <option value="Active">
+    Active
+  </option>
+
+  <option value="Target 1 Hit">
+    Target 1 Hit
+  </option>
+
+  <option value="Target 2 Hit">
+    Target 2 Hit
+  </option>
+
+  <option value="Target 3 Hit">
+    Target 3 Hit
+  </option>
+
+  <option value="Booked Profit">
+    Booked Profit
+  </option>
+
+  <option value="Booked Loss">
+    Booked Loss
+  </option>
+
+  <option value="Breakeven">
+    Breakeven
+  </option>
+
+  <option value="SL Hit">
+    SL Hit
+  </option>
+
+  <option value="Cancelled">
+    Cancelled
+  </option>
+</select>
 
         <select
           value={roiSort}
