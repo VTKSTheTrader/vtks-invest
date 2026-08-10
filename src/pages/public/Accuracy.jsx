@@ -419,43 +419,105 @@ const realisedAverageReturn =
       holding.accuracyBlur
     );
 
-    const getTargetIndicator = (
-  holding,
-  type
-) => {
+   const getTargetIndicator = (holding, type) => {
   const status = getStatus(holding);
+
+  // Highest traded price reached during the study.
+  // For booked-profit trades, CMP may no longer represent
+  // the highest level reached.
+  const highestPrice = Number(
+    holding.highestPrice ??
+      holding.highest_price ??
+      holding.cmp ??
+      0
+  );
+
+  const lowestPrice = Number(
+    holding.lowestPrice ??
+      holding.lowest_price ??
+      holding.cmp ??
+      0
+  );
+
+  const target1 = Number(
+    holding.target1 ?? 0
+  );
+
+  const target2 = Number(
+    holding.target2 ?? 0
+  );
+
+  const target3 = Number(
+    holding.target3 ?? 0
+  );
+
+  const stopLoss = Number(
+    holding.stopLoss ??
+      holding.stop_loss ??
+      0
+  );
+
+  /*
+   * IMPORTANT:
+   * Do not rely only on status.
+   *
+   * A trade may have status "Booked Profit"
+   * even though Target 1 / Target 2 were
+   * already achieved.
+   */
+
+  const target1Hit =
+    target1 > 0 &&
+    highestPrice >= target1;
+
+  const target2Hit =
+    target2 > 0 &&
+    highestPrice >= target2;
+
+  const target3Hit =
+    target3 > 0 &&
+    highestPrice >= target3;
+
+  const stopLossHit =
+    stopLoss > 0 &&
+    lowestPrice <= stopLoss;
 
   switch (type) {
     case "t1":
-      return [
-        "Target 1 Hit",
-        "Target 2 Hit",
-        "Target 3 Hit",
-      ].includes(status)
+      return target1Hit ||
+        [
+          "Target 1 Hit",
+          "Target 2 Hit",
+          "Target 3 Hit",
+        ].includes(status)
         ? " ✅"
         : "";
 
     case "t2":
-      return [
-        "Target 2 Hit",
-        "Target 3 Hit",
-      ].includes(status)
+      return target2Hit ||
+        [
+          "Target 2 Hit",
+          "Target 3 Hit",
+        ].includes(status)
         ? " 🚀"
         : "";
 
     case "t3":
-      return status === "Target 3 Hit"
+      return target3Hit ||
+        status === "Target 3 Hit"
         ? " 🏆"
         : "";
 
     case "sl":
-      return status === "SL Hit"
+      return stopLossHit ||
+        status === "SL Hit"
         ? " 🛑"
         : "";
 
     default:
       return "";
   }
+
 };
   const formatPrice = (value) =>
     `₹${Number(

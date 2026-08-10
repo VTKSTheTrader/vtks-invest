@@ -875,6 +875,59 @@ function PortfolioCard({
       ? "Realised ROI"
       : "Live ROI";
 
+  /* =====================================================
+     TARGET HIT LOGIC
+  ====================================================== */
+
+  const referencePrice = Number(
+    isBookedProfit
+      ? savedExitPrice || displayPrice || 0
+      : holding.highestPrice ??
+          holding.highest_price ??
+          holding.cmp ??
+          0
+  );
+
+  const target1 = Number(
+    holding.target1 || 0
+  );
+
+  const target2 = Number(
+    holding.target2 || 0
+  );
+
+  const target3 = Number(
+    holding.target3 || 0
+  );
+
+  const target1Hit =
+    target1 > 0 &&
+    (
+      referencePrice >= target1 ||
+      [
+        "Target 1 Hit",
+        "Target 2 Hit",
+        "Target 3 Hit",
+      ].includes(status)
+    );
+
+  const target2Hit =
+    target2 > 0 &&
+    (
+      referencePrice >= target2 ||
+      [
+        "Target 2 Hit",
+        "Target 3 Hit",
+      ].includes(status)
+    );
+
+  const target3Hit =
+    target3 > 0 &&
+    (
+      referencePrice >= target3 ||
+      status === "Target 3 Hit"
+    );
+
   const protectedValue = (value) => {
     if (!protectedTrade) {
       return value;
@@ -960,17 +1013,15 @@ function PortfolioCard({
           )}
         />
 
+        {/* TARGET 1 */}
         <Detail
           label="Target 1"
           value={protectedValue(
             holding.target1 ? (
               <>
                 {formatPrice(holding.target1)}
-                {[
-                  "Target 1 Hit",
-                  "Target 2 Hit",
-                  "Target 3 Hit",
-                ].includes(status) && (
+
+                {target1Hit && (
                   <span
                     style={{
                       marginLeft: "6px",
@@ -987,23 +1038,22 @@ function PortfolioCard({
           )}
         />
 
+        {/* TARGET 2 */}
         <Detail
           label="Target 2"
           value={protectedValue(
             holding.target2 ? (
               <>
                 {formatPrice(holding.target2)}
-                {[
-                  "Target 2 Hit",
-                  "Target 3 Hit",
-                ].includes(status) && (
+
+                {target2Hit && (
                   <span
                     style={{
                       marginLeft: "6px",
                       fontSize: "16px",
                     }}
                   >
-                    🚀
+                    ✅
                   </span>
                 )}
               </>
@@ -1012,6 +1062,29 @@ function PortfolioCard({
             )
           )}
         />
+
+        {/* TARGET 3 */}
+        {holding.target3 && (
+          <Detail
+            label="Target 3"
+            value={protectedValue(
+              <>
+                {formatPrice(holding.target3)}
+
+                {target3Hit && (
+                  <span
+                    style={{
+                      marginLeft: "6px",
+                      fontSize: "16px",
+                    }}
+                  >
+                    ✅
+                  </span>
+                )}
+              </>
+            )}
+          />
+        )}
 
         <Detail
           label="Stop Loss"
@@ -1022,8 +1095,6 @@ function PortfolioCard({
           )}
         />
       </div>
-
-      
 
       <div style={cardFooterStyle}>
         <span style={tradeTypeStyle}>
