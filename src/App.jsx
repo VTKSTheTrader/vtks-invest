@@ -6,11 +6,15 @@ import {
 
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import SubscriberRoute from "./components/auth/SubscriberRoute";
+import RouteSEO from "./components/common/RouteSEO";
 
 import PublicLayout from "./layouts/PublicLayout";
 import AdminLayout from "./layouts/AdminLayout";
 
-/* Public pages */
+/* =====================================================
+   PUBLIC PAGES
+===================================================== */
+
 import Home from "./pages/public/Home";
 import Funds from "./pages/public/Funds";
 import Indicators from "./pages/public/Indicators";
@@ -29,7 +33,12 @@ import NotFound from "./pages/public/NotFound";
 import PublicTestimonials from "./pages/public/Testimonials";
 import AskVTKS from "./pages/public/AskVTKS";
 import AnsweredQueries from "./pages/public/AnsweredQueries";
-/* Admin pages */
+import PublicMonthlyLevels from "./pages/public/MonthlyLevels";
+
+/* =====================================================
+   ADMIN PAGES
+===================================================== */
+
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminHoldings from "./pages/admin/Holdings";
 import AdminMembers from "./pages/admin/Members";
@@ -39,22 +48,49 @@ import AdminSettings from "./pages/admin/Settings";
 import CommunityLinks from "./pages/admin/CommunityLinks";
 import AdminTestimonials from "./pages/admin/Testimonials";
 import MonthlyLevels from "./pages/admin/MonthlyLevels";
-import PublicMonthlyLevels from "./pages/public/MonthlyLevels";
 import AdminStockQueries from "./pages/admin/StockQueries";
-/* Subscriber pages */
+
+/* =====================================================
+   SUBSCRIBER PAGES
+===================================================== */
+
 import SubscriberDashboard from "./pages/subscriber/Dashboard";
 import SubscriberLibrary from "./pages/subscriber/Library";
 import SubscriberScanner from "./pages/subscriber/Scanner";
 import Feedback from "./pages/subscriber/Feedback";
 import SubscriberMonthlyLevels from "./pages/subscriber/MonthlyLevels";
+
 function App() {
   return (
     <BrowserRouter>
+      {/* =================================================
+          GLOBAL ROUTE SEO
+
+          This automatically updates:
+          - Page title
+          - Description
+          - Canonical URL
+          - Robots
+          - Open Graph
+          - Twitter metadata
+      ================================================== */}
+      <RouteSEO />
+
       <Routes>
-        {/* Public routes */}
+        {/* =================================================
+            PUBLIC ROUTES
+        ================================================== */}
+
         <Route element={<PublicLayout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/funds" element={<Funds />} />
+          <Route
+            path="/"
+            element={<Home />}
+          />
+
+          <Route
+            path="/funds"
+            element={<Funds />}
+          />
 
           <Route
             path="/indicators"
@@ -81,15 +117,40 @@ function App() {
             element={<Resources />}
           />
 
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
+          <Route
+            path="/about"
+            element={<About />}
+          />
+
+          <Route
+            path="/contact"
+            element={<Contact />}
+          />
 
           <Route
             path="/testimonials"
             element={<PublicTestimonials />}
           />
 
-          <Route path="/login" element={<Login />} />
+          <Route
+            path="/monthly-levels"
+            element={<PublicMonthlyLevels />}
+          />
+
+          <Route
+            path="/ask-vtks"
+            element={<AskVTKS />}
+          />
+
+          <Route
+            path="/answered-queries"
+            element={<AnsweredQueries />}
+          />
+
+          <Route
+            path="/login"
+            element={<Login />}
+          />
 
           <Route
             path="/register"
@@ -110,21 +171,17 @@ function App() {
             path="/trade/:id"
             element={<TradeDetails />}
           />
+
           <Route
-  path="/monthly-levels"
-  element={<PublicMonthlyLevels />}
-/>
-<Route path="/ask-vtks" element={<AskVTKS />} />
-
-<Route
-  path="/answered-queries"
-  element={<AnsweredQueries />}
-/>
-
-          <Route path="*" element={<NotFound />} />
+            path="*"
+            element={<NotFound />}
+          />
         </Route>
 
-        {/* Admin routes */}
+        {/* =================================================
+            ADMIN ROUTES
+        ================================================== */}
+
         <Route
           path="/admin"
           element={
@@ -157,10 +214,12 @@ function App() {
             path="library"
             element={<AdminLibrary />}
           />
-<Route
-  path="stock-queries"
-  element={<AdminStockQueries />}
-/>
+
+          <Route
+            path="stock-queries"
+            element={<AdminStockQueries />}
+          />
+
           <Route
             path="settings"
             element={<AdminSettings />}
@@ -176,14 +235,16 @@ function App() {
             element={<AdminTestimonials />}
           />
 
-          {/* Temporary local testing route */}
           <Route
             path="monthly-levels"
             element={<MonthlyLevels />}
           />
         </Route>
 
-        {/* Subscriber routes */}
+        {/* =================================================
+            SUBSCRIBER ROUTES
+        ================================================== */}
+
         <Route
           path="/dashboard"
           element={
@@ -192,14 +253,15 @@ function App() {
             </SubscriberRoute>
           }
         />
+
         <Route
-  path="/dashboard/monthly-levels"
-  element={
-    <SubscriberRoute>
-      <SubscriberMonthlyLevels />
-    </SubscriberRoute>
-  }
-/>
+          path="/dashboard/monthly-levels"
+          element={
+            <SubscriberRoute>
+              <SubscriberMonthlyLevels />
+            </SubscriberRoute>
+          }
+        />
 
         <Route
           path="/dashboard/library"

@@ -1,11 +1,19 @@
 import { Helmet } from "react-helmet-async";
 import { useLocation } from "react-router-dom";
 
+/* =========================================================
+   SITE CONSTANTS
+========================================================= */
+
 const SITE_NAME = "VTKS INVEST";
 const SITE_URL = "https://www.vtksinvest.com";
 
 const DEFAULT_DESCRIPTION =
   "VTKS INVEST is a stock market education and research platform focused on technical analysis, swing trading, market studies, indicators, disciplined risk management and structured decision-making.";
+
+/* =========================================================
+   PUBLIC + PRIVATE ROUTE SEO CONFIGURATION
+========================================================= */
 
 const seoConfig = {
   "/": {
@@ -18,9 +26,9 @@ const seoConfig = {
 
   "/funds": {
     title:
-      "VTKS Market Analysis | Stock Research & Investment Studies",
+      "VTKS Market Studies | Stock Research & Analysis",
     description:
-      "Explore VTKS market studies, publicly shared stock research, investment analysis and structured educational case studies.",
+      "Explore VTKS educational market studies, structured stock research, technical analysis and investment case studies.",
     indexable: true,
   },
 
@@ -52,7 +60,7 @@ const seoConfig = {
     title:
       "VTKS Learning Resources | Videos, PDFs & Market Scanners",
     description:
-      "Explore VTKS educational videos, trading PDFs, technical studies, learning resources and public market scanners.",
+      "Explore VTKS educational videos, market PDFs, technical studies, learning resources and public market scanners.",
     indexable: true,
   },
 
@@ -76,7 +84,7 @@ const seoConfig = {
     title:
       "About VTKS INVEST | Research, Knowledge & Strategy",
     description:
-      "Learn about VTKS INVEST and its educational approach to structured market research, knowledge, discipline and independent decision-making.",
+      "Learn about VTKS INVEST and its approach to structured market research, knowledge, discipline and independent decision-making.",
     indexable: true,
   },
 
@@ -87,6 +95,30 @@ const seoConfig = {
       "Contact VTKS INVEST for membership information, educational resources, platform support and general enquiries.",
     indexable: true,
   },
+
+  /* =====================================================
+     VTKS QUESTIONS
+  ===================================================== */
+
+  "/ask-vtks": {
+    title:
+      "Ask VTKS | Submit Your Market Question",
+    description:
+      "Submit your stock market and technical analysis questions to VTKS for educational discussion and structured market learning.",
+    indexable: false,
+  },
+
+  "/answered-queries": {
+    title:
+      "VTKS Answered Queries | Market Questions & Learning",
+    description:
+      "Explore educational market questions answered by VTKS covering technical analysis, market structure, trading discipline and investment learning.",
+    indexable: true,
+  },
+
+  /* =====================================================
+     NON-INDEXABLE PUBLIC UTILITY PAGES
+  ===================================================== */
 
   "/payment": {
     title: "Payment | VTKS INVEST",
@@ -123,6 +155,10 @@ const seoConfig = {
     indexable: false,
   },
 
+  /* =====================================================
+     SUBSCRIBER / DASHBOARD ROUTES
+  ===================================================== */
+
   "/dashboard": {
     title: "Subscriber Dashboard | VTKS INVEST",
     description:
@@ -130,20 +166,38 @@ const seoConfig = {
     indexable: false,
   },
 
-  "/subscriber/scanner": {
+  "/dashboard/monthly-levels": {
+    title: "Subscriber Market Levels | VTKS INVEST",
+    description:
+      "Access VTKS INVEST subscriber market levels.",
+    indexable: false,
+  },
+
+  "/dashboard/library": {
+    title: "Subscriber Library | VTKS INVEST",
+    description:
+      "Access VTKS INVEST subscriber learning resources.",
+    indexable: false,
+  },
+
+  "/dashboard/scanner": {
     title: "Subscriber Scanners | VTKS INVEST",
     description:
       "Access VTKS INVEST subscriber market scanners.",
     indexable: false,
   },
 
-  "/subscriber/library": {
-    title: "Subscriber Library | VTKS INVEST",
+  "/subscriber/feedback": {
+    title: "Subscriber Feedback | VTKS INVEST",
     description:
-      "Access VTKS INVEST subscriber learning resources.",
+      "Submit feedback about your VTKS INVEST subscriber experience.",
     indexable: false,
   },
 };
+
+/* =========================================================
+   PATH NORMALIZATION
+========================================================= */
 
 const normalizePathname = (pathname) => {
   if (!pathname || pathname === "/") {
@@ -153,9 +207,14 @@ const normalizePathname = (pathname) => {
   return pathname.replace(/\/+$/, "");
 };
 
+/* =========================================================
+   GET SEO CONFIG FOR CURRENT ROUTE
+========================================================= */
+
 const getPageConfig = (pathname) => {
   const cleanPath = normalizePathname(pathname);
 
+  /* Public trade details */
   if (cleanPath.startsWith("/trade/")) {
     return {
       title: "Market Study Details | VTKS INVEST",
@@ -165,6 +224,22 @@ const getPageConfig = (pathname) => {
     };
   }
 
+  /* Subscriber trade details */
+  if (
+    cleanPath.startsWith(
+      "/dashboard/trade/"
+    )
+  ) {
+    return {
+      title:
+        "Subscriber Market Study | VTKS INVEST",
+      description:
+        "Access detailed VTKS subscriber market study information.",
+      indexable: false,
+    };
+  }
+
+  /* Admin */
   if (cleanPath.startsWith("/admin")) {
     return {
       title: "Admin Panel | VTKS INVEST",
@@ -174,34 +249,61 @@ const getPageConfig = (pathname) => {
     };
   }
 
-  if (cleanPath.startsWith("/subscriber")) {
+  /* Any other subscriber route */
+  if (
+    cleanPath.startsWith("/subscriber")
+  ) {
     return {
-      title: "Subscriber Area | VTKS INVEST",
+      title:
+        "Subscriber Area | VTKS INVEST",
       description:
         "VTKS INVEST subscriber area.",
       indexable: false,
     };
   }
 
+  /* Any unmatched dashboard route */
+  if (
+    cleanPath.startsWith("/dashboard")
+  ) {
+    return {
+      title:
+        "Subscriber Dashboard | VTKS INVEST",
+      description:
+        "VTKS INVEST subscriber dashboard.",
+      indexable: false,
+    };
+  }
+
   return (
     seoConfig[cleanPath] || {
-      title: `Page Not Found | ${SITE_NAME}`,
-      description: DEFAULT_DESCRIPTION,
+      title:
+        `Page Not Found | ${SITE_NAME}`,
+      description:
+        DEFAULT_DESCRIPTION,
       indexable: false,
     }
   );
 };
 
+/* =========================================================
+   ROUTE SEO COMPONENT
+========================================================= */
+
 export default function RouteSEO() {
   const { pathname } = useLocation();
 
-  const cleanPath = normalizePathname(pathname);
-  const config = getPageConfig(cleanPath);
+  const cleanPath =
+    normalizePathname(pathname);
 
-  const isHomePage = cleanPath === "/";
+  const config =
+    getPageConfig(cleanPath);
+
+  const isHomePage =
+    cleanPath === "/";
 
   const canonicalUrl =
-    cleanPath === "/"
+    isHomePage
       ? `${SITE_URL}/`
       : `${SITE_URL}${cleanPath}`;
 
@@ -211,31 +313,58 @@ export default function RouteSEO() {
   const logoUrl =
     `${SITE_URL}/favicon.png`;
 
-  const robotsContent = config.indexable
-    ? "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
-    : "noindex, follow";
+  /* =====================================================
+     ROBOTS
+  ===================================================== */
+
+  const robotsContent =
+    config.indexable
+      ? "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+      : "noindex, follow";
+
+  /* =====================================================
+     STRUCTURED DATA
+  ===================================================== */
 
   const websiteSchema = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    name: SITE_NAME,
-    alternateName: "VTKS",
-    url: `${SITE_URL}/`,
+    "@context":
+      "https://schema.org",
+    "@type":
+      "WebSite",
+    name:
+      SITE_NAME,
+    alternateName:
+      "VTKS",
+    url:
+      `${SITE_URL}/`,
   };
 
   const organizationSchema = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    name: SITE_NAME,
-    alternateName: "VTKS",
-    url: `${SITE_URL}/`,
-    logo: logoUrl,
-    description: DEFAULT_DESCRIPTION,
+    "@context":
+      "https://schema.org",
+    "@type":
+      "Organization",
+    name:
+      SITE_NAME,
+    alternateName:
+      "VTKS",
+    url:
+      `${SITE_URL}/`,
+    logo:
+      logoUrl,
+    description:
+      DEFAULT_DESCRIPTION,
   };
 
   return (
     <Helmet>
-      <title>{config.title}</title>
+      {/* =================================================
+          PRIMARY SEO
+      ================================================= */}
+
+      <title>
+        {config.title}
+      </title>
 
       <meta
         name="description"
@@ -267,12 +396,18 @@ export default function RouteSEO() {
         content="#0f172a"
       />
 
+      {/* =================================================
+          CANONICAL
+      ================================================= */}
+
       <link
         rel="canonical"
         href={canonicalUrl}
       />
 
-      {/* OPEN GRAPH */}
+      {/* =================================================
+          OPEN GRAPH
+      ================================================= */}
 
       <meta
         property="og:type"
@@ -310,11 +445,23 @@ export default function RouteSEO() {
       />
 
       <meta
+        property="og:image:secure_url"
+        content={socialImageUrl}
+      />
+
+      <meta
+        property="og:image:type"
+        content="image/png"
+      />
+
+      <meta
         property="og:image:alt"
         content="VTKS INVEST stock market education and technical analysis platform"
       />
 
-      {/* X / TWITTER */}
+      {/* =================================================
+          X / TWITTER
+      ================================================= */}
 
       <meta
         name="twitter:card"
@@ -341,17 +488,23 @@ export default function RouteSEO() {
         content="VTKS INVEST stock market education and technical analysis platform"
       />
 
-      {/* SITE NAME / ORGANIZATION SCHEMA */}
+      {/* =================================================
+          HOMEPAGE STRUCTURED DATA
+      ================================================= */}
 
       {isHomePage && (
         <script type="application/ld+json">
-          {JSON.stringify(websiteSchema)}
+          {JSON.stringify(
+            websiteSchema
+          )}
         </script>
       )}
 
       {isHomePage && (
         <script type="application/ld+json">
-          {JSON.stringify(organizationSchema)}
+          {JSON.stringify(
+            organizationSchema
+          )}
         </script>
       )}
     </Helmet>
