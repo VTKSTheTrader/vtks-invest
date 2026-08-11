@@ -37,6 +37,8 @@ export default function FundList() {
 
   const [search, setSearch] = useState("");
   const [sector, setSector] = useState("All");
+  const [visibilityFilter, setVisibilityFilter] =
+    useState("all");
   const [status, setStatus] = useState("All");
   const [roiSort, setRoiSort] = useState("default");
   const [currentPage, setCurrentPage] = useState(1);
@@ -171,9 +173,6 @@ export default function FundList() {
         ""
     ).trim();
 
-    /*
-      Respect manually closed outcomes.
-    */
     if (
       [
         "Booked Profit",
@@ -261,8 +260,7 @@ export default function FundList() {
       return 0;
     }
 
-    const tradeStatus =
-      getStatus(holding);
+    const tradeStatus = getStatus(holding);
 
     const isRealisedTrade = [
       "Booked Profit",
@@ -422,6 +420,24 @@ export default function FundList() {
           (holding.sector || "General") ===
             sector;
 
+        /* ===============================================
+           VISIBILITY FILTER
+        =============================================== */
+
+        const matchesVisibility =
+          visibilityFilter === "all" ||
+          (
+            visibilityFilter === "public" &&
+            visibility === "public"
+          ) ||
+          (
+            visibilityFilter === "subscriber" &&
+            [
+              "subscriber",
+              "community",
+            ].includes(visibility)
+          );
+
         const currentStatus =
           getStatus(holding);
 
@@ -444,11 +460,6 @@ export default function FundList() {
           holding.target3 || 0
         );
 
-        /*
-          Target filter logic remains intact.
-          Target 3 is simply not displayed
-          on the public cards.
-        */
         const hasReachedTarget1 =
           currentStatus === "Target 1 Hit" ||
           currentStatus === "Target 2 Hit" ||
@@ -514,6 +525,7 @@ export default function FundList() {
         return (
           matchesSearch &&
           matchesSector &&
+          matchesVisibility &&
           matchesStatus
         );
       }
@@ -522,6 +534,7 @@ export default function FundList() {
     visibleHoldings,
     search,
     sector,
+    visibilityFilter,
     status,
   ]);
 
@@ -565,6 +578,7 @@ export default function FundList() {
   }, [
     search,
     sector,
+    visibilityFilter,
     status,
     roiSort,
   ]);
@@ -592,19 +606,21 @@ export default function FundList() {
     totalPages,
   ]);
 
-  const paginatedHoldings = useMemo(() => {
-    const startIndex =
-      (currentPage - 1) *
-      ITEMS_PER_PAGE;
+  const paginatedHoldings =
+    useMemo(() => {
+      const startIndex =
+        (currentPage - 1) *
+        ITEMS_PER_PAGE;
 
-    return sortedHoldings.slice(
-      startIndex,
-      startIndex + ITEMS_PER_PAGE
-    );
-  }, [
-    sortedHoldings,
-    currentPage,
-  ]);
+      return sortedHoldings.slice(
+        startIndex,
+        startIndex +
+          ITEMS_PER_PAGE
+      );
+    }, [
+      sortedHoldings,
+      currentPage,
+    ]);
 
   /* =========================================================
      COUNTS
@@ -716,9 +732,11 @@ export default function FundList() {
 
   return (
     <section style={wrapperStyle}>
+
       {/* HEADER */}
 
       <div style={headerStyle}>
+
         <div>
           <h2 style={titleStyle}>
             Market Case Studies
@@ -805,6 +823,9 @@ export default function FundList() {
       {/* FILTERS */}
 
       <div style={filtersStyle}>
+
+        {/* SEARCH */}
+
         <input
           type="search"
           placeholder="Search stock, sector or study..."
@@ -816,6 +837,8 @@ export default function FundList() {
           }
           style={inputStyle}
         />
+
+        {/* SECTOR */}
 
         <select
           value={sector}
@@ -839,6 +862,32 @@ export default function FundList() {
             )
           )}
         </select>
+
+        {/* VISIBILITY */}
+
+        <select
+          value={visibilityFilter}
+          onChange={(event) =>
+            setVisibilityFilter(
+              event.target.value
+            )
+          }
+          style={selectStyle}
+        >
+          <option value="all">
+            👁 All Studies
+          </option>
+
+          <option value="public">
+            🌐 Public Studies
+          </option>
+
+          <option value="subscriber">
+            🔒 Subscriber Studies
+          </option>
+        </select>
+
+        {/* STATUS */}
 
         <select
           value={status}
@@ -885,6 +934,8 @@ export default function FundList() {
             SL Hit
           </option>
         </select>
+
+        {/* ROI */}
 
         <select
           value={roiSort}
@@ -1090,10 +1141,6 @@ function PortfolioCard({
       holding.accuracyBlur
     );
 
-  /*
-    Final outcomes use Exit Price
-    and Realised ROI.
-  */
   const isRealisedTrade = [
     "Booked Profit",
     "Booked Loss",
@@ -1118,14 +1165,14 @@ function PortfolioCard({
 
   const returnLabel =
     isRealisedTrade
-      ? "Realised ROI"
+      ? status === "Booked Loss" ||
+        status === "SL Hit"
+        ? "Realised Loss"
+        : "Realised ROI"
       : "Live ROI";
 
   /* =====================================================
      TARGET DISPLAY LOGIC
-
-     Public card shows only Target 1 + Target 2.
-     Target 3 remains internal.
   ====================================================== */
 
   const referencePrice = Number(
@@ -1201,9 +1248,11 @@ function PortfolioCard({
 
   return (
     <article style={portfolioCardStyle}>
+
       {/* TOP */}
 
       <div style={cardTopRowStyle}>
+
         <span
           style={
             protectedTrade
@@ -1240,6 +1289,7 @@ function PortfolioCard({
       {/* DETAILS */}
 
       <div style={detailsGridStyle}>
+
         <Detail
           label="Entry"
           value={protectedValue(
@@ -1360,6 +1410,7 @@ function PortfolioCard({
       {/* FOOTER */}
 
       <div style={cardFooterStyle}>
+
         <span style={tradeTypeStyle}>
           {holding.tradeType ||
             "Swing"}
@@ -1626,7 +1677,7 @@ const filtersStyle = {
 };
 
 const inputStyle = {
-  flex: "1 1 280px",
+  flex: "1 1 260px",
   width: "100%",
   minWidth: 0,
   padding: "13px 15px",
@@ -1636,7 +1687,7 @@ const inputStyle = {
 };
 
 const selectStyle = {
-  flex: "1 1 190px",
+  flex: "1 1 180px",
   width: "100%",
   minWidth: 0,
   padding: "13px 15px",
