@@ -12,15 +12,15 @@ import {
 } from "../../services/holdingService";
 
 import Pagination from "../../components/common/Pagination";
-import "./Accuracy.css";
 import SEO from "../../components/common/SEO";
 
 import {
   calculatePerformanceSummary,
   getTradeROI,
-  isActiveTrade,
   isRealisedTrade,
 } from "../../utils/performanceUtils";
+
+import "./Accuracy.css";
 
 const ITEMS_PER_PAGE = 5;
 const AUTO_REFRESH_INTERVAL = 60 * 1000;
@@ -31,49 +31,36 @@ const normalize = (value) =>
     .toLowerCase();
 
 export default function Accuracy() {
-  const [holdings, setHoldings] =
-    useState([]);
+  const [holdings, setHoldings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [loadError, setLoadError] = useState("");
+  const [lastUpdated, setLastUpdated] = useState(null);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [roiSort, setRoiSort] = useState("default");
 
-  const [refreshing, setRefreshing] =
-    useState(false);
+  const [
+    visibilityFilter,
+    setVisibilityFilter,
+  ] = useState("all");
 
-  const [loadError, setLoadError] =
-    useState("");
-
-  const [lastUpdated, setLastUpdated] =
-    useState(null);
-
-  const [currentPage, setCurrentPage] =
-    useState(1);
-
-  const [roiSort, setRoiSort] =
-    useState("default");
-
-  const requestInProgressRef =
-    useRef(false);
-
-  const mountedRef =
-    useRef(true);
+  const requestInProgressRef = useRef(false);
+  const mountedRef = useRef(true);
 
   /* =========================================================
-     LOAD ACCURACY DATA
+     LOAD DATA
   ========================================================= */
 
   const loadAccuracy = useCallback(
     async ({
       showInitialLoader = false,
     } = {}) => {
-      if (
-        requestInProgressRef.current
-      ) {
+      if (requestInProgressRef.current) {
         return;
       }
 
-      requestInProgressRef.current =
-        true;
+      requestInProgressRef.current = true;
 
       try {
         if (showInitialLoader) {
@@ -84,22 +71,17 @@ export default function Accuracy() {
 
         setLoadError("");
 
-        const rows =
-          await getHoldings();
+        const rows = await getHoldings();
 
         if (!mountedRef.current) {
           return;
         }
 
         setHoldings(
-          (rows || []).map(
-            mapHoldingFromDB
-          )
+          (rows || []).map(mapHoldingFromDB)
         );
 
-        setLastUpdated(
-          new Date()
-        );
+        setLastUpdated(new Date());
       } catch (error) {
         console.error(
           "Accuracy data load error:",
@@ -115,12 +97,9 @@ export default function Accuracy() {
             "Failed to load accuracy data."
         );
       } finally {
-        requestInProgressRef.current =
-          false;
+        requestInProgressRef.current = false;
 
-        if (
-          mountedRef.current
-        ) {
+        if (mountedRef.current) {
           setLoading(false);
           setRefreshing(false);
         }
@@ -140,20 +119,7 @@ export default function Accuracy() {
       showInitialLoader: true,
     });
 
-    const intervalId =
-      window.setInterval(
-        () => {
-          if (
-            document.visibilityState ===
-            "visible"
-          ) {
-            loadAccuracy();
-          }
-        },
-        AUTO_REFRESH_INTERVAL
-      );
-
-    const handleVisibilityChange =
+    const intervalId = window.setInterval(
       () => {
         if (
           document.visibilityState ===
@@ -161,7 +127,18 @@ export default function Accuracy() {
         ) {
           loadAccuracy();
         }
-      };
+      },
+      AUTO_REFRESH_INTERVAL
+    );
+
+    const handleVisibilityChange = () => {
+      if (
+        document.visibilityState ===
+        "visible"
+      ) {
+        loadAccuracy();
+      }
+    };
 
     window.addEventListener(
       "focus",
@@ -176,9 +153,7 @@ export default function Accuracy() {
     return () => {
       mountedRef.current = false;
 
-      window.clearInterval(
-        intervalId
-      );
+      window.clearInterval(intervalId);
 
       window.removeEventListener(
         "focus",
@@ -193,104 +168,84 @@ export default function Accuracy() {
   }, [loadAccuracy]);
 
   /* =========================================================
-     DISPLAY STATUS
+     STATUS
   ========================================================= */
 
   const getStatus = useCallback(
     (holding) => {
-      const manualStatus =
-        String(
-          holding.tradeStatus ||
-            holding.trade_status ||
-            ""
-        ).trim();
+      const manualStatus = String(
+        holding.tradeStatus ||
+          holding.trade_status ||
+          ""
+      ).trim();
 
-      /*
-        Respect all manually saved
-        final outcomes.
-      */
       if (
         [
           "Booked Profit",
           "Booked Loss",
           "Breakeven",
           "Cancelled",
-        ].includes(
-          manualStatus
-        )
+        ].includes(manualStatus)
       ) {
         return manualStatus;
       }
 
-      const highestPrice =
-        Number(
-          holding.highestPrice ??
-            holding.highest_price ??
-            holding.cmp ??
-            0
-        );
+      const highestPrice = Number(
+        holding.highestPrice ??
+          holding.highest_price ??
+          holding.cmp ??
+          0
+      );
 
-      const lowestPrice =
-        Number(
-          holding.lowestPrice ??
-            holding.lowest_price ??
-            holding.cmp ??
-            0
-        );
+      const lowestPrice = Number(
+        holding.lowestPrice ??
+          holding.lowest_price ??
+          holding.cmp ??
+          0
+      );
 
-      const stopLoss =
-        Number(
-          holding.stopLoss ??
-            holding.stop_loss ??
-            0
-        );
+      const stopLoss = Number(
+        holding.stopLoss ??
+          holding.stop_loss ??
+          0
+      );
 
-      const target1 =
-        Number(
-          holding.target1 ??
-            0
-        );
+      const target1 = Number(
+        holding.target1 ?? 0
+      );
 
-      const target2 =
-        Number(
-          holding.target2 ??
-            0
-        );
+      const target2 = Number(
+        holding.target2 ?? 0
+      );
 
-      const target3 =
-        Number(
-          holding.target3 ??
-            0
-        );
+      const target3 = Number(
+        holding.target3 ?? 0
+      );
 
       if (
         stopLoss > 0 &&
-        lowestPrice <=
-          stopLoss
+        lowestPrice <= stopLoss
       ) {
         return "SL Hit";
       }
 
       if (
         target3 > 0 &&
-        highestPrice >=
-          target3
+        highestPrice >= target3
       ) {
         return "Target 3 Hit";
       }
 
       if (
         target2 > 0 &&
-        highestPrice >=
-          target2
+        highestPrice >= target2
       ) {
         return "Target 2 Hit";
       }
 
       if (
         target1 > 0 &&
-        highestPrice >=
-          target1
+        highestPrice >= target1
       ) {
         return "Target 1 Hit";
       }
@@ -306,160 +261,163 @@ export default function Accuracy() {
 
   const getROI = useCallback(
     (holding) =>
-      getTradeROI(
-        holding
-      ),
+      getTradeROI(holding),
     []
   );
 
   /* =========================================================
-     PUBLIC ACCURACY HOLDINGS
+     BASE ACCURACY STUDIES
   ========================================================= */
 
-  const accuracyHoldings =
+  const accuracyHoldings = useMemo(() => {
+    return holdings.filter((holding) => {
+      const visibility = normalize(
+        holding.visibility
+      );
+
+      const publishStatus = normalize(
+        holding.publishStatus
+      );
+
+      const allowedVisibility = [
+        "public",
+        "subscriber",
+        "community",
+      ].includes(visibility);
+
+      return (
+        allowedVisibility &&
+        visibility !== "private" &&
+        publishStatus !== "draft" &&
+        holding.accuracyShow !== false &&
+        getStatus(holding) !== "Cancelled"
+      );
+    });
+  }, [holdings, getStatus]);
+
+  /* =========================================================
+     VISIBILITY FILTER
+  ========================================================= */
+
+  const filteredAccuracyHoldings =
     useMemo(() => {
-      return holdings.filter(
+      return accuracyHoldings.filter(
         (holding) => {
-          const visibility =
-            normalize(
-              holding.visibility
-            );
-
-          const publishStatus =
-            normalize(
-              holding.publishStatus
-            );
-
-          const allowedVisibility =
-            [
-              "public",
-              "subscriber",
-              "community",
-            ].includes(
-              visibility
-            );
-
-          return (
-            allowedVisibility &&
-            visibility !==
-              "private" &&
-            publishStatus !==
-              "draft" &&
-            holding.accuracyShow !==
-              false &&
-            getStatus(
-              holding
-            ) !==
-              "Cancelled"
+          const visibility = normalize(
+            holding.visibility
           );
+
+          const blurred = Boolean(
+            holding.accuracyBlur
+          );
+
+          if (
+            visibilityFilter === "public"
+          ) {
+            return (
+              visibility === "public" &&
+              !blurred
+            );
+          }
+
+          if (
+            visibilityFilter ===
+            "protected"
+          ) {
+            return (
+              [
+                "subscriber",
+                "community",
+              ].includes(visibility) &&
+              blurred
+            );
+          }
+
+          return true;
         }
       );
     }, [
-      holdings,
-      getStatus,
+      accuracyHoldings,
+      visibilityFilter,
     ]);
 
   /* =========================================================
      PERFORMANCE SUMMARY
   ========================================================= */
 
-  const performanceSummary =
-    useMemo(
-      () =>
-        calculatePerformanceSummary(
-          accuracyHoldings
-        ),
-      [accuracyHoldings]
-    );
+  const performanceSummary = useMemo(
+    () =>
+      calculatePerformanceSummary(
+        accuracyHoldings
+      ),
+    [accuracyHoldings]
+  );
 
-  const activeTrades =
-    accuracyHoldings.filter(
-      isActiveTrade
-    );
+  const winRate = Number(
+    performanceSummary.winRate || 0
+  ).toFixed(1);
 
-  const realisedTrades =
-    accuracyHoldings.filter(
-      isRealisedTrade
-    );
+  const activeAverageReturn = Number(
+    performanceSummary.activeAverageReturn ||
+      0
+  ).toFixed(2);
 
-  const winRate =
-    performanceSummary.winRate.toFixed(
-      1
-    );
-
-  const activeAverageReturn =
-    performanceSummary.activeAverageReturn.toFixed(
-      2
-    );
-
-  const realisedAverageReturn =
-    performanceSummary.realisedAverageReturn.toFixed(
-      2
-    );
+  const realisedAverageReturn = Number(
+    performanceSummary.realisedAverageReturn ||
+      0
+  ).toFixed(2);
 
   /* =========================================================
      BEST / WORST
   ========================================================= */
 
-  const sortedByROI =
-    useMemo(() => {
-      return [
-        ...accuracyHoldings,
-      ].sort(
-        (first, second) =>
-          getROI(second) -
-          getROI(first)
-      );
-    }, [
-      accuracyHoldings,
-      getROI,
-    ]);
+  const sortedByROI = useMemo(() => {
+    return [
+      ...filteredAccuracyHoldings,
+    ].sort(
+      (first, second) =>
+        getROI(second) - getROI(first)
+    );
+  }, [
+    filteredAccuracyHoldings,
+    getROI,
+  ]);
 
   const bestTrade =
-    sortedByROI[0] ||
-    null;
+    sortedByROI[0] || null;
 
   const worstTrade =
     sortedByROI.length > 0
       ? sortedByROI[
-          sortedByROI.length -
-            1
+          sortedByROI.length - 1
         ]
       : null;
 
   /* =========================================================
-     SORT TABLE
+     ROI SORT
   ========================================================= */
 
   const sortedAccuracyHoldings =
     useMemo(() => {
       const rows = [
-        ...accuracyHoldings,
+        ...filteredAccuracyHoldings,
       ];
 
       if (
-        roiSort ===
-        "high-to-low"
+        roiSort === "high-to-low"
       ) {
-        return rows.sort(
-          (
-            first,
-            second
-          ) =>
+        rows.sort(
+          (first, second) =>
             getROI(second) -
             getROI(first)
         );
       }
 
       if (
-        roiSort ===
-        "low-to-high"
+        roiSort === "low-to-high"
       ) {
-        return rows.sort(
-          (
-            first,
-            second
-          ) =>
+        rows.sort(
+          (first, second) =>
             getROI(first) -
             getROI(second)
         );
@@ -467,7 +425,7 @@ export default function Accuracy() {
 
       return rows;
     }, [
-      accuracyHoldings,
+      filteredAccuracyHoldings,
       roiSort,
       getROI,
     ]);
@@ -476,24 +434,19 @@ export default function Accuracy() {
      PAGINATION
   ========================================================= */
 
-  const totalPages =
-    Math.max(
-      1,
-
-      Math.ceil(
-        sortedAccuracyHoldings.length /
-          ITEMS_PER_PAGE
-      )
-    );
+  const totalPages = Math.max(
+    1,
+    Math.ceil(
+      sortedAccuracyHoldings.length /
+        ITEMS_PER_PAGE
+    )
+  );
 
   useEffect(() => {
     if (
-      currentPage >
-      totalPages
+      currentPage > totalPages
     ) {
-      setCurrentPage(
-        totalPages
-      );
+      setCurrentPage(totalPages);
     }
   }, [
     currentPage,
@@ -518,92 +471,79 @@ export default function Accuracy() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [roiSort]);
+  }, [
+    roiSort,
+    visibilityFilter,
+  ]);
 
   /* =========================================================
      BLUR
   ========================================================= */
 
-  const isBlurred = (
-    holding
-  ) =>
+  const isBlurred = (holding) =>
     Boolean(
       holding.accuracyBlur
     );
 
   /* =========================================================
-     TARGET INDICATOR
+     TARGET INDICATORS
   ========================================================= */
 
   const getTargetIndicator = (
     holding,
     type
   ) => {
-    const status =
-      getStatus(
-        holding
-      );
+    const status = getStatus(
+      holding
+    );
 
-    const highestPrice =
-      Number(
-        holding.highestPrice ??
-          holding.highest_price ??
-          holding.cmp ??
-          0
-      );
+    const highestPrice = Number(
+      holding.highestPrice ??
+        holding.highest_price ??
+        holding.cmp ??
+        0
+    );
 
-    const lowestPrice =
-      Number(
-        holding.lowestPrice ??
-          holding.lowest_price ??
-          holding.cmp ??
-          0
-      );
+    const lowestPrice = Number(
+      holding.lowestPrice ??
+        holding.lowest_price ??
+        holding.cmp ??
+        0
+    );
 
-    const target1 =
-      Number(
-        holding.target1 ??
-          0
-      );
+    const target1 = Number(
+      holding.target1 ?? 0
+    );
 
-    const target2 =
-      Number(
-        holding.target2 ??
-          0
-      );
+    const target2 = Number(
+      holding.target2 ?? 0
+    );
 
-    const target3 =
-      Number(
-        holding.target3 ??
-          0
-      );
+    const target3 = Number(
+      holding.target3 ?? 0
+    );
 
-    const stopLoss =
-      Number(
-        holding.stopLoss ??
-          holding.stop_loss ??
-          0
-      );
+    const stopLoss = Number(
+      holding.stopLoss ??
+        holding.stop_loss ??
+        0
+    );
 
     const target1Hit =
       target1 > 0 &&
-      highestPrice >=
-        target1;
+      highestPrice >= target1;
 
     const target2Hit =
       target2 > 0 &&
-      highestPrice >=
-        target2;
+      highestPrice >= target2;
 
     const target3Hit =
       target3 > 0 &&
-      highestPrice >=
-        target3;
+      highestPrice >= target3;
 
     const stopLossHit =
       stopLoss > 0 &&
-      lowestPrice <=
-        stopLoss;
+      lowestPrice <= stopLoss;
 
     switch (type) {
       case "t1":
@@ -632,8 +572,7 @@ export default function Accuracy() {
       case "t3":
         return (
           target3Hit ||
-          status ===
-            "Target 3 Hit"
+          status === "Target 3 Hit"
         )
           ? " 🏆"
           : "";
@@ -641,8 +580,7 @@ export default function Accuracy() {
       case "sl":
         return (
           stopLossHit ||
-          status ===
-            "SL Hit"
+          status === "SL Hit"
         )
           ? " 🛑"
           : "";
@@ -656,108 +594,83 @@ export default function Accuracy() {
      FORMATTERS
   ========================================================= */
 
-  const formatPrice = (
-    value
-  ) =>
+  const formatPrice = (value) =>
     `₹${Number(
       value || 0
     ).toLocaleString(
       "en-IN",
       {
-        maximumFractionDigits:
-          2,
+        maximumFractionDigits: 2,
       }
     )}`;
 
-  const formatUpdatedTime =
-    (value) => {
-      if (!value) {
-        return "";
+  const formatUpdatedTime = (
+    value
+  ) => {
+    if (!value) {
+      return "";
+    }
+
+    return value.toLocaleTimeString(
+      "en-IN",
+      {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
       }
-
-      return value.toLocaleTimeString(
-        "en-IN",
-        {
-          hour:
-            "2-digit",
-
-          minute:
-            "2-digit",
-
-          second:
-            "2-digit",
-        }
-      );
-    };
+    );
+  };
 
   /* =========================================================
-     PROTECTED TEXT
+     PROTECTED VALUES
   ========================================================= */
 
-  const renderProtectedText =
-    (
-      value,
-      holding,
-      fallback = "-"
-    ) => {
-      if (
-        !isBlurred(
-          holding
-        )
-      ) {
-        return (
-          value ||
-          fallback
-        );
-      }
+  const renderProtectedText = (
+    value,
+    holding,
+    fallback = "-"
+  ) => {
+    if (!isBlurred(holding)) {
+      return value || fallback;
+    }
 
-      return (
-        <span
-          className="accuracy-blurred-value"
-          title="Subscriber study details are protected"
-        >
-          {value ||
-            "Protected"}
-        </span>
-      );
-    };
+    return (
+      <span
+        className="accuracy-blurred-value"
+        title="Subscriber study details are protected"
+      >
+        {value || "Protected"}
+      </span>
+    );
+  };
 
-  const renderProtectedPrice =
-    (
-      value,
-      holding
-    ) => {
-      if (
-        !isBlurred(
-          holding
-        )
-      ) {
-        return formatPrice(
-          value
-        );
-      }
+  const renderProtectedPrice = (
+    value,
+    holding
+  ) => {
+    if (!isBlurred(holding)) {
+      return formatPrice(value);
+    }
 
-      return (
-        <span
-          className="accuracy-blurred-value"
-          title="Subscriber study details are protected"
-        >
-          ₹000.00
-        </span>
-      );
-    };
+    return (
+      <span
+        className="accuracy-blurred-value"
+        title="Subscriber study details are protected"
+      >
+        ₹000.00
+      </span>
+    );
+  };
 
   /* =========================================================
-     TABLE DISPLAY PRICE
+     DISPLAY PRICE
   ========================================================= */
 
   const getDisplayPrice = (
     holding
   ) => {
     if (
-      isRealisedTrade(
-        holding
-      )
+      isRealisedTrade(holding)
     ) {
       const exitPrice =
         holding.exitPrice ??
@@ -773,6 +686,52 @@ export default function Accuracy() {
     }
 
     return holding.cmp;
+  };
+
+  /* =========================================================
+     REALISED BADGE
+  ========================================================= */
+
+  const getRealisedBadgeClass = (
+    status
+  ) => {
+    if (
+      status === "Booked Loss" ||
+      status === "SL Hit"
+    ) {
+      return "accuracy-realised-loss";
+    }
+
+    if (
+      status === "Breakeven"
+    ) {
+      return "accuracy-realised-neutral";
+    }
+
+    return "accuracy-realised-profit";
+  };
+
+  /* =========================================================
+     EXIT PRICE HIGHLIGHT
+  ========================================================= */
+
+  const getExitPriceClass = (
+    status
+  ) => {
+    if (
+      status === "Booked Loss" ||
+      status === "SL Hit"
+    ) {
+      return "accuracy-exit-price-loss";
+    }
+
+    if (
+      status === "Breakeven"
+    ) {
+      return "accuracy-exit-price-neutral";
+    }
+
+    return "accuracy-exit-price-profit";
   };
 
   /* =========================================================
@@ -793,15 +752,13 @@ export default function Accuracy() {
 
   if (
     loadError &&
-    holdings.length ===
-      0
+    holdings.length === 0
   ) {
     return (
       <main className="accuracy-page">
         <section className="accuracy-empty-state">
           <h2>
-            Unable to load performance
-            data
+            Unable to load performance data
           </h2>
 
           <p>
@@ -812,8 +769,7 @@ export default function Accuracy() {
             type="button"
             onClick={() =>
               loadAccuracy({
-                showInitialLoader:
-                  true,
+                showInitialLoader: true,
               })
             }
           >
@@ -837,9 +793,7 @@ export default function Accuracy() {
 
       <section className="accuracy-page">
 
-        {/* ===================================================
-            HERO
-        =================================================== */}
+        {/* HERO */}
 
         <div className="accuracy-hero">
           <span className="accuracy-badge">
@@ -886,24 +840,19 @@ export default function Accuracy() {
           </div>
         </div>
 
-        {/* INLINE ERROR */}
-
         {loadError && (
           <div className="accuracy-inline-error">
             {loadError}
           </div>
         )}
 
-        {/* ===================================================
-            STAT CARDS
-        =================================================== */}
+        {/* STATS */}
 
         <div className="accuracy-stats">
+
           <div className="accuracy-card">
             <h2>
-              {
-                performanceSummary.totalTrades
-              }
+              {performanceSummary.totalTrades}
             </h2>
 
             <p>
@@ -913,9 +862,7 @@ export default function Accuracy() {
 
           <div className="accuracy-card">
             <h2>
-              {
-                performanceSummary.activeTrades
-              }
+              {performanceSummary.activeTrades}
             </h2>
 
             <p>
@@ -925,9 +872,7 @@ export default function Accuracy() {
 
           <div className="accuracy-card">
             <h2>
-              {
-                performanceSummary.realisedTrades
-              }
+              {performanceSummary.realisedTrades}
             </h2>
 
             <p>
@@ -1017,8 +962,6 @@ export default function Accuracy() {
             </p>
           </div>
 
-          
-
           <div className="accuracy-card">
             <h2>
               {
@@ -1032,11 +975,10 @@ export default function Accuracy() {
           </div>
         </div>
 
-        {/* ===================================================
-            BEST / WORST
-        =================================================== */}
+        {/* BEST / WORST */}
 
         <div className="accuracy-grid">
+
           <div className="accuracy-panel">
             <h3>
               🏆 Best Performer
@@ -1058,16 +1000,12 @@ export default function Accuracy() {
 
                 <strong
                   className={
-                    getROI(
-                      bestTrade
-                    ) >= 0
+                    getROI(bestTrade) >= 0
                       ? "positive"
                       : "negative"
                   }
                 >
-                  {getROI(
-                    bestTrade
-                  ) >= 0
+                  {getROI(bestTrade) >= 0
                     ? "+"
                     : ""}
 
@@ -1113,16 +1051,13 @@ export default function Accuracy() {
 
                 <strong
                   className={
-                    getROI(
-                      worstTrade
-                    ) >= 0
+                    getROI(worstTrade) >=
+                    0
                       ? "positive"
                       : "negative"
                   }
                 >
-                  {getROI(
-                    worstTrade
-                  ) >= 0
+                  {getROI(worstTrade) >= 0
                     ? "+"
                     : ""}
 
@@ -1148,163 +1083,115 @@ export default function Accuracy() {
           </div>
         </div>
 
-        {/* ===================================================
-            TABLE
-        =================================================== */}
+        {/* TABLE */}
 
         <div className="accuracy-table-wrap">
+
           <div className="accuracy-table-header">
-            <div>
+
+            <div className="accuracy-table-heading">
               <h2>
                 Recent Analysis
               </h2>
 
               <p>
-                Showing {ITEMS_PER_PAGE} studies per
-                page. Subscriber stock identity and
-                price levels remain blurred until the
-                admin chooses to reveal them.
+                Showing {ITEMS_PER_PAGE} studies per page.
+                Subscriber stock identity and price levels
+                remain blurred until the admin chooses to
+                reveal them.
               </p>
             </div>
 
-            <div
-              className="accuracy-table-actions"
-              style={{
-                display:
-                  "flex",
+            <div className="accuracy-table-actions">
 
-                alignItems:
-                  "center",
-
-                justifyContent:
-                  "flex-end",
-
-                flexWrap:
-                  "wrap",
-
-                gap:
-                  "12px",
-              }}
-            >
               <span className="accuracy-protection-note">
                 🔒 Protected subscriber details
               </span>
 
-              <select
-                className="accuracy-roi-sort"
-                value={
-                  roiSort
-                }
-                onChange={(event) =>
-                  setRoiSort(
-                    event.target.value
-                  )
-                }
-                aria-label="Sort market studies by ROI"
-                style={{
-                  minHeight:
-                    "42px",
+              <div className="accuracy-filter-group">
 
-                  padding:
-                    "9px 38px 9px 13px",
+                <select
+                  className="accuracy-table-select"
+                  value={
+                    visibilityFilter
+                  }
+                  onChange={(event) =>
+                    setVisibilityFilter(
+                      event.target.value
+                    )
+                  }
+                  aria-label="Filter studies by visibility"
+                >
+                  <option value="all">
+                    👁 All Studies
+                  </option>
 
-                  border:
-                    "1px solid #cbd5e1",
+                  <option value="public">
+                    🌐 Public Studies
+                  </option>
 
-                  borderRadius:
-                    "10px",
+                  <option value="protected">
+                    🔒 Protected Studies
+                  </option>
+                </select>
 
-                  background:
-                    "#ffffff",
+                <select
+                  className="accuracy-table-select"
+                  value={roiSort}
+                  onChange={(event) =>
+                    setRoiSort(
+                      event.target.value
+                    )
+                  }
+                  aria-label="Sort market studies by ROI"
+                >
+                  <option value="default">
+                    Sort by ROI
+                  </option>
 
-                  color:
-                    "#0f172a",
+                  <option value="high-to-low">
+                    ROI: High to Low
+                  </option>
 
-                  font:
-                    "inherit",
+                  <option value="low-to-high">
+                    ROI: Low to High
+                  </option>
+                </select>
 
-                  fontSize:
-                    "13px",
-
-                  fontWeight:
-                    700,
-
-                  cursor:
-                    "pointer",
-                }}
-              >
-                <option value="default">
-                  Sort by ROI
-                </option>
-
-                <option value="high-to-low">
-                  ROI: High to Low
-                </option>
-
-                <option value="low-to-high">
-                  ROI: Low to High
-                </option>
-              </select>
+              </div>
             </div>
           </div>
 
-          {accuracyHoldings.length ===
+          {sortedAccuracyHoldings.length ===
           0 ? (
             <div className="accuracy-empty-state">
               <h3>
-                No performance studies available
+                No studies found
               </h3>
 
               <p>
-                Published studies selected for the
-                Accuracy page will appear here.
+                No studies match the selected
+                visibility filter.
               </p>
             </div>
           ) : (
             <>
               <div className="accuracy-table-scroll">
+
                 <table className="accuracy-table">
+
                   <thead>
                     <tr>
-                      <th>
-                        Stock
-                      </th>
-
-                      <th>
-                        Sector
-                      </th>
-
-                      <th>
-                        Trade Type
-                      </th>
-
-                      <th>
-                        Entry
-                      </th>
-
-                      <th>
-                        CMP / Exit
-                      </th>
-
-                      <th>
-                        SL
-                      </th>
-
-                      <th>
-                        Target 1
-                      </th>
-
-                      <th>
-                        Target 2
-                      </th>
-
-                      <th>
-                        Status
-                      </th>
-
-                      <th>
-                        ROI
-                      </th>
+                      <th>Stock</th>
+                      <th>Sector</th>
+                      <th>Trade Type</th>
+                      <th>Entry</th>
+                      <th>CMP / Exit</th>
+                      <th>SL</th>
+                      <th>Target 1</th>
+                      <th>Target 2</th>
+                      <th>Status</th>
+                      <th>ROI</th>
                     </tr>
                   </thead>
 
@@ -1312,14 +1199,10 @@ export default function Accuracy() {
                     {paginatedHoldings.map(
                       (holding) => {
                         const roi =
-                          getROI(
-                            holding
-                          );
+                          getROI(holding);
 
                         const status =
-                          getStatus(
-                            holding
-                          );
+                          getStatus(holding);
 
                         const realised =
                           isRealisedTrade(
@@ -1337,10 +1220,10 @@ export default function Accuracy() {
                               holding.id
                             }
                           >
-                            {/* STOCK */}
 
                             <td>
                               <div className="accuracy-stock-cell">
+
                                 <strong>
                                   {renderProtectedText(
                                     holding.stock,
@@ -1358,21 +1241,15 @@ export default function Accuracy() {
                               </div>
                             </td>
 
-                            {/* SECTOR */}
-
                             <td>
                               {holding.sector ||
                                 "General"}
                             </td>
 
-                            {/* TYPE */}
-
                             <td>
                               {holding.tradeType ||
                                 "Swing"}
                             </td>
-
-                            {/* ENTRY */}
 
                             <td>
                               {renderProtectedPrice(
@@ -1381,37 +1258,36 @@ export default function Accuracy() {
                               )}
                             </td>
 
-                            {/* CMP / EXIT */}
-
                             <td>
-                              <div
-                                style={{
-                                  display:
-                                    "flex",
+                              <div className="accuracy-price-cell">
 
-                                  flexDirection:
-                                    "column",
-
-                                  gap:
-                                    "3px",
-                                }}
-                              >
-                                {renderProtectedPrice(
-                                  displayPrice,
-                                  holding
+                                {realised ? (
+                                  <span
+                                    className={`accuracy-exit-price ${getExitPriceClass(
+                                      status
+                                    )}`}
+                                  >
+                                    {renderProtectedPrice(
+                                      displayPrice,
+                                      holding
+                                    )}
+                                  </span>
+                                ) : (
+                                  renderProtectedPrice(
+                                    displayPrice,
+                                    holding
+                                  )
                                 )}
 
                                 {!isBlurred(
                                   holding
                                 ) && (
                                   <small
-                                    style={{
-                                      color:
-                                        "#64748b",
-
-                                      fontWeight:
-                                        700,
-                                    }}
+                                    className={
+                                      realised
+                                        ? "accuracy-exit-label"
+                                        : ""
+                                    }
                                   >
                                     {realised
                                       ? "Exit Price"
@@ -1420,8 +1296,6 @@ export default function Accuracy() {
                                 )}
                               </div>
                             </td>
-
-                            {/* SL */}
 
                             <td>
                               {renderProtectedPrice(
@@ -1438,8 +1312,6 @@ export default function Accuracy() {
                                 )}
                             </td>
 
-                            {/* T1 */}
-
                             <td>
                               {renderProtectedPrice(
                                 holding.target1,
@@ -1454,8 +1326,6 @@ export default function Accuracy() {
                                   "t1"
                                 )}
                             </td>
-
-                            {/* T2 */}
 
                             <td>
                               {renderProtectedPrice(
@@ -1472,17 +1342,11 @@ export default function Accuracy() {
                                 )}
                             </td>
 
-                            {/* STATUS */}
-
                             <td>
                               <StatusBadge
-                                status={
-                                  status
-                                }
+                                status={status}
                               />
                             </td>
-
-                            {/* ROI */}
 
                             <td
                               className={
@@ -1495,8 +1359,9 @@ export default function Accuracy() {
                             >
                               {realised && (
                                 <span
-                                  className="accuracy-realised-label"
-                                  title="Final realised return"
+                                  className={`accuracy-realised-label ${getRealisedBadgeClass(
+                                    status
+                                  )}`}
                                 >
                                   ✓ Realised
                                 </span>
@@ -1536,17 +1401,18 @@ export default function Accuracy() {
           )}
         </div>
 
-        {/* ===================================================
-            DISCLOSURE
-        =================================================== */}
+        {/* DISCLOSURE */}
 
         <section className="accuracy-disclosure">
+
           <div className="accuracy-disclosure-icon">
             ⚠️
           </div>
 
           <div className="accuracy-disclosure-content">
+
             <div className="accuracy-disclosure-header">
+
               <span className="accuracy-disclosure-eyebrow">
                 Important Information
               </span>
@@ -1557,31 +1423,31 @@ export default function Accuracy() {
             </div>
 
             <div className="accuracy-disclosure-copy">
+
               <p>
                 The historical performance presented on
-                this page is shared solely for
-                educational and research purposes. Past
-                performance reflects prevailing market
-                conditions at the time of publication
-                and should not be interpreted as a
-                guarantee of future returns or
-                investment performance.
+                this page is shared solely for educational
+                and research purposes. Past performance
+                reflects prevailing market conditions at
+                the time of publication and should not be
+                interpreted as a guarantee of future
+                returns or investment performance.
               </p>
 
               <p>
-                Every market study is published using
-                the information and market conditions
-                available at the time of analysis.
-                Future market conditions may differ
-                significantly. Always conduct your own
-                research, follow disciplined risk
-                management, and make investment
-                decisions according to your financial
-                objectives and risk tolerance.
+                Every market study is published using the
+                information and market conditions available
+                at the time of analysis. Future market
+                conditions may differ significantly.
+                Always conduct your own research, follow
+                disciplined risk management, and make
+                investment decisions according to your
+                financial objectives and risk tolerance.
               </p>
             </div>
 
             <div className="accuracy-standard-disclaimer">
+
               <div className="accuracy-standard-disclaimer-title">
                 <span>
                   📜
@@ -1596,18 +1462,17 @@ export default function Accuracy() {
                 Investing in the securities market is
                 subject to market risks. The value of
                 investments and the income derived from
-                them may fluctuate due to changing
-                market conditions, and investors may
-                lose part or all of their invested
-                capital. Please read all related
-                documents carefully, conduct your own
-                research (DYOR), and consult a
-                SEBI-registered investment adviser or
-                other qualified financial professional
-                if you require personalised investment
-                advice. Invest only according to your
-                financial objectives, investment
-                horizon, and risk tolerance.
+                them may fluctuate due to changing market
+                conditions, and investors may lose part or
+                all of their invested capital. Please read
+                all related documents carefully, conduct
+                your own research (DYOR), and consult a
+                SEBI-registered investment adviser or other
+                qualified financial professional if you
+                require personalised investment advice.
+                Invest only according to your financial
+                objectives, investment horizon, and risk
+                tolerance.
               </p>
             </div>
           </div>
