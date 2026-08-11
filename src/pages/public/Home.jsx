@@ -36,13 +36,7 @@ export default function Home() {
     settings?.website?.showTestimonial
   );
 
-  const showAskVTKS = Boolean(
-    settings?.website?.showAskVTKS
-  );
-
-  const showAnsweredQueries = Boolean(
-    settings?.website?.showAnsweredQueries
-  );
+  
 
   const [holdings, setHoldings] =
     useState([]);
@@ -853,90 +847,6 @@ export default function Home() {
         </section>
       )}
 
-      {/* ASK VTKS */}
-      {showAskVTKS && (
-        <section className="ask-vtks-home">
-          <div className="ask-vtks-content">
-            <span className="ask-vtks-badge">
-              💬 Stock Queries
-            </span>
-
-            <h2>
-              Have a Question About Any
-              Stock?
-            </h2>
-
-            <p>
-              Submit your stock query and
-              receive a structured
-              educational explanation from
-              the VTKS team through charts,
-              videos or written analysis.
-              Browse previously answered
-              queries to learn from real
-              market examples.
-            </p>
-
-            <div className="ask-vtks-buttons">
-              <Link
-                to="/ask-vtks"
-                className="ask-primary-btn"
-              >
-                Ask Your Stock →
-              </Link>
-
-              {showAnsweredQueries && (
-                <Link
-                  to="/answered-queries"
-                  className="ask-secondary-btn"
-                >
-                  View Answered Queries
-                </Link>
-              )}
-            </div>
-          </div>
-
-          <div className="ask-vtks-stats">
-            <div className="ask-stat-card">
-              <h3>📈</h3>
-
-              <strong>
-                Chart Analysis
-              </strong>
-
-              <p>
-                Educational chart-based
-                responses.
-              </p>
-            </div>
-
-            <div className="ask-stat-card">
-              <h3>🎥</h3>
-
-              <strong>
-                Video Explanation
-              </strong>
-
-              <p>
-                Upload or YouTube supported.
-              </p>
-            </div>
-
-            <div className="ask-stat-card">
-              <h3>📝</h3>
-
-              <strong>
-                Written View
-              </strong>
-
-              <p>
-                Simple and structured
-                explanation.
-              </p>
-            </div>
-          </div>
-        </section>
-      )}
-    </main>
+         </main>
   );
 }
