@@ -300,46 +300,57 @@ export default function Accuracy() {
   ========================================================= */
 
   const filteredAccuracyHoldings =
-    useMemo(() => {
-      return accuracyHoldings.filter(
-        (holding) => {
-          const visibility = normalize(
-            holding.visibility
+  useMemo(() => {
+    return accuracyHoldings.filter(
+      (holding) => {
+        const visibility = normalize(
+          holding.visibility
+        );
+
+        const blurred = Boolean(
+          holding.accuracyBlur
+        );
+
+        const isPublicStudy =
+          visibility === "public";
+
+        const isMemberStudy =
+          [
+            "subscriber",
+            "community",
+          ].includes(visibility);
+
+        const isRevealedMemberStudy =
+          isMemberStudy &&
+          blurred === false;
+
+        const isProtectedStudy =
+          isMemberStudy &&
+          blurred === true;
+
+        if (
+          visibilityFilter === "public"
+        ) {
+          return (
+            isPublicStudy ||
+            isRevealedMemberStudy
           );
-
-          const blurred = Boolean(
-            holding.accuracyBlur
-          );
-
-          if (
-            visibilityFilter === "public"
-          ) {
-            return (
-              visibility === "public" &&
-              !blurred
-            );
-          }
-
-          if (
-            visibilityFilter ===
-            "protected"
-          ) {
-            return (
-              [
-                "subscriber",
-                "community",
-              ].includes(visibility) &&
-              blurred
-            );
-          }
-
-          return true;
         }
-      );
-    }, [
-      accuracyHoldings,
-      visibilityFilter,
-    ]);
+
+        if (
+          visibilityFilter ===
+          "protected"
+        ) {
+          return isProtectedStudy;
+        }
+
+        return true;
+      }
+    );
+  }, [
+    accuracyHoldings,
+    visibilityFilter,
+  ]);
 
   /* =========================================================
      PERFORMANCE SUMMARY
@@ -1127,7 +1138,7 @@ export default function Accuracy() {
                   </option>
 
                   <option value="public">
-                    🌐 Public Studies
+                    🌐 Public  & Revealed Studies
                   </option>
 
                   <option value="protected">
