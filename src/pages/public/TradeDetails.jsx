@@ -52,15 +52,22 @@ export default function TradeDetails() {
 
   useEffect(() => {
     loadTrade();
-  }, [id, isSubscriberView]);
+  }, [
+    id,
+    isSubscriberView,
+  ]);
 
   /* =========================================================
      ESCAPE CLOSES CHART
   ========================================================= */
 
   useEffect(() => {
-    const handleEscape = (event) => {
-      if (event.key === "Escape") {
+    const handleEscape = (
+      event
+    ) => {
+      if (
+        event.key === "Escape"
+      ) {
         setSelectedChart(null);
       }
     };
@@ -89,11 +96,17 @@ export default function TradeDetails() {
       const rows =
         await getHoldings();
 
-      const selected = (rows || [])
-        .map(mapHoldingFromDB)
+      const selected = (
+        rows || []
+      )
+        .map(
+          mapHoldingFromDB
+        )
         .find(
           (item) =>
-            String(item.id) ===
+            String(
+              item.id
+            ) ===
             String(id)
         );
 
@@ -102,19 +115,26 @@ export default function TradeDetails() {
         return;
       }
 
-      const visibility = normalize(
-        selected.visibility
-      );
+      const visibility =
+        normalize(
+          selected.visibility
+        );
 
-      const publishStatus = normalize(
-        selected.publishStatus ||
-          selected.publish_status
-      );
+      const publishStatus =
+        normalize(
+          selected.publishStatus ||
+            selected.publish_status
+        );
 
-      const tradeStatus = normalize(
-        selected.tradeStatus ||
-          selected.trade_status
-      );
+      const tradeStatus =
+        normalize(
+          selected.tradeStatus ||
+            selected.trade_status
+        );
+
+      /* =====================================================
+         ALWAYS BLOCK
+      ===================================================== */
 
       if (
         publishStatus === "draft" ||
@@ -124,20 +144,56 @@ export default function TradeDetails() {
         return;
       }
 
-      const allowedVisibilities =
-        isSubscriberView
-          ? [
-              "public",
-              "subscriber",
-              "community",
-            ]
-          : ["public"];
+      /* =====================================================
+         ACCESS CONTROL
 
-      if (
-        !allowedVisibilities.includes(
+         PUBLIC ROUTE:
+         - Public
+         - Revealed Subscriber
+         - Revealed Community
+
+         SUBSCRIBER ROUTE:
+         - Public
+         - Subscriber
+         - Community
+
+         PRIVATE:
+         - Never publicly accessible
+      ===================================================== */
+
+      const isPublicStudy =
+        visibility === "public";
+
+      const isMemberStudy =
+        visibility ===
+          "subscriber" ||
+        visibility ===
+          "community";
+
+      const isRevealedMemberStudy =
+        isMemberStudy &&
+        selected.accuracyBlur ===
+          false;
+
+      const canViewPublicly =
+        isPublicStudy ||
+        isRevealedMemberStudy;
+
+      const canViewAsSubscriber =
+        [
+          "public",
+          "subscriber",
+          "community",
+        ].includes(
           visibility
-        )
-      ) {
+        );
+
+      const hasAccess =
+        isSubscriberView
+          ? canViewAsSubscriber
+          : canViewPublicly;
+
+      if (!hasAccess) {
         setTrade(null);
         return;
       }
@@ -167,12 +223,15 @@ export default function TradeDetails() {
      override target/CMP calculations.
   ========================================================= */
 
-  const getStatus = (holding) => {
-    const manualStatus = normalize(
-      holding.tradeStatus ||
-        holding.trade_status ||
-        holding.status
-    );
+  const getStatus = (
+    holding
+  ) => {
+    const manualStatus =
+      normalize(
+        holding.tradeStatus ||
+          holding.trade_status ||
+          holding.status
+      );
 
     const supportedStatuses = [
       "active",
@@ -196,74 +255,78 @@ export default function TradeDetails() {
       return manualStatus;
     }
 
-    const highestPrice = Number(
-      holding.highestPrice ??
-        holding.highest_price ??
-        holding.cmp ??
-        0
-    );
+    const highestPrice =
+      Number(
+        holding.highestPrice ??
+          holding.highest_price ??
+          holding.cmp ??
+          0
+      );
 
-    const lowestPrice = Number(
-      holding.lowestPrice ??
-        holding.lowest_price ??
-        holding.cmp ??
-        0
-    );
+    const lowestPrice =
+      Number(
+        holding.lowestPrice ??
+          holding.lowest_price ??
+          holding.cmp ??
+          0
+      );
 
-    const stopLoss = Number(
-      holding.stopLoss ??
-        holding.stop_loss ??
-        0
-    );
+    const stopLoss =
+      Number(
+        holding.stopLoss ??
+          holding.stop_loss ??
+          0
+      );
 
-    const target1 = Number(
-      holding.target1 ??
-        holding.target_1 ??
-        0
-    );
+    const target1 =
+      Number(
+        holding.target1 ??
+          holding.target_1 ??
+          0
+      );
 
-    const target2 = Number(
-      holding.target2 ??
-        holding.target_2 ??
-        0
-    );
+    const target2 =
+      Number(
+        holding.target2 ??
+          holding.target_2 ??
+          0
+      );
 
-    const target3 = Number(
-      holding.target3 ??
-        holding.target_3 ??
-        0
-    );
+    const target3 =
+      Number(
+        holding.target3 ??
+          holding.target_3 ??
+          0
+      );
 
-    /*
-      Stop-loss uses historical low.
-    */
     if (
       stopLoss > 0 &&
-      lowestPrice <= stopLoss
+      lowestPrice <=
+        stopLoss
     ) {
       return "sl hit";
     }
 
-    /*
-      Target detection uses historical high.
-    */
     if (
       target3 > 0 &&
-      highestPrice >= target3
+      highestPrice >=
+        target3
     ) {
       return "target 3 hit";
     }
 
     if (
       target2 > 0 &&
-      highestPrice >= target2
+      highestPrice >=
+        target2
     ) {
       return "target 2 hit";
     }
 
     if (
       target1 > 0 &&
-      highestPrice >= target1
+      highestPrice >=
+        target1
     ) {
       return "target 1 hit";
     }
@@ -275,32 +338,31 @@ export default function TradeDetails() {
      FORMAT STATUS
   ========================================================= */
 
-  const formatStatus = (value) =>
+  const formatStatus = (
+    value
+  ) =>
     String(value || "")
       .split(" ")
       .map(
         (word) =>
-          word.charAt(0).toUpperCase() +
+          word
+            .charAt(0)
+            .toUpperCase() +
           word.slice(1)
       )
       .join(" ");
 
   /* =========================================================
      ROI
-
-     Active / Target Hit:
-     Entry -> Live CMP
-
-     Booked Profit / Booked Loss /
-     Breakeven / SL Hit:
-     Saved Realised ROI first,
-     Entry -> Exit Price fallback.
   ========================================================= */
 
-  const getReturn = (holding) => {
-    const entry = Number(
-      holding.entry || 0
-    );
+  const getReturn = (
+    holding
+  ) => {
+    const entry =
+      Number(
+        holding.entry || 0
+      );
 
     if (!entry) {
       return 0;
@@ -321,11 +383,14 @@ export default function TradeDetails() {
     if (
       isRealisedTrade &&
       realisedReturn !== null &&
-      realisedReturn !== undefined &&
+      realisedReturn !==
+        undefined &&
       realisedReturn !== ""
     ) {
       const parsedReturn =
-        Number(realisedReturn);
+        Number(
+          realisedReturn
+        );
 
       if (
         Number.isFinite(
@@ -343,11 +408,14 @@ export default function TradeDetails() {
     if (
       isRealisedTrade &&
       exitPrice !== null &&
-      exitPrice !== undefined &&
+      exitPrice !==
+        undefined &&
       exitPrice !== ""
     ) {
       const parsedExitPrice =
-        Number(exitPrice);
+        Number(
+          exitPrice
+        );
 
       if (
         Number.isFinite(
@@ -356,31 +424,41 @@ export default function TradeDetails() {
         parsedExitPrice > 0
       ) {
         return (
-          ((parsedExitPrice - entry) /
-            entry) *
-          100
-        );
+          (
+            parsedExitPrice -
+            entry
+          ) /
+          entry
+        ) * 100;
       }
     }
 
-    const cmp = Number(
-      holding.cmp || entry
-    );
+    const cmp =
+      Number(
+        holding.cmp ||
+          entry
+      );
 
     return (
-      ((cmp - entry) / entry) *
-      100
-    );
+      (
+        cmp -
+        entry
+      ) /
+      entry
+    ) * 100;
   };
 
   /* =========================================================
      CURRENCY
   ========================================================= */
 
-  const formatCurrency = (value) => {
-    const number = Number(
-      value || 0
-    );
+  const formatCurrency = (
+    value
+  ) => {
+    const number =
+      Number(
+        value || 0
+      );
 
     if (!number) {
       return "-";
@@ -389,7 +467,8 @@ export default function TradeDetails() {
     return `₹${number.toLocaleString(
       "en-IN",
       {
-        maximumFractionDigits: 2,
+        maximumFractionDigits:
+          2,
       }
     )}`;
   };
@@ -398,14 +477,17 @@ export default function TradeDetails() {
      DATE
   ========================================================= */
 
-  const formatDate = (value) => {
+  const formatDate = (
+    value
+  ) => {
     if (!value) {
       return "-";
     }
 
-    const date = new Date(
-      `${value}T00:00:00`
-    );
+    const date =
+      new Date(
+        `${value}T00:00:00`
+      );
 
     if (
       Number.isNaN(
@@ -439,26 +521,31 @@ export default function TradeDetails() {
     }
 
     if (
-      status === "booked loss" ||
-      status === "sl hit"
+      status ===
+        "booked loss" ||
+      status ===
+        "sl hit"
     ) {
       return "trade-status-loss";
     }
 
     if (
-      status === "booked profit"
+      status ===
+        "booked profit"
     ) {
       return "trade-status-booked";
     }
 
     if (
-      status === "breakeven"
+      status ===
+        "breakeven"
     ) {
       return "trade-status-neutral";
     }
 
     if (
-      status === "cancelled"
+      status ===
+        "cancelled"
     ) {
       return "trade-status-cancelled";
     }
@@ -482,49 +569,57 @@ export default function TradeDetails() {
     status
   ) => {
     if (
-      status === "booked profit"
+      status ===
+        "booked profit"
     ) {
       return "💰 Booked Profit";
     }
 
     if (
-      status === "booked loss"
+      status ===
+        "booked loss"
     ) {
       return "📉 Booked Loss";
     }
 
     if (
-      status === "breakeven"
+      status ===
+        "breakeven"
     ) {
       return "⚖️ Breakeven";
     }
 
     if (
-      status === "sl hit"
+      status ===
+        "sl hit"
     ) {
       return "🛑 SL Hit";
     }
 
     if (
-      status === "target 1 hit"
+      status ===
+        "target 1 hit"
     ) {
       return "🎯 Target 1 Hit";
     }
 
     if (
-      status === "target 2 hit"
+      status ===
+        "target 2 hit"
     ) {
       return "🚀 Target 2 Hit";
     }
 
     if (
-      status === "target 3 hit"
+      status ===
+        "target 3 hit"
     ) {
       return "🏆 Target 3 Hit";
     }
 
     if (
-      status === "active"
+      status ===
+        "active"
     ) {
       return "🟢 Active";
     }
@@ -542,10 +637,15 @@ export default function TradeDetails() {
     visibility
   ) => {
     const value =
-      normalize(visibility);
+      normalize(
+        visibility
+      );
 
     if (
-      value === "subscriber"
+      value ===
+        "subscriber" ||
+      value ===
+        "community"
     ) {
       return "trade-visibility-subscriber";
     }
@@ -557,6 +657,49 @@ export default function TradeDetails() {
     }
 
     return "trade-visibility-public";
+  };
+
+  const getVisibilityLabel = (
+    holding
+  ) => {
+    const visibility =
+      normalize(
+        holding.visibility
+      );
+
+    const isRevealedMemberStudy =
+      (
+        visibility ===
+          "subscriber" ||
+        visibility ===
+          "community"
+      ) &&
+      holding.accuracyBlur ===
+        false;
+
+    if (
+      isRevealedMemberStudy
+    ) {
+      return "⭐ Featured Member Study";
+    }
+
+    if (
+      visibility ===
+        "subscriber" ||
+      visibility ===
+        "community"
+    ) {
+      return "⭐ Subscriber Study";
+    }
+
+    if (
+      visibility ===
+        "private"
+    ) {
+      return "🔒 Private Study";
+    }
+
+    return "🌐 Published Market Study";
   };
 
   /* =========================================================
@@ -592,9 +735,10 @@ export default function TradeDetails() {
           </h1>
 
           <p>
-            This trade may have been
-            removed or is no longer
-            available.
+            This market study may
+            have been removed,
+            protected or is no
+            longer available.
           </p>
 
           <Link
@@ -627,11 +771,14 @@ export default function TradeDetails() {
     );
 
   const isLossOutcome =
-    status === "booked loss" ||
-    status === "sl hit";
+    status ===
+      "booked loss" ||
+    status ===
+      "sl hit";
 
   const isProfitOutcome =
-    status === "booked profit";
+    status ===
+      "booked profit";
 
   const savedExitPrice =
     trade.exitPrice ??
@@ -649,21 +796,16 @@ export default function TradeDetails() {
   const isPositive =
     roi >= 0;
 
-  /*
-    Main ROI label.
-  */
   const roiLabel =
     isLossOutcome
       ? "Realised Loss"
       : isProfitOutcome
         ? "Realised ROI"
-        : status === "breakeven"
+        : status ===
+            "breakeven"
           ? "Realised ROI"
           : "Live ROI";
 
-  /*
-    Main price metric.
-  */
   const priceLabel =
     isRealisedTrade
       ? "Exit Price"
@@ -676,71 +818,76 @@ export default function TradeDetails() {
 
   /* =========================================================
      TARGET ACHIEVEMENTS
-
-     IMPORTANT:
-     Even after a trade is Booked Loss,
-     we retain historical target achievements.
-
-     Example:
-     TCS may have reached T2 earlier and later
-     finally closed as Booked Loss.
   ========================================================= */
 
-  const highestPrice = Number(
-    trade.highestPrice ??
-      trade.highest_price ??
-      trade.cmp ??
-      0
-  );
+  const highestPrice =
+    Number(
+      trade.highestPrice ??
+        trade.highest_price ??
+        trade.cmp ??
+        0
+    );
 
-  const lowestPrice = Number(
-    trade.lowestPrice ??
-      trade.lowest_price ??
-      trade.cmp ??
-      0
-  );
+  const lowestPrice =
+    Number(
+      trade.lowestPrice ??
+        trade.lowest_price ??
+        trade.cmp ??
+        0
+    );
 
   const target1 =
     Number(
-      trade.target1 || 0
+      trade.target1 ||
+        0
     );
 
   const target2 =
     Number(
-      trade.target2 || 0
+      trade.target2 ||
+        0
     );
 
   const stopLoss =
     Number(
-      trade.stopLoss || 0
+      trade.stopLoss ||
+        0
     );
 
   const target1Reached =
     target1 > 0 &&
     (
-      highestPrice >= target1 ||
+      highestPrice >=
+        target1 ||
       [
         "target 1 hit",
         "target 2 hit",
         "target 3 hit",
-      ].includes(status)
+      ].includes(
+        status
+      )
     );
 
   const target2Reached =
     target2 > 0 &&
     (
-      highestPrice >= target2 ||
+      highestPrice >=
+        target2 ||
       [
         "target 2 hit",
         "target 3 hit",
-      ].includes(status)
+      ].includes(
+        status
+      )
     );
 
   const stopLossReached =
     stopLoss > 0 &&
     (
-      lowestPrice <= stopLoss ||
-      status === "sl hit"
+      lowestPrice <=
+        stopLoss ||
+      status ===
+        "sl hit"
     );
 
   /* =========================================================
@@ -768,7 +915,8 @@ export default function TradeDetails() {
 
   const metricCards = [
     {
-      label: "Entry Price",
+      label:
+        "Entry Price",
 
       value:
         formatCurrency(
@@ -928,7 +1076,7 @@ export default function TradeDetails() {
 
             <div className="trade-badge-row">
 
-              {/* FINAL STATUS */}
+              {/* STATUS */}
 
               <span
                 className={`trade-status-badge ${getStatusClass(
@@ -947,17 +1095,9 @@ export default function TradeDetails() {
                   trade.visibility
                 )}`}
               >
-                {normalize(
-                  trade.visibility
-                ) ===
-                "subscriber"
-                  ? "⭐ Subscriber Trade"
-                  : normalize(
-                        trade.visibility
-                      ) ===
-                      "private"
-                    ? "🔒 Members-Only Market Study"
-                    : "🌐 Published Market Study"}
+                {getVisibilityLabel(
+                  trade
+                )}
               </span>
 
               {/* CATEGORY */}
@@ -966,13 +1106,14 @@ export default function TradeDetails() {
                 {trade.marketCategory ||
                   "Other"}
               </span>
+
             </div>
 
             {/* STOCK */}
 
             <h1>
               {trade.stock ||
-                "Trade"}
+                "Market Study"}
             </h1>
 
             <p>
@@ -984,7 +1125,7 @@ export default function TradeDetails() {
               </span>
 
               {trade.tradeType ||
-                "Trade"}
+                "Swing"}
 
               {trade.tradingviewSymbol && (
                 <>
@@ -1000,18 +1141,7 @@ export default function TradeDetails() {
             </p>
           </div>
 
-          {/* =================================================
-              ROI CARD
-
-              Profit:
-              Realised ROI green
-
-              Loss:
-              Realised Loss red
-
-              Active:
-              Live ROI
-          ================================================= */}
+          {/* ROI */}
 
           <div
             className={`trade-roi-card ${
@@ -1082,10 +1212,12 @@ export default function TradeDetails() {
         </section>
 
         {/* ===================================================
-            THESIS / SUMMARY
+            CONTENT
         =================================================== */}
 
         <section className="trade-content-grid">
+
+          {/* THESIS */}
 
           <article className="trade-section-card trade-thesis-card">
 
@@ -1097,7 +1229,7 @@ export default function TradeDetails() {
 
                 <div>
                   <h2>
-                    Trade Thesis
+                    Market Study Thesis
                   </h2>
 
                   <p>
@@ -1119,17 +1251,25 @@ export default function TradeDetails() {
                       paragraph,
                       index
                     ) => (
-                      <p key={index}>
-                        {paragraph}
+                      <p
+                        key={
+                          index
+                        }
+                      >
+                        {
+                          paragraph
+                        }
                       </p>
                     )
                   )
               ) : (
                 <p>
-                  Trade thesis will be
-                  updated by the VTKS team.
+                  Market study thesis
+                  will be updated by
+                  the VTKS team.
                 </p>
               )}
+
             </div>
           </article>
 
@@ -1145,12 +1285,12 @@ export default function TradeDetails() {
 
                 <div>
                   <h2>
-                    Trade Summary
+                    Study Summary
                   </h2>
 
                   <p>
-                    Key classification and
-                    access details.
+                    Key classification
+                    and access details.
                   </p>
                 </div>
               </div>
@@ -1176,8 +1316,9 @@ export default function TradeDetails() {
                 </dt>
 
                 <dd>
-                  {trade.visibility ||
-                    "Public"}
+                  {getVisibilityLabel(
+                    trade
+                  )}
                 </dd>
               </div>
 
@@ -1225,8 +1366,10 @@ export default function TradeDetails() {
                     : "No"}
                 </dd>
               </div>
+
             </dl>
           </article>
+
         </section>
 
         {/* ===================================================
@@ -1263,6 +1406,7 @@ export default function TradeDetails() {
                   : "trade-chart-single"
               }`}
             >
+
               {/* BEFORE */}
 
               {beforeChartUrl && (
@@ -1394,6 +1538,7 @@ export default function TradeDetails() {
                   </button>
                 </article>
               )}
+
             </div>
           </section>
         )}
@@ -1416,7 +1561,7 @@ export default function TradeDetails() {
 
               <p>
                 Open the detailed research PDF
-                shared for this trade.
+                shared for this market study.
               </p>
             </div>
 
@@ -1430,6 +1575,7 @@ export default function TradeDetails() {
             >
               View Research PDF
             </a>
+
           </section>
         )}
 
@@ -1438,18 +1584,22 @@ export default function TradeDetails() {
         =================================================== */}
 
         <section className="trade-disclaimer">
+
           <strong>
             Educational Disclosure
           </strong>
 
           <p>
-            This trade information is provided
-            for educational and research purposes.
-            Please perform your own analysis and
-            manage risk according to your financial
-            situation.
+            This market study is provided
+            for educational and research
+            purposes only. Please perform
+            your own analysis and manage
+            risk according to your financial
+            objectives and risk tolerance.
           </p>
+
         </section>
+
       </div>
 
       {/* =====================================================
@@ -1459,7 +1609,9 @@ export default function TradeDetails() {
       {selectedChart && (
         <div
           className="trade-chart-modal-backdrop"
-          onMouseDown={(event) => {
+          onMouseDown={(
+            event
+          ) => {
             if (
               event.target ===
               event.currentTarget
@@ -1478,6 +1630,7 @@ export default function TradeDetails() {
               selectedChart.title
             }
           >
+
             <div className="trade-chart-modal-header">
 
               <h2>
@@ -1497,6 +1650,7 @@ export default function TradeDetails() {
               >
                 ×
               </button>
+
             </div>
 
             <img
@@ -1507,9 +1661,11 @@ export default function TradeDetails() {
                 selectedChart.title
               }
             />
+
           </div>
         </div>
       )}
+
     </main>
   );
 }
