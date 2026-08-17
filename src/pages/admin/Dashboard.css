@@ -4,3 +4,150 @@ flex-direction:column;
 gap:28px;
 min-width:0;
 }
+/* =====================================================
+   FINANCE OVERVIEW
+===================================================== */
+
+.dashboard-finance-section {
+  margin-bottom: 28px;
+}
+
+.dashboard-finance-section h2 {
+  margin: 0 0 16px;
+
+  font-size: 28px;
+  font-weight: 800;
+
+  color: #071a3d;
+}
+
+.dashboard-finance-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      4,
+      minmax(0, 1fr)
+    );
+
+  gap: 16px;
+}
+
+.dashboard-finance-card {
+  min-height: 110px;
+
+  padding: 20px 22px;
+
+  border: 1px solid #dbe4f0;
+
+  border-radius: 16px;
+
+  background: #ffffff;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  box-shadow:
+    0 8px 22px
+    rgba(
+      15,
+      23,
+      42,
+      0.04
+    );
+}
+
+.dashboard-finance-card strong {
+  margin-bottom: 8px;
+
+  font-size: 28px;
+  line-height: 1;
+
+  font-weight: 800;
+
+  color: #071a3d;
+}
+
+.dashboard-finance-card span {
+  font-size: 14px;
+  font-weight: 700;
+
+  color: #64748b;
+}
+
+.dashboard-finance-card.highlight {
+  border-color: #bbf7d0;
+
+  background: #f0fdf4;
+}
+
+.dashboard-finance-card.highlight strong {
+  color: #15803d;
+}
+
+
+/* =====================================================
+   ERROR
+===================================================== */
+
+.dashboard-error {
+  margin-bottom: 18px;
+
+  padding: 12px 16px;
+
+  border-radius: 10px;
+
+  background: #fff0ef;
+
+  color: #b42318;
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 1100px) {
+  .dashboard-finance-grid {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+  }
+}
+
+@media (max-width: 650px) {
+  .dashboard-finance-grid {
+    grid-template-columns:
+      1fr;
+  }
+
+  .dashboard-finance-card {
+    min-height: 95px;
+  }
+
+  .dashboard-finance-card strong {
+    font-size: 24px;
+  }
+}
+/* =====================================================
+   PLATFORM OVERVIEW
+===================================================== */
+
+.dashboard-performance-section {
+  margin-top: 34px;
+}
+
+.dashboard-performance-section h2 {
+  margin: 0 0 18px;
+
+  font-size: 28px;
+  font-weight: 800;
+
+  color: #071a3d;
+}

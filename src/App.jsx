@@ -41,7 +41,7 @@ import PublicMonthlyLevels from "./pages/public/MonthlyLevels";
 
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminHoldings from "./pages/admin/Holdings";
-import AdminMembers from "./pages/admin/Members";
+import MembersV2Test from "./pages/admin/MembersV2Test";
 import AdminScanner from "./pages/admin/Scanner";
 import AdminLibrary from "./pages/admin/Library";
 import AdminSettings from "./pages/admin/Settings";
@@ -49,7 +49,7 @@ import CommunityLinks from "./pages/admin/CommunityLinks";
 import AdminTestimonials from "./pages/admin/Testimonials";
 import MonthlyLevels from "./pages/admin/MonthlyLevels";
 import AdminStockQueries from "./pages/admin/StockQueries";
-
+import AdminExpenses from "./pages/admin/Expenses";
 /* =====================================================
    SUBSCRIBER PAGES
 ===================================================== */
@@ -63,25 +63,21 @@ import SubscriberMonthlyLevels from "./pages/subscriber/MonthlyLevels";
 function App() {
   return (
     <BrowserRouter>
+
       {/* =================================================
           GLOBAL ROUTE SEO
-
-          This automatically updates:
-          - Page title
-          - Description
-          - Canonical URL
-          - Robots
-          - Open Graph
-          - Twitter metadata
       ================================================== */}
+
       <RouteSEO />
 
       <Routes>
+
         {/* =================================================
             PUBLIC ROUTES
         ================================================== */}
 
         <Route element={<PublicLayout />}>
+
           <Route
             path="/"
             element={<Home />}
@@ -176,6 +172,7 @@ function App() {
             path="*"
             element={<NotFound />}
           />
+
         </Route>
 
         {/* =================================================
@@ -190,6 +187,7 @@ function App() {
             </ProtectedRoute>
           }
         >
+
           <Route
             index
             element={<AdminDashboard />}
@@ -200,9 +198,24 @@ function App() {
             element={<AdminHoldings />}
           />
 
+          {/* =================================================
+              MEMBERS V2 IS NOW MAIN MEMBERS PAGE
+          ================================================= */}
+
           <Route
             path="members"
-            element={<AdminMembers />}
+            element={<MembersV2Test />}
+          />
+          <Route
+  path="expenses"
+  element={<AdminExpenses />}
+/>
+
+          {/* TEMPORARY FALLBACK TEST ROUTE */}
+
+          <Route
+            path="members-v2-test"
+            element={<MembersV2Test />}
           />
 
           <Route
@@ -239,6 +252,7 @@ function App() {
             path="monthly-levels"
             element={<MonthlyLevels />}
           />
+
         </Route>
 
         {/* =================================================
@@ -298,7 +312,9 @@ function App() {
             </SubscriberRoute>
           }
         />
+
       </Routes>
+
     </BrowserRouter>
   );
 }

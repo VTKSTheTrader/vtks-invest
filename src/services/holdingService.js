@@ -681,7 +681,7 @@ export const fetchSelectedInstrumentCMP =
 
     const { data, error } =
       await supabase.functions.invoke(
-        "refresh-cmp",
+        "refresh-dhan-cmp-v2",
         {
           body: {
             securityId:
@@ -755,7 +755,7 @@ export const refreshCMP = async () => {
   try {
     const { data, error } =
       await supabase.functions.invoke(
-        "refresh-cmp",
+        "refresh-dhan-cmp-v2",
         {
           body: {},
         }

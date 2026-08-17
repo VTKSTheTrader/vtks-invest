@@ -1,17 +1,36 @@
 import { useState } from "react";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import {
+  NavLink,
+  Outlet,
+  useNavigate,
+} from "react-router-dom";
+
 import "./AdminLayout.css";
 
 export default function AdminLayout() {
   const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const closeSidebar = () => setSidebarOpen(false);
+  const [
+    sidebarOpen,
+    setSidebarOpen,
+  ] = useState(false);
+
+  const closeSidebar = () =>
+    setSidebarOpen(false);
 
   const handleLogout = () => {
-    if (!window.confirm("Are you sure you want to logout?")) return;
+    if (
+      !window.confirm(
+        "Are you sure you want to logout?"
+      )
+    ) {
+      return;
+    }
 
-    localStorage.removeItem("vtks_admin");
+    localStorage.removeItem(
+      "vtks_admin"
+    );
+
     navigate("/login");
   };
 
@@ -32,6 +51,10 @@ export default function AdminLayout() {
     {
       to: "/admin/members",
       label: "👥 Members",
+    },
+    {
+      to: "/admin/expenses",
+      label: "💰 Expenses",
     },
     {
       to: "/admin/stock-queries",
@@ -61,49 +84,79 @@ export default function AdminLayout() {
 
   return (
     <div className="admin-layout">
-      {/* Mobile Header */}
+
+      {/* MOBILE HEADER */}
+
       <header className="admin-mobile-header">
+
         <button
           type="button"
           className="admin-menu-btn"
-          onClick={() => setSidebarOpen(true)}
+          onClick={() =>
+            setSidebarOpen(true)
+          }
           aria-label="Open admin menu"
         >
           ☰
         </button>
 
-        <strong>VTKS Control</strong>
+        <strong>
+          VTKS Control
+        </strong>
+
       </header>
 
-      {/* Backdrop */}
+      {/* BACKDROP */}
+
       {sidebarOpen && (
         <button
           type="button"
           className="admin-backdrop"
-          onClick={closeSidebar}
+          onClick={
+            closeSidebar
+          }
           aria-label="Close menu"
         />
       )}
 
-      {/* Sidebar */}
+      {/* SIDEBAR */}
+
       <aside
         className={`admin-sidebar ${
-          sidebarOpen ? "open" : ""
+          sidebarOpen
+            ? "open"
+            : ""
         }`}
       >
-        <h2>VTKS Control</h2>
+
+        <h2>
+          VTKS Control
+        </h2>
 
         <nav>
-          {menuItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              onClick={closeSidebar}
-            >
-              {item.label}
-            </NavLink>
-          ))}
+
+          {menuItems.map(
+            (item) => (
+              <NavLink
+                key={
+                  item.to
+                }
+                to={
+                  item.to
+                }
+                end={
+                  item.end
+                }
+                onClick={
+                  closeSidebar
+                }
+              >
+                {
+                  item.label
+                }
+              </NavLink>
+            )
+          )}
 
           <hr />
 
@@ -117,12 +170,17 @@ export default function AdminLayout() {
           >
             🚪 Logout
           </button>
+
         </nav>
+
       </aside>
+
+      {/* MAIN CONTENT */}
 
       <main className="admin-main">
         <Outlet />
       </main>
+
     </div>
   );
 }
