@@ -220,7 +220,7 @@ const getPageConfig = (pathname) => {
       title: "Market Study Details | VTKS INVEST",
       description:
         "View detailed VTKS educational market study information.",
-      indexable: false,
+      indexable: true,
     };
   }
 
