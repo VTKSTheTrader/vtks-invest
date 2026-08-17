@@ -44,6 +44,7 @@ export default function Dashboard() {
     expenseStats: null,
 
     settledRevenue: 0,
+    pendingRevenue: 0,
     totalExpenses: 0,
     netRevenue: 0,
   });
@@ -61,6 +62,10 @@ export default function Dashboard() {
   useEffect(() => {
     loadDashboard();
   }, []);
+
+  /* =====================================================
+     LOAD DASHBOARD
+  ===================================================== */
 
   const loadDashboard = async () => {
     try {
@@ -83,14 +88,28 @@ export default function Dashboard() {
         getScanners(),
       ]);
 
+      /* =================================================
+         EXPENSE STATS
+      ================================================= */
+
       const expenseStats =
         getExpenseStats(
           expenses || []
         );
 
+      /* =================================================
+         FINANCE VALUES
+      ================================================= */
+
       const settledRevenue =
         Number(
           memberStats?.settledRevenue ||
+            0
+        );
+
+      const pendingRevenue =
+        Number(
+          memberStats?.pendingRevenue ||
             0
         );
 
@@ -100,9 +119,20 @@ export default function Dashboard() {
             0
         );
 
+      /*
+        VTKS preferred calculation:
+
+        Net Revenue =
+        Pending Revenue - Total Expenses
+      */
+
       const netRevenue =
-        settledRevenue -
+        pendingRevenue -
         totalExpenses;
+
+      /* =================================================
+         SAVE DASHBOARD STATE
+      ================================================= */
 
       setStats({
         holdings:
@@ -125,6 +155,8 @@ export default function Dashboard() {
 
         settledRevenue,
 
+        pendingRevenue,
+
         totalExpenses,
 
         netRevenue,
@@ -144,12 +176,16 @@ export default function Dashboard() {
     }
   };
 
+  /* =====================================================
+     PAGE
+  ===================================================== */
+
   return (
     <section className="admin-dashboard-page">
 
-      {/* =========================================
+      {/* =================================================
           PAGE HEADER
-      ========================================= */}
+      ================================================= */}
 
       <PageHeader
         title="VTKS Admin Dashboard"
@@ -160,9 +196,9 @@ export default function Dashboard() {
         }
       />
 
-      {/* =========================================
+      {/* =================================================
           ERROR
-      ========================================= */}
+      ================================================= */}
 
       {error && (
         <div className="dashboard-error">
@@ -173,9 +209,9 @@ export default function Dashboard() {
       {!loading && (
         <>
 
-          {/* =========================================
+          {/* =================================================
               FINANCE OVERVIEW
-          ========================================= */}
+          ================================================= */}
 
           <section className="dashboard-finance-section">
 
@@ -184,6 +220,8 @@ export default function Dashboard() {
             </h2>
 
             <div className="dashboard-finance-grid">
+
+              {/* SETTLED REVENUE */}
 
               <FinanceCard
                 label="Settled Revenue"
@@ -194,6 +232,19 @@ export default function Dashboard() {
                 }
               />
 
+              {/* PENDING REVENUE */}
+
+              <FinanceCard
+                label="Pending Revenue"
+                value={
+                  formatMoney(
+                    stats.pendingRevenue
+                  )
+                }
+              />
+
+              {/* TOTAL EXPENSES */}
+
               <FinanceCard
                 label="Total Expenses"
                 value={
@@ -202,6 +253,8 @@ export default function Dashboard() {
                   )
                 }
               />
+
+              {/* NET REVENUE */}
 
               <FinanceCard
                 label="Net Revenue"
@@ -213,24 +266,13 @@ export default function Dashboard() {
                 highlight
               />
 
-              <FinanceCard
-                label="Pending Revenue"
-                value={
-                  formatMoney(
-                    stats.memberStats
-                      ?.pendingRevenue ||
-                      0
-                  )
-                }
-              />
-
             </div>
 
           </section>
 
-          {/* =========================================
+          {/* =================================================
               PLATFORM OVERVIEW
-          ========================================= */}
+          ================================================= */}
 
           <section className="dashboard-performance-section">
 
