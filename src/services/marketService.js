@@ -1,26 +1,117 @@
-const API_KEY = import.meta.env.VITE_TWELVEDATA_API_KEY;
+import { supabase } from "../lib/supabase";
 
-export const fetchLiveCMP = async (stock) => {
+/* =====================================================
+   FETCH SINGLE LIVE CMP
+===================================================== */
+
+export const fetchLiveCMP = async (
+  securityId,
+  segment = "NSE_EQ"
+) => {
   try {
-    if (!stock) return null;
+    if (!securityId) {
+      console.warn(
+        "Security ID missing."
+      );
 
-    const symbol = `${stock.trim().toUpperCase()}.NSE`;
-
-    const response = await fetch(
-      `https://api.twelvedata.com/price?symbol=${symbol}&apikey=${API_KEY}`
-    );
-
-    const data = await response.json();
-
-    console.log(symbol, data);
-
-    if (data.status === "error") {
       return null;
     }
 
-    return Number(data.price);
-  } catch (err) {
-    console.error(err);
+    const {
+      data,
+      error,
+    } =
+      await supabase.functions.invoke(
+        "refresh-dhan-cmp-v2",
+        {
+          body: {
+            securityId:
+              Number(securityId),
+
+            segment,
+          },
+        }
+      );
+
+    if (error) {
+      console.error(
+        "Dhan CMP function error:",
+        error
+      );
+
+      return null;
+    }
+
+    if (
+      !data?.success ||
+      !data?.cmp
+    ) {
+      console.error(
+        "Invalid Dhan CMP response:",
+        data
+      );
+
+      return null;
+    }
+
+    return Number(data.cmp);
+  } catch (error) {
+    console.error(
+      "fetchLiveCMP error:",
+      error
+    );
+
     return null;
   }
 };
+
+
+/* =====================================================
+   REFRESH ALL ACTIVE HOLDINGS
+===================================================== */
+
+export const refreshAllHoldingsCMP =
+  async () => {
+    try {
+      const {
+        data,
+        error,
+      } =
+        await supabase.functions.invoke(
+          "refresh-dhan-cmp-v2",
+          {
+            body: {},
+          }
+        );
+
+      if (error) {
+        console.error(
+          "Bulk CMP refresh error:",
+          error
+        );
+
+        throw error;
+      }
+
+      if (!data?.success) {
+        throw new Error(
+          data?.message ||
+            "CMP refresh failed."
+        );
+      }
+
+      console.log(
+        "CMP refresh successful:",
+        data
+      );
+
+      return data;
+    } catch (error) {
+      console.error(
+        "refreshAllHoldingsCMP error:",
+        error
+      );
+
+      throw error;
+    }
+  };

@@ -15,7 +15,6 @@ import Pagination from "../../components/common/Pagination";
 import "./Holdings.css";
 
 import {
-  refreshCMP,
   getHoldings,
   addHolding,
   updateHolding,
@@ -23,6 +22,10 @@ import {
   mapHoldingFromDB,
   uploadHoldingFile,
 } from "../../services/holdingService";
+
+import {
+  refreshAllHoldingsCMP,
+} from "../../services/marketService";
 
 const ITEMS_PER_PAGE = 5;
 const AUTO_REFRESH_INTERVAL_MS = 60 * 1000;
@@ -92,7 +95,7 @@ export default function Holdings() {
         refreshInProgressRef.current = true;
         setRefreshing(true);
 
-        const result = await refreshCMP();
+        const result =  await refreshAllHoldingsCMP();
         await loadHoldings(false);
 
         if (showMessage) {
