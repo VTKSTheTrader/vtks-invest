@@ -11,6 +11,8 @@ import {
   mapHoldingFromDB,
 } from "../../services/holdingService";
 
+import { supabase } from "../../lib/supabase";
+
 import Pagination from "../../components/common/Pagination";
 import SEO from "../../components/common/SEO";
 
@@ -119,36 +121,58 @@ export default function Accuracy() {
       showInitialLoader: true,
     });
 
-    const intervalId = window.setInterval(
-      () => {
-        if (
-          document.visibilityState ===
-          "visible"
-        ) {
-          loadAccuracy();
-        }
-      },
-      AUTO_REFRESH_INTERVAL
-    );
+    /*
+      Backup polling: re-read the latest holdings from Supabase
+      every 60 seconds while this page is visible.
+    */
+    const intervalId = window.setInterval(() => {
+      if (document.visibilityState === "visible") {
+        loadAccuracy();
+      }
+    }, AUTO_REFRESH_INTERVAL);
 
+    /*
+      Refresh immediately when the user returns to the page.
+    */
     const handleVisibilityChange = () => {
-      if (
-        document.visibilityState ===
-        "visible"
-      ) {
+      if (document.visibilityState === "visible") {
         loadAccuracy();
       }
     };
 
-    window.addEventListener(
-      "focus",
-      handleVisibilityChange
-    );
-
+    window.addEventListener("focus", handleVisibilityChange);
     document.addEventListener(
       "visibilitychange",
       handleVisibilityChange
     );
+
+    /*
+      Realtime listener: whenever the backend CMP / accuracy cron
+      updates a row in public.holdings, fetch the latest holdings
+      immediately. This removes any dependency on admin login or
+      a manual browser refresh.
+    */
+    const realtimeChannel = supabase
+      .channel("accuracy-holdings-realtime")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "holdings",
+        },
+        () => {
+          if (document.visibilityState === "visible") {
+            loadAccuracy();
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log(
+          "Accuracy holdings realtime status:",
+          status
+        );
+      });
 
     return () => {
       mountedRef.current = false;
@@ -164,6 +188,8 @@ export default function Accuracy() {
         "visibilitychange",
         handleVisibilityChange
       );
+
+      supabase.removeChannel(realtimeChannel);
     };
   }, [loadAccuracy]);
 
