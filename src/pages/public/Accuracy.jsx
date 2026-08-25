@@ -6,32 +6,30 @@ import {
   useState,
 } from "react";
 
+import { supabase } from "../../lib/supabase";
+
 import {
   getHoldings,
   mapHoldingFromDB,
 } from "../../services/holdingService";
-
-import { supabase } from "../../lib/supabase";
-
-import Pagination from "../../components/common/Pagination";
-import SEO from "../../components/common/SEO";
 
 import {
   getTradeROI,
   isRealisedTrade,
 } from "../../utils/performanceUtils";
 
+import SEO from "../../components/common/SEO";
+import Pagination from "../../components/common/Pagination";
+
 import "./Accuracy.css";
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 3;
 const AUTO_REFRESH_INTERVAL = 60 * 1000;
 
 const normalize = (value) =>
-  String(value || "")
-    .trim()
-    .toLowerCase();
+  String(value || "").trim().toLowerCase();
 
-const getNumericValue = (...values) => {
+const getNumber = (...values) => {
   for (const value of values) {
     if (
       value !== null &&
@@ -40,7 +38,7 @@ const getNumericValue = (...values) => {
     ) {
       const number = Number(value);
 
-      if (!Number.isNaN(number)) {
+      if (Number.isFinite(number)) {
         return number;
       }
     }
@@ -49,80 +47,88 @@ const getNumericValue = (...values) => {
   return 0;
 };
 
+const formatPrice = (value) => {
+  if (
+    value === null ||
+    value === undefined ||
+    value === ""
+  ) {
+    return "-";
+  }
+
+  const number = Number(value);
+
+  if (!Number.isFinite(number)) {
+    return "-";
+  }
+
+  return `₹${number.toLocaleString("en-IN", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  })}`;
+};
+
 export default function Accuracy() {
   const [holdings, setHoldings] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [loadError, setLoadError] = useState("");
+  const [error, setError] = useState("");
   const [lastUpdated, setLastUpdated] = useState(null);
+
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [accessFilter, setAccessFilter] = useState("all");
+  const [sectorFilter, setSectorFilter] = useState("all");
+  const [sortMode, setSortMode] = useState("newest");
+  const [search, setSearch] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
 
-  const [visibilityFilter, setVisibilityFilter] =
-    useState("all");
-
-  const [studyStatusFilter, setStudyStatusFilter] =
-    useState("all");
-
-  const [sectorFilter, setSectorFilter] =
-    useState("all");
-
-  const [sortMode, setSortMode] =
-    useState("newest");
-
-  const requestInProgressRef = useRef(false);
   const mountedRef = useRef(true);
+  const requestRef = useRef(false);
 
   /* =========================================================
      LOAD DATA
   ========================================================= */
 
-  const loadAccuracy = useCallback(
-    async ({
-      showInitialLoader = false,
-    } = {}) => {
-      if (requestInProgressRef.current) {
-        return;
-      }
+  const loadData = useCallback(
+    async ({ initial = false } = {}) => {
+      if (requestRef.current) return;
 
-      requestInProgressRef.current = true;
+      requestRef.current = true;
 
       try {
-        if (showInitialLoader) {
+        if (initial) {
           setLoading(true);
         } else {
           setRefreshing(true);
         }
 
-        setLoadError("");
+        setError("");
 
         const rows = await getHoldings();
 
-        if (!mountedRef.current) {
-          return;
-        }
+        if (!mountedRef.current) return;
 
         setHoldings(
           (rows || []).map(mapHoldingFromDB)
         );
 
         setLastUpdated(new Date());
-      } catch (error) {
+      } catch (err) {
         console.error(
-          "Market studies data load error:",
-          error
+          "Market study load error:",
+          err
         );
 
-        if (!mountedRef.current) {
-          return;
+        if (mountedRef.current) {
+          setError(
+            err?.message ||
+              "Unable to load market studies."
+          );
         }
-
-        setLoadError(
-          error?.message ||
-            "Failed to load market studies."
-        );
       } finally {
-        requestInProgressRef.current = false;
+        requestRef.current = false;
 
         if (mountedRef.current) {
           setLoading(false);
@@ -134,47 +140,38 @@ export default function Accuracy() {
   );
 
   /* =========================================================
-     AUTO REFRESH + REALTIME
+     REALTIME + AUTO REFRESH
   ========================================================= */
 
   useEffect(() => {
     mountedRef.current = true;
 
-    loadAccuracy({
-      showInitialLoader: true,
-    });
+    loadData({ initial: true });
 
-    const intervalId = window.setInterval(
-      () => {
-        if (
-          document.visibilityState === "visible"
-        ) {
-          loadAccuracy();
-        }
-      },
-      AUTO_REFRESH_INTERVAL
-    );
+    const interval = window.setInterval(() => {
+      if (document.visibilityState === "visible") {
+        loadData();
+      }
+    }, AUTO_REFRESH_INTERVAL);
 
-    const handleVisibilityChange = () => {
-      if (
-        document.visibilityState === "visible"
-      ) {
-        loadAccuracy();
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        loadData();
       }
     };
 
     window.addEventListener(
       "focus",
-      handleVisibilityChange
+      handleVisibility
     );
 
     document.addEventListener(
       "visibilitychange",
-      handleVisibilityChange
+      handleVisibility
     );
 
-    const realtimeChannel = supabase
-      .channel("market-studies-holdings-realtime")
+    const channel = supabase
+      .channel("market-study-library-summary")
       .on(
         "postgres_changes",
         {
@@ -187,35 +184,30 @@ export default function Accuracy() {
             document.visibilityState ===
             "visible"
           ) {
-            loadAccuracy();
+            loadData();
           }
         }
       )
-      .subscribe((status) => {
-        console.log(
-          "Market studies realtime status:",
-          status
-        );
-      });
+      .subscribe();
 
     return () => {
       mountedRef.current = false;
 
-      window.clearInterval(intervalId);
+      window.clearInterval(interval);
 
       window.removeEventListener(
         "focus",
-        handleVisibilityChange
+        handleVisibility
       );
 
       document.removeEventListener(
         "visibilitychange",
-        handleVisibilityChange
+        handleVisibility
       );
 
-      supabase.removeChannel(realtimeChannel);
+      supabase.removeChannel(channel);
     };
-  }, [loadAccuracy]);
+  }, [loadData]);
 
   /* =========================================================
      INTERNAL STATUS
@@ -240,32 +232,32 @@ export default function Accuracy() {
         return manualStatus;
       }
 
-      const highestPrice = getNumericValue(
+      const highestPrice = getNumber(
         holding.highestPrice,
         holding.highest_price,
         holding.cmp
       );
 
-      const lowestPrice = getNumericValue(
+      const lowestPrice = getNumber(
         holding.lowestPrice,
         holding.lowest_price,
         holding.cmp
       );
 
-      const stopLoss = getNumericValue(
+      const stopLoss = getNumber(
         holding.stopLoss,
         holding.stop_loss
       );
 
-      const target1 = getNumericValue(
+      const target1 = getNumber(
         holding.target1
       );
 
-      const target2 = getNumericValue(
+      const target2 = getNumber(
         holding.target2
       );
 
-      const target3 = getNumericValue(
+      const target3 = getNumber(
         holding.target3
       );
 
@@ -303,27 +295,10 @@ export default function Accuracy() {
   );
 
   /* =========================================================
-     PRICE MOVEMENT
+     COMPLETED
   ========================================================= */
 
-  const getPriceMovement = useCallback(
-    (holding) => {
-      const value = Number(
-        getTradeROI(holding) || 0
-      );
-
-      return Number.isFinite(value)
-        ? value
-        : 0;
-    },
-    []
-  );
-
-  /* =========================================================
-     COMPLETED STUDY
-  ========================================================= */
-
-  const isCompletedStudy = useCallback(
+  const isCompleted = useCallback(
     (holding) => {
       const status =
         getInternalStatus(holding);
@@ -345,28 +320,20 @@ export default function Accuracy() {
   );
 
   /* =========================================================
-     PUBLIC STATUS
+     PRICE MOVEMENT
   ========================================================= */
 
-  const getPublicStatus = useCallback(
+  const getMovement = useCallback(
     (holding) => {
-      const status =
-        getInternalStatus(holding);
+      const value = Number(
+        getTradeROI(holding) || 0
+      );
 
-      if (status === "SL Hit") {
-        return "Invalidated";
-      }
-
-      if (isCompletedStudy(holding)) {
-        return "Completed";
-      }
-
-      return "Ongoing";
+      return Number.isFinite(value)
+        ? value
+        : 0;
     },
-    [
-      getInternalStatus,
-      isCompletedStudy,
-    ]
+    []
   );
 
   /* =========================================================
@@ -384,15 +351,12 @@ export default function Accuracy() {
           holding.publish_status
       );
 
-      const allowedVisibility = [
-        "public",
-        "subscriber",
-        "community",
-      ].includes(visibility);
-
       return (
-        allowedVisibility &&
-        visibility !== "private" &&
+        [
+          "public",
+          "subscriber",
+          "community",
+        ].includes(visibility) &&
         publishStatus !== "draft" &&
         holding.accuracyShow !== false &&
         holding.accuracy_show !== false &&
@@ -406,71 +370,36 @@ export default function Accuracy() {
   ]);
 
   /* =========================================================
-     BLUR
+     PROTECTION
   ========================================================= */
 
-  const isBlurred = useCallback(
-    (holding) =>
-      Boolean(
+  const isProtected = useCallback(
+    (holding) => {
+      const visibility = normalize(
+        holding.visibility
+      );
+
+      const blur = Boolean(
         holding.accuracyBlur ??
           holding.accuracy_blur
-      ),
+      );
+
+      return (
+        [
+          "subscriber",
+          "community",
+        ].includes(visibility) &&
+        blur
+      );
+    },
     []
   );
 
-  /* =========================================================
-     VISIBILITY FILTER
-  ========================================================= */
-
-  const visibilityFilteredStudies =
-    useMemo(() => {
-      return publishedStudies.filter(
-        (holding) => {
-          const visibility = normalize(
-            holding.visibility
-          );
-
-          const blurred =
-            isBlurred(holding);
-
-          const isPublic =
-            visibility === "public";
-
-          const isMember = [
-            "subscriber",
-            "community",
-          ].includes(visibility);
-
-          const isRevealedMember =
-            isMember && !blurred;
-
-          const isProtected =
-            isMember && blurred;
-
-          if (
-            visibilityFilter === "public"
-          ) {
-            return (
-              isPublic ||
-              isRevealedMember
-            );
-          }
-
-          if (
-            visibilityFilter ===
-            "protected"
-          ) {
-            return isProtected;
-          }
-
-          return true;
-        }
-      );
-    }, [
-      publishedStudies,
-      visibilityFilter,
-      isBlurred,
-    ]);
+  const isPublicStudy = useCallback(
+    (holding) =>
+      !isProtected(holding),
+    [isProtected]
+  );
 
   /* =========================================================
      SUMMARY + MEDIAN
@@ -478,112 +407,181 @@ export default function Accuracy() {
 
   const summary = useMemo(() => {
     const completed =
-      publishedStudies.filter(
-        isCompletedStudy
-      );
+      publishedStudies.filter(isCompleted);
 
     const ongoing =
       publishedStudies.filter(
         (holding) =>
-          !isCompletedStudy(holding)
+          !isCompleted(holding)
       );
 
     const positive =
       completed.filter(
         (holding) =>
-          getPriceMovement(holding) > 0
+          getMovement(holding) > 0
       );
 
     const negative =
       completed.filter(
         (holding) =>
-          getPriceMovement(holding) < 0
+          getMovement(holding) < 0
       );
 
     const neutral =
       completed.filter(
         (holding) =>
-          getPriceMovement(holding) === 0
+          getMovement(holding) === 0
       );
 
-    const completedMovements = completed
+    const movements = completed
       .map((holding) =>
-        Number(
-          getPriceMovement(holding)
-        )
+        getMovement(holding)
       )
-      .filter((value) =>
-        Number.isFinite(value)
-      )
+      .filter(Number.isFinite)
       .sort((a, b) => a - b);
 
-    let medianPriceMovement = 0;
+    let medianMovement = 0;
 
-    if (
-      completedMovements.length > 0
-    ) {
+    if (movements.length > 0) {
       const middle = Math.floor(
-        completedMovements.length / 2
+        movements.length / 2
       );
 
       if (
-        completedMovements.length % 2 ===
-        0
+        movements.length % 2 === 0
       ) {
-        medianPriceMovement =
+        medianMovement =
           (
-            completedMovements[
-              middle - 1
-            ] +
-            completedMovements[middle]
+            movements[middle - 1] +
+            movements[middle]
           ) / 2;
       } else {
-        medianPriceMovement =
-          completedMovements[middle];
+        medianMovement =
+          movements[middle];
       }
     }
 
     return {
-      total: publishedStudies.length,
-      ongoing: ongoing.length,
-      completed: completed.length,
-      positive: positive.length,
-      negative: negative.length,
-      neutral: neutral.length,
-      medianPriceMovement,
+      total:
+        publishedStudies.length,
+
+      ongoing:
+        ongoing.length,
+
+      completed:
+        completed.length,
+
+      positive:
+        positive.length,
+
+      negative:
+        negative.length,
+
+      neutral:
+        neutral.length,
+
+      medianMovement,
     };
   }, [
     publishedStudies,
-    isCompletedStudy,
-    getPriceMovement,
+    isCompleted,
+    getMovement,
   ]);
 
   /* =========================================================
-     SECTOR OPTIONS
+     MOVEMENT DISTRIBUTION
   ========================================================= */
 
-  const sectorOptions = useMemo(() => {
+  const movementDistribution =
+    useMemo(() => {
+      const completed =
+        publishedStudies.filter(
+          isCompleted
+        );
+
+      const buckets = [
+        {
+          label: "Below 0%",
+          count: 0,
+          type: "negative",
+        },
+        {
+          label: "0% to 10%",
+          count: 0,
+          type: "orange",
+        },
+        {
+          label: "10% to 25%",
+          count: 0,
+          type: "light-green",
+        },
+        {
+          label: "25% to 50%",
+          count: 0,
+          type: "green",
+        },
+        {
+          label: "50% and above",
+          count: 0,
+          type: "dark-green",
+        },
+      ];
+
+      completed.forEach(
+        (holding) => {
+          const movement =
+            getMovement(holding);
+
+          if (movement < 0) {
+            buckets[0].count += 1;
+          } else if (
+            movement < 10
+          ) {
+            buckets[1].count += 1;
+          } else if (
+            movement < 25
+          ) {
+            buckets[2].count += 1;
+          } else if (
+            movement < 50
+          ) {
+            buckets[3].count += 1;
+          } else {
+            buckets[4].count += 1;
+          }
+        }
+      );
+
+      return buckets;
+    }, [
+      publishedStudies,
+      isCompleted,
+      getMovement,
+    ]);
+
+  /* =========================================================
+     SECTORS
+  ========================================================= */
+
+  const sectors = useMemo(() => {
     return Array.from(
       new Set(
         publishedStudies
-          .map((holding) =>
-            String(
+          .map(
+            (holding) =>
               holding.sector ||
-                "General"
-            ).trim()
+              "General"
           )
           .filter(Boolean)
       )
-    ).sort((a, b) =>
-      a.localeCompare(b)
-    );
+    ).sort();
   }, [publishedStudies]);
 
   /* =========================================================
-     PUBLICATION DATE
+     DATE
   ========================================================= */
 
-  const getPublishedDateValue = (
+  const getDateValue = (
     holding
   ) =>
     holding.recommendationDate ||
@@ -592,37 +590,22 @@ export default function Accuracy() {
     holding.created_at ||
     null;
 
-  const getPublishedTimestamp = (
+  const formatDate = (
     holding
   ) => {
     const value =
-      getPublishedDateValue(holding);
+      getDateValue(holding);
 
-    if (!value) {
-      return 0;
-    }
+    if (!value) return "-";
 
-    const timestamp =
-      new Date(value).getTime();
+    const date =
+      new Date(value);
 
-    return Number.isNaN(timestamp)
-      ? 0
-      : timestamp;
-  };
-
-  const formatPublishedDate = (
-    holding
-  ) => {
-    const value =
-      getPublishedDateValue(holding);
-
-    if (!value) {
-      return "-";
-    }
-
-    const date = new Date(value);
-
-    if (Number.isNaN(date.getTime())) {
+    if (
+      Number.isNaN(
+        date.getTime()
+      )
+    ) {
       return String(value);
     }
 
@@ -636,392 +619,268 @@ export default function Accuracy() {
     );
   };
 
+  const getTimestamp = (
+    holding
+  ) => {
+    const value =
+      getDateValue(holding);
+
+    if (!value) return 0;
+
+    const timestamp =
+      new Date(value).getTime();
+
+    return Number.isNaN(timestamp)
+      ? 0
+      : timestamp;
+  };
+
   /* =========================================================
      FILTER + SORT
   ========================================================= */
 
-  const filteredStudies = useMemo(() => {
-    let rows = [
-      ...visibilityFilteredStudies,
-    ];
+  const filteredStudies =
+    useMemo(() => {
+      let result = [
+        ...publishedStudies,
+      ];
 
-    if (
-      studyStatusFilter === "ongoing"
-    ) {
-      rows = rows.filter(
-        (holding) =>
-          !isCompletedStudy(holding)
-      );
-    }
+      if (
+        statusFilter ===
+        "ongoing"
+      ) {
+        result =
+          result.filter(
+            (holding) =>
+              !isCompleted(
+                holding
+              )
+          );
+      }
 
-    if (
-      studyStatusFilter === "completed"
-    ) {
-      rows = rows.filter(
-        isCompletedStudy
-      );
-    }
+      if (
+        statusFilter ===
+        "completed"
+      ) {
+        result =
+          result.filter(
+            isCompleted
+          );
+      }
 
-    if (
-      sectorFilter !== "all"
-    ) {
-      rows = rows.filter(
-        (holding) =>
-          String(
-            holding.sector ||
-              "General"
-          ).trim() === sectorFilter
-      );
-    }
+      if (
+        accessFilter ===
+        "public"
+      ) {
+        result =
+          result.filter(
+            isPublicStudy
+          );
+      }
 
-    if (
-      sortMode === "newest"
-    ) {
-      rows.sort(
-        (a, b) =>
-          getPublishedTimestamp(b) -
-          getPublishedTimestamp(a)
-      );
-    }
+      if (
+        accessFilter ===
+        "protected"
+      ) {
+        result =
+          result.filter(
+            isProtected
+          );
+      }
 
-    if (
-      sortMode === "oldest"
-    ) {
-      rows.sort(
-        (a, b) =>
-          getPublishedTimestamp(a) -
-          getPublishedTimestamp(b)
-      );
-    }
+      if (
+        sectorFilter !==
+        "all"
+      ) {
+        result =
+          result.filter(
+            (holding) =>
+              (
+                holding.sector ||
+                "General"
+              ) ===
+              sectorFilter
+          );
+      }
 
-    if (
-      sortMode ===
-      "movement-high"
-    ) {
-      rows.sort(
-        (a, b) =>
-          getPriceMovement(b) -
-          getPriceMovement(a)
-      );
-    }
+      const query =
+        normalize(search);
 
-    if (
-      sortMode ===
-      "movement-low"
-    ) {
-      rows.sort(
-        (a, b) =>
-          getPriceMovement(a) -
-          getPriceMovement(b)
-      );
-    }
+      if (query) {
+        result =
+          result.filter(
+            (holding) => {
+              const protectedStudy =
+                isProtected(
+                  holding
+                );
 
-    return rows;
-  }, [
-    visibilityFilteredStudies,
-    studyStatusFilter,
-    sectorFilter,
-    sortMode,
-    isCompletedStudy,
-    getPriceMovement,
-  ]);
+              const searchable =
+                protectedStudy
+                  ? [
+                      holding.sector,
+                      holding.tradeType,
+                      holding.trade_type,
+                    ]
+                  : [
+                      holding.stock,
+                      holding.symbol,
+                      holding.sector,
+                      holding.tradeType,
+                      holding.trade_type,
+                    ];
+
+              return searchable
+                .join(" ")
+                .toLowerCase()
+                .includes(
+                  query
+                );
+            }
+          );
+      }
+
+      if (
+        sortMode ===
+        "newest"
+      ) {
+        result.sort(
+          (a, b) =>
+            getTimestamp(b) -
+            getTimestamp(a)
+        );
+      }
+
+      if (
+        sortMode ===
+        "oldest"
+      ) {
+        result.sort(
+          (a, b) =>
+            getTimestamp(a) -
+            getTimestamp(b)
+        );
+      }
+
+      if (
+        sortMode ===
+        "movement-high"
+      ) {
+        result.sort(
+          (a, b) =>
+            getMovement(b) -
+            getMovement(a)
+        );
+      }
+
+      if (
+        sortMode ===
+        "movement-low"
+      ) {
+        result.sort(
+          (a, b) =>
+            getMovement(a) -
+            getMovement(b)
+        );
+      }
+
+      return result;
+    }, [
+      publishedStudies,
+      statusFilter,
+      accessFilter,
+      sectorFilter,
+      sortMode,
+      search,
+      isCompleted,
+      isProtected,
+      isPublicStudy,
+      getMovement,
+    ]);
 
   /* =========================================================
      PAGINATION
   ========================================================= */
 
-  const totalPages = Math.max(
-    1,
-    Math.ceil(
-      filteredStudies.length /
-        ITEMS_PER_PAGE
-    )
-  );
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [
+    statusFilter,
+    accessFilter,
+    sectorFilter,
+    sortMode,
+    search,
+  ]);
+
+  const totalPages =
+    Math.max(
+      1,
+      Math.ceil(
+        filteredStudies.length /
+          ITEMS_PER_PAGE
+      )
+    );
 
   useEffect(() => {
     if (
-      currentPage > totalPages
+      currentPage >
+      totalPages
     ) {
-      setCurrentPage(totalPages);
+      setCurrentPage(
+        totalPages
+      );
     }
   }, [
     currentPage,
     totalPages,
   ]);
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [
-    visibilityFilter,
-    studyStatusFilter,
-    sectorFilter,
-    sortMode,
-  ]);
-
-  const paginatedStudies = useMemo(
-    () => {
+  const paginatedStudies =
+    useMemo(() => {
       const start =
         (currentPage - 1) *
         ITEMS_PER_PAGE;
 
       return filteredStudies.slice(
         start,
-        start + ITEMS_PER_PAGE
-      );
-    },
-    [
-      filteredStudies,
-      currentPage,
-    ]
-  );
-
-  /* =========================================================
-     MOVEMENT DISTRIBUTION
-  ========================================================= */
-
-  const movementDistribution =
-    useMemo(() => {
-      const completed =
-        publishedStudies.filter(
-          isCompletedStudy
-        );
-
-      const buckets = [
-        {
-          label: "< 0%",
-          count: 0,
-          className: "loss",
-        },
-        {
-          label: "0% - 10%",
-          count: 0,
-          className: "low",
-        },
-        {
-          label: "10% - 25%",
-          count: 0,
-          className: "medium",
-        },
-        {
-          label: "25%+",
-          count: 0,
-          className: "high",
-        },
-      ];
-
-      completed.forEach(
-        (holding) => {
-          const movement =
-            getPriceMovement(
-              holding
-            );
-
-          if (movement < 0) {
-            buckets[0].count += 1;
-          } else if (
-            movement < 10
-          ) {
-            buckets[1].count += 1;
-          } else if (
-            movement < 25
-          ) {
-            buckets[2].count += 1;
-          } else {
-            buckets[3].count += 1;
-          }
-        }
-      );
-
-      const maxCount = Math.max(
-        ...buckets.map(
-          (item) => item.count
-        ),
-        1
-      );
-
-      return buckets.map(
-        (item) => ({
-          ...item,
-
-          height:
-            (item.count /
-              maxCount) *
-            100,
-        })
+        start +
+          ITEMS_PER_PAGE
       );
     }, [
-      publishedStudies,
-      isCompletedStudy,
-      getPriceMovement,
+      filteredStudies,
+      currentPage,
     ]);
-
-  /* =========================================================
-     FORMATTERS
-  ========================================================= */
-
-  const formatPrice = (
-    value
-  ) => {
-    if (
-      value === null ||
-      value === undefined ||
-      value === ""
-    ) {
-      return "-";
-    }
-
-    const number = Number(value);
-
-    if (
-      Number.isNaN(number)
-    ) {
-      return "-";
-    }
-
-    return `₹${number.toLocaleString(
-      "en-IN",
-      {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2,
-      }
-    )}`;
-  };
-
-  const formatUpdatedTime = (
-    value
-  ) => {
-    if (!value) {
-      return "";
-    }
-
-    return value.toLocaleTimeString(
-      "en-IN",
-      {
-        hour: "2-digit",
-        minute: "2-digit",
-      }
-    );
-  };
-
-  const formatUpdatedDate = (
-    value
-  ) => {
-    if (!value) {
-      return "";
-    }
-
-    return value.toLocaleDateString(
-      "en-IN",
-      {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      }
-    );
-  };
-
-  /* =========================================================
-     PROTECTED VALUES
-  ========================================================= */
-
-  const renderProtectedText = (
-    value,
-    holding,
-    fallback = "-"
-  ) => {
-    if (
-      !isBlurred(holding)
-    ) {
-      return value || fallback;
-    }
-
-    return (
-      <span
-        className="accuracy-blurred-value"
-        title="Subscriber study details are protected"
-      >
-        {value || "Protected"}
-      </span>
-    );
-  };
-
-  const renderProtectedPrice = (
-    value,
-    holding
-  ) => {
-    if (
-      !isBlurred(holding)
-    ) {
-      return formatPrice(value);
-    }
-
-    return (
-      <span
-        className="accuracy-blurred-value"
-        title="Subscriber study details are protected"
-      >
-        ₹000.00
-      </span>
-    );
-  };
-
-  /* =========================================================
-     CURRENT / CLOSING REFERENCE
-  ========================================================= */
-
-  const getDisplayPrice = (
-    holding
-  ) => {
-    if (
-      isCompletedStudy(holding)
-    ) {
-      const exitPrice =
-        holding.exitPrice ??
-        holding.exit_price;
-
-      if (
-        exitPrice !== null &&
-        exitPrice !== undefined &&
-        exitPrice !== ""
-      ) {
-        return exitPrice;
-      }
-    }
-
-    return holding.cmp;
-  };
 
   /* =========================================================
      DONUT
   ========================================================= */
 
-  const completedTotal =
-    summary.completed || 0;
-
-  const positivePercent =
-    completedTotal > 0
-      ? (summary.positive /
-          completedTotal) *
-        100
+  const positivePercentage =
+    summary.completed > 0
+      ? (
+          summary.positive /
+          summary.completed
+        ) * 100
       : 0;
 
-  const negativePercent =
-    completedTotal > 0
-      ? (summary.negative /
-          completedTotal) *
-        100
+  const negativePercentage =
+    summary.completed > 0
+      ? (
+          summary.negative /
+          summary.completed
+        ) * 100
       : 0;
 
   const donutStyle = {
     background: `conic-gradient(
-      #22c55e 0% ${positivePercent}%,
-      #ef4444 ${positivePercent}% ${
-        positivePercent +
-        negativePercent
+      #16a34a 0% ${positivePercentage}%,
+      #ef4444 ${positivePercentage}% ${
+        positivePercentage +
+        negativePercentage
       }%,
-      #cbd5e1 ${
-        positivePercent +
-        negativePercent
+      #94a3b8 ${
+        positivePercentage +
+        negativePercentage
       }% 100%
     )`,
   };
@@ -1032,288 +891,245 @@ export default function Accuracy() {
 
   if (loading) {
     return (
-      <div className="accuracy-loading">
+      <div className="study-library-loading">
         Loading market studies...
       </div>
     );
   }
 
-  /* =========================================================
-     ERROR
-  ========================================================= */
-
-  if (
-    loadError &&
-    holdings.length === 0
-  ) {
-    return (
-      <main className="accuracy-page">
-
-        <section className="accuracy-empty-state">
-
-          <h2>
-            Unable to load market studies
-          </h2>
-
-          <p>
-            {loadError}
-          </p>
-
-          <button
-            type="button"
-            onClick={() =>
-              loadAccuracy({
-                showInitialLoader: true,
-              })
-            }
-          >
-            Try Again
-          </button>
-
-        </section>
-
-      </main>
-    );
-  }
-
-  /* =========================================================
-     UI
-  ========================================================= */
-
   return (
     <>
       <SEO
-        title="VTKS Market Studies"
-        description="Explore timestamped VTKS educational market studies, reference levels and subsequent market observations."
+        title="VTKS Market Study"
+        description="Documented educational market studies, reference structures and historical market observations."
       />
 
-      <main className="accuracy-page">
+      <main className="study-library-page">
 
-        {/* =================================================
-            HEADER
-        ================================================= */}
+        <div className="study-library-layout">
 
-        <section className="accuracy-topbar">
+          {/* =================================================
+              LEFT
+          ================================================= */}
 
-          <div className="accuracy-title-area">
+          <div className="study-library-main">
 
-            <div className="accuracy-title-line">
+            {/* HEADER */}
 
-              <h1>
-                VTKS Market Studies
-              </h1>
+            <section className="library-header">
 
-              <span className="accuracy-research-badge">
-                Educational Research
-              </span>
+              <div>
 
-            </div>
+                <div className="library-title-row">
 
-            <p className="accuracy-philosophy">
+                  <h1>
+                    VTKS Market Study
+                  </h1>
 
-              <span>
-                Objective
-              </span>
-
-              <span className="accuracy-philosophy-dot">
-                •
-              </span>
-
-              <span>
-                Structured
-              </span>
-
-              <span className="accuracy-philosophy-dot">
-                •
-              </span>
-
-              <span>
-                Educational
-              </span>
-
-            </p>
-
-          </div>
-
-          <div className="accuracy-refresh-area">
-
-            <div className="accuracy-last-updated">
-
-              {lastUpdated ? (
-                <span>
-                  Last updated:{" "}
-                  {formatUpdatedDate(
-                    lastUpdated
-                  )}
-                  ,{" "}
-                  {formatUpdatedTime(
-                    lastUpdated
-                  )}
-                </span>
-              ) : (
-                <span>
-                  Waiting for latest data
-                </span>
-              )}
-
-            </div>
-
-            <button
-              type="button"
-              className="accuracy-refresh-btn"
-              onClick={() =>
-                loadAccuracy()
-              }
-              disabled={refreshing}
-            >
-              {refreshing
-                ? "Refreshing..."
-                : "↻ Refresh Data"}
-            </button>
-
-          </div>
-
-        </section>
-
-        {loadError && (
-          <div className="accuracy-inline-error">
-            {loadError}
-          </div>
-        )}
-
-        {/* =================================================
-            SUMMARY CARDS
-        ================================================= */}
-
-        <section className="accuracy-stats">
-
-          <SummaryCard
-            icon="▤"
-            value={summary.total}
-            title="Published Studies"
-            subtitle="All-time studies shared"
-            tone="blue"
-          />
-
-          <SummaryCard
-            icon="↗"
-            value={summary.ongoing}
-            title="Ongoing Studies"
-            subtitle="Currently being tracked"
-            tone="green"
-          />
-
-          <SummaryCard
-            icon="✓"
-            value={summary.completed}
-            title="Completed Studies"
-            subtitle="Studies with closing update"
-            tone="purple"
-          />
-
-          <SummaryCard
-            icon="◎"
-            value={`${summary.positive} / ${summary.completed}`}
-            title="Positive Price Movement"
-            subtitle="Completed studies only"
-            tone="orange"
-          />
-
-          <SummaryCard
-            icon="⌁"
-            value={`${
-              summary.medianPriceMovement >
-              0
-                ? "+"
-                : ""
-            }${summary.medianPriceMovement.toFixed(
-              2
-            )}%`}
-            title="Median Price Movement"
-            subtitle="Completed studies only"
-            tone="teal"
-          />
-
-        </section>
-
-        {/* =================================================
-            EDUCATIONAL BANNER
-        ================================================= */}
-
-        <section className="accuracy-education-banner">
-
-          <div className="accuracy-info-icon">
-            i
-          </div>
-
-          <div>
-
-            <strong>
-              Educational Market Studies
-            </strong>
-
-            <p>
-              The studies and levels shown
-              here are presented for
-              educational and research
-              purposes only. They are not
-              buy/sell recommendations,
-              investment advice, or tips.
-              Markets are dynamic. Please
-              conduct your own research
-              before making investment
-              decisions.
-            </p>
-
-          </div>
-
-        </section>
-
-        {/* =================================================
-            MAIN GRID
-        ================================================= */}
-
-        <section className="accuracy-main-grid">
-
-          {/* ===============================================
-              STUDY ARCHIVE
-          =============================================== */}
-
-          <div className="accuracy-track-card">
-
-            <div className="accuracy-track-header">
-
-              <div className="accuracy-archive-title">
-
-                <div className="accuracy-archive-icon">
-                  ▣
-                </div>
-
-                <div>
-
-                  <h2>
-                    Study Archive
-                  </h2>
-
-                  <p>
-                    Historical market
-                    studies and documented
-                    outcomes
-                  </p>
+                  <span className="library-research-pill">
+                    Educational Research
+                  </span>
 
                 </div>
+
+                <div className="library-values">
+
+                  <strong>
+                    Tracked
+                  </strong>
+
+                  <span>
+                    •
+                  </span>
+
+                  <strong>
+                    Documented
+                  </strong>
+
+                  <span>
+                    •
+                  </span>
+
+                  <strong>
+                    Reviewed
+                  </strong>
+
+                </div>
+
+                <p className="library-description">
+                  Documenting market structure,
+                  reference levels and subsequent
+                  price behaviour for research and
+                  learning.
+                </p>
 
               </div>
 
-              <div className="accuracy-track-controls">
+              <div className="library-refresh">
+
+                {lastUpdated && (
+                  <span>
+                    Last updated:{" "}
+                    {lastUpdated.toLocaleDateString(
+                      "en-IN",
+                      {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      }
+                    )}
+                    ,{" "}
+                    {lastUpdated.toLocaleTimeString(
+                      "en-IN",
+                      {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }
+                    )}
+                  </span>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    loadData()
+                  }
+                  disabled={
+                    refreshing
+                  }
+                >
+                  ↻{" "}
+                  {refreshing
+                    ? "Refreshing..."
+                    : "Refresh Data"}
+                </button>
+
+              </div>
+
+            </section>
+
+            {/* SUMMARY */}
+
+            <section className="library-compact-summary">
+
+              <CompactStat
+                value={
+                  summary.total
+                }
+                label="Studies"
+                tone="blue"
+              />
+
+              <CompactStat
+                value={
+                  summary.ongoing
+                }
+                label="Ongoing"
+                tone="green"
+              />
+
+              <CompactStat
+                value={
+                  summary.completed
+                }
+                label="Completed"
+                tone="purple"
+              />
+
+              <CompactStat
+                value={`${summary.positive} / ${summary.completed}`}
+                label="Positive"
+                tone="orange"
+              />
+
+            </section>
+
+            {/* FILTERS */}
+
+            <section className="library-filter-bar">
+
+              <div className="library-tabs">
+
+                <button
+                  type="button"
+                  className={
+                    statusFilter ===
+                    "all"
+                      ? "active"
+                      : ""
+                  }
+                  onClick={() =>
+                    setStatusFilter(
+                      "all"
+                    )
+                  }
+                >
+                  All Studies
+                </button>
+
+                <button
+                  type="button"
+                  className={
+                    statusFilter ===
+                    "ongoing"
+                      ? "active"
+                      : ""
+                  }
+                  onClick={() =>
+                    setStatusFilter(
+                      "ongoing"
+                    )
+                  }
+                >
+                  Ongoing
+                </button>
+
+                <button
+                  type="button"
+                  className={
+                    statusFilter ===
+                    "completed"
+                      ? "active"
+                      : ""
+                  }
+                  onClick={() =>
+                    setStatusFilter(
+                      "completed"
+                    )
+                  }
+                >
+                  Completed
+                </button>
+
+              </div>
+
+              <div className="library-filters">
+
+                <div className="library-search">
+
+                  <input
+                    type="text"
+                    value={search}
+                    onChange={(event) =>
+                      setSearch(
+                        event.target.value
+                      )
+                    }
+                    placeholder="Search studies, sectors..."
+                  />
+
+                  <span>
+                    ⌕
+                  </span>
+
+                </div>
 
                 <select
-                  className="accuracy-table-select"
                   value={
-                    visibilityFilter
+                    accessFilter
                   }
                   onChange={(event) =>
-                    setVisibilityFilter(
+                    setAccessFilter(
                       event.target.value
                     )
                   }
@@ -1323,16 +1139,16 @@ export default function Accuracy() {
                   </option>
 
                   <option value="public">
-                    Public & Revealed
+                    Published
                   </option>
 
                   <option value="protected">
-                    Protected Studies
+                    Members-Only
                   </option>
+
                 </select>
 
                 <select
-                  className="accuracy-table-select"
                   value={
                     sectorFilter
                   }
@@ -1346,21 +1162,27 @@ export default function Accuracy() {
                     All Sectors
                   </option>
 
-                  {sectorOptions.map(
+                  {sectors.map(
                     (sector) => (
                       <option
-                        key={sector}
-                        value={sector}
+                        key={
+                          sector
+                        }
+                        value={
+                          sector
+                        }
                       >
                         {sector}
                       </option>
                     )
                   )}
+
                 </select>
 
                 <select
-                  className="accuracy-table-select"
-                  value={sortMode}
+                  value={
+                    sortMode
+                  }
                   onChange={(event) =>
                     setSortMode(
                       event.target.value
@@ -1376,444 +1198,190 @@ export default function Accuracy() {
                   </option>
 
                   <option value="movement-high">
-                    Movement: High to Low
+                    Movement High-Low
                   </option>
 
                   <option value="movement-low">
-                    Movement: Low to High
+                    Movement Low-High
                   </option>
+
                 </select>
 
               </div>
 
-            </div>
+            </section>
 
-            {/* STATUS FILTER */}
-
-            <div className="accuracy-status-tabs">
-
-              <button
-                type="button"
-                className={
-                  studyStatusFilter ===
-                  "all"
-                    ? "active"
-                    : ""
-                }
-                onClick={() =>
-                  setStudyStatusFilter(
-                    "all"
-                  )
-                }
-              >
-                All Studies
-              </button>
-
-              <button
-                type="button"
-                className={
-                  studyStatusFilter ===
-                  "ongoing"
-                    ? "active"
-                    : ""
-                }
-                onClick={() =>
-                  setStudyStatusFilter(
-                    "ongoing"
-                  )
-                }
-              >
-                Ongoing
-              </button>
-
-              <button
-                type="button"
-                className={
-                  studyStatusFilter ===
-                  "completed"
-                    ? "active"
-                    : ""
-                }
-                onClick={() =>
-                  setStudyStatusFilter(
-                    "completed"
-                  )
-                }
-              >
-                Completed
-              </button>
-
-            </div>
-
-            {/* TABLE */}
-
-            {filteredStudies.length ===
-            0 ? (
-              <div className="accuracy-empty-state">
-
-                <h3>
-                  No studies found
-                </h3>
-
-                <p>
-                  No market studies match
-                  the selected filters.
-                </p>
-
+            {error && (
+              <div className="library-error">
+                {error}
               </div>
-            ) : (
-              <>
-
-                <div className="accuracy-table-scroll">
-
-                  <table className="accuracy-table">
-
-                    <thead>
-
-                      <tr>
-
-                        <th>
-                          Study
-                        </th>
-
-                        <th>
-                          Sector
-                        </th>
-
-                        <th>
-                          Study Type
-                        </th>
-
-                        <th>
-                          Published On
-                        </th>
-
-                        <th>
-                          Reference Price
-                          <small>
-                            At Publication
-                          </small>
-                        </th>
-
-                        <th>
-                          Invalidation Level
-                          <small>
-                            If Broken
-                          </small>
-                        </th>
-
-                        <th>
-                          Reference Zone 1
-                          <small>
-                            Study Level
-                          </small>
-                        </th>
-
-                        <th>
-                          Reference Zone 2
-                          <small>
-                            Extended Level
-                          </small>
-                        </th>
-
-                        <th>
-                          Current / Closing
-                          Reference
-                          <small>
-                            Live / Closing
-                          </small>
-                        </th>
-
-                        <th>
-                          Price Movement
-                          <small>
-                            Since Publication
-                          </small>
-                        </th>
-
-                        <th>
-                          Status
-                        </th>
-
-                      </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                      {paginatedStudies.map(
-                        (holding) => {
-
-                          const movement =
-                            getPriceMovement(
-                              holding
-                            );
-
-                          const completed =
-                            isCompletedStudy(
-                              holding
-                            );
-
-                          const publicStatus =
-                            getPublicStatus(
-                              holding
-                            );
-
-                          const displayPrice =
-                            getDisplayPrice(
-                              holding
-                            );
-
-                          const studyType =
-                            holding.tradeType ||
-                            holding.trade_type ||
-                            "-";
-
-                          return (
-                            <tr
-                              key={
-                                holding.id
-                              }
-                            >
-
-                              <td>
-
-                                <div className="accuracy-study-cell">
-
-                                  <strong>
-                                    {renderProtectedText(
-                                      holding.stock,
-                                      holding
-                                    )}
-                                  </strong>
-
-                                  {isBlurred(
-                                    holding
-                                  ) && (
-                                    <span className="accuracy-protected-badge">
-                                      🔒 Protected
-                                    </span>
-                                  )}
-
-                                </div>
-
-                              </td>
-
-                              <td>
-                                {holding.sector ||
-                                  "General"}
-                              </td>
-
-                              <td>
-
-                                <span className="accuracy-study-type-pill">
-                                  {studyType}
-                                </span>
-
-                              </td>
-
-                              <td>
-                                {formatPublishedDate(
-                                  holding
-                                )}
-                              </td>
-
-                              <td>
-                                {renderProtectedPrice(
-                                  holding.entry,
-                                  holding
-                                )}
-                              </td>
-
-                              <td>
-
-                                <span className="accuracy-invalidation-value">
-
-                                  {renderProtectedPrice(
-                                    holding.stopLoss ??
-                                      holding.stop_loss,
-                                    holding
-                                  )}
-
-                                </span>
-
-                              </td>
-
-                              <td>
-                                {renderProtectedPrice(
-                                  holding.target1,
-                                  holding
-                                )}
-                              </td>
-
-                              <td>
-                                {renderProtectedPrice(
-                                  holding.target2,
-                                  holding
-                                )}
-                              </td>
-
-                              <td>
-
-                                <div className="accuracy-reference-cell">
-
-                                  {renderProtectedPrice(
-                                    displayPrice,
-                                    holding
-                                  )}
-
-                                  {!isBlurred(
-                                    holding
-                                  ) && (
-                                    <small>
-                                      {completed
-                                        ? "Closing Reference"
-                                        : "Live Reference"}
-                                    </small>
-                                  )}
-
-                                </div>
-
-                              </td>
-
-                              <td>
-
-                                <div
-                                  className={`accuracy-movement ${
-                                    movement > 0
-                                      ? "positive"
-                                      : movement < 0
-                                        ? "negative"
-                                        : "neutral"
-                                  }`}
-                                >
-
-                                  <strong>
-
-                                    {movement > 0
-                                      ? "+"
-                                      : ""}
-
-                                    {movement.toFixed(
-                                      2
-                                    )}
-
-                                    %
-
-                                  </strong>
-
-                                  <MiniTrend
-                                    positive={
-                                      movement >=
-                                      0
-                                    }
-                                  />
-
-                                </div>
-
-                              </td>
-
-                              <td>
-
-                                <PublicStatusBadge
-                                  status={
-                                    publicStatus
-                                  }
-                                />
-
-                              </td>
-
-                            </tr>
-                          );
-                        }
-                      )}
-
-                    </tbody>
-
-                  </table>
-
-                </div>
-
-                <div className="accuracy-pagination-row">
-
-                  <span>
-
-                    Showing{" "}
-
-                    {Math.min(
-                      (currentPage - 1) *
-                        ITEMS_PER_PAGE +
-                        1,
-                      filteredStudies.length
+            )}
+
+            {/* STUDIES */}
+
+            <section className="study-card-list">
+
+              {paginatedStudies.map(
+                (holding) => (
+                  <StudyCard
+                    key={
+                      holding.id
+                    }
+                    holding={
+                      holding
+                    }
+                    protectedStudy={isProtected(
+                      holding
                     )}
-
-                    {" "}to{" "}
-
-                    {Math.min(
-                      currentPage *
-                        ITEMS_PER_PAGE,
-                      filteredStudies.length
+                    completed={isCompleted(
+                      holding
                     )}
-
-                    {" "}of{" "}
-
-                    {
-                      filteredStudies.length
-                    }
-
-                    {" "}studies
-
-                  </span>
-
-                  <Pagination
-                    currentPage={
-                      currentPage
-                    }
-                    totalPages={
-                      totalPages
-                    }
-                    onPageChange={
-                      setCurrentPage
+                    movement={getMovement(
+                      holding
+                    )}
+                    formatDate={
+                      formatDate
                     }
                   />
+                )
+              )}
 
+              {paginatedStudies.length ===
+                0 && (
+                <div className="library-empty">
+                  No studies match the
+                  selected filters.
                 </div>
+              )}
 
-              </>
+            </section>
+
+            {/* PAGINATION */}
+
+            {filteredStudies.length >
+              0 && (
+              <section className="library-pagination">
+
+                <span>
+                  Showing{" "}
+                  {Math.min(
+                    (currentPage - 1) *
+                      ITEMS_PER_PAGE +
+                      1,
+                    filteredStudies.length
+                  )}{" "}
+                  to{" "}
+                  {Math.min(
+                    currentPage *
+                      ITEMS_PER_PAGE,
+                    filteredStudies.length
+                  )}{" "}
+                  of{" "}
+                  {
+                    filteredStudies.length
+                  }{" "}
+                  studies
+                </span>
+
+                <Pagination
+                  currentPage={
+                    currentPage
+                  }
+                  totalPages={
+                    totalPages
+                  }
+                  onPageChange={
+                    setCurrentPage
+                  }
+                />
+
+              </section>
             )}
 
           </div>
 
-          {/* ===============================================
-              RIGHT SIDE CHARTS
-          =============================================== */}
+          {/* =================================================
+              RIGHT SIDEBAR
+          ================================================= */}
 
-          <aside className="accuracy-side-column">
+          <aside className="study-library-sidebar">
 
-            {/* OUTCOME SUMMARY */}
+            {/* MEDIAN */}
 
-            <section className="accuracy-side-card">
+            <section className="median-side-card">
 
-              <div className="accuracy-side-heading">
+              <div className="median-side-icon">
+                ↝
+              </div>
 
-                <h3>
-                  Study Outcome Summary
-                </h3>
+              <div className="median-side-content">
 
-                <span>
-                  Completed studies
+                <span className="median-side-label">
+                  Median Price Movement
                 </span>
+
+                <strong
+                  className={
+                    summary.medianMovement > 0
+                      ? "median-positive"
+                      : summary.medianMovement < 0
+                        ? "median-negative"
+                        : "median-neutral"
+                  }
+                >
+                  {summary.medianMovement > 0
+                    ? "+"
+                    : ""}
+
+                  {summary.medianMovement.toFixed(
+                    2
+                  )}
+
+                  %
+                </strong>
+
+                <small>
+                  Based on completed studies
+                </small>
 
               </div>
 
-              <div className="accuracy-outcome-content">
+            </section>
+
+            {/* OUTCOME */}
+
+            <section className="library-side-card">
+
+              <div className="side-card-title">
+
+                <div className="side-card-icon">
+                  ◎
+                </div>
+
+                <div>
+
+                  <h2>
+                    Study Outcome Summary
+                  </h2>
+
+                  <p>
+                    Completed studies only
+                  </p>
+
+                </div>
+
+              </div>
+
+              <div className="outcome-body">
 
                 <div
-                  className="accuracy-donut"
-                  style={donutStyle}
+                  className="outcome-donut"
+                  style={
+                    donutStyle
+                  }
                 >
 
-                  <div className="accuracy-donut-center">
+                  <div>
 
                     <strong>
                       {summary.completed}
@@ -1827,234 +1395,229 @@ export default function Accuracy() {
 
                 </div>
 
-                <div className="accuracy-outcome-list">
+                <div className="outcome-stats">
 
                   <OutcomeRow
-                    color="green"
                     label="Positive"
-                    value={
+                    count={
                       summary.positive
                     }
                     total={
                       summary.completed
                     }
+                    type="positive"
                   />
 
                   <OutcomeRow
-                    color="red"
                     label="Negative"
-                    value={
+                    count={
                       summary.negative
                     }
                     total={
                       summary.completed
                     }
+                    type="negative"
                   />
 
                   <OutcomeRow
-                    color="gray"
                     label="Neutral"
-                    value={
+                    count={
                       summary.neutral
                     }
                     total={
                       summary.completed
                     }
+                    type="neutral"
                   />
 
                 </div>
 
               </div>
 
+              <p className="side-footer-text">
+                Based on{" "}
+                {summary.completed}{" "}
+                completed studies
+              </p>
+
             </section>
 
-            {/* MOVEMENT DISTRIBUTION */}
+            {/* DISTRIBUTION */}
 
-            <section className="accuracy-side-card">
+            <section className="library-side-card">
 
-              <div className="accuracy-side-heading">
+              <div className="side-card-title">
 
-                <h3>
-                  Movement Distribution
-                </h3>
+                <div className="side-card-icon">
+                  ▥
+                </div>
 
-                <span>
-                  Completed studies
-                </span>
+                <div>
+
+                  <h2>
+                    Price Movement Distribution
+                  </h2>
+
+                  <p>
+                    Completed studies only
+                  </p>
+
+                </div>
 
               </div>
 
-              <div className="accuracy-bar-chart">
+              <div className="movement-list">
 
                 {movementDistribution.map(
                   (item) => (
-                    <div
-                      className="accuracy-bar-column"
-                      key={item.label}
-                    >
-
-                      <div className="accuracy-bar-value">
-                        {item.count}
-                      </div>
-
-                      <div className="accuracy-bar-track">
-
-                        <div
-                          className={`accuracy-bar-fill ${item.className}`}
-                          style={{
-                            height: `${Math.max(
-                              item.height,
-                              item.count > 0
-                                ? 12
-                                : 0
-                            )}%`,
-                          }}
-                        />
-
-                      </div>
-
-                      <strong>
-                        {item.label}
-                      </strong>
-
-                      <small>
-
-                        {item.count}{" "}
-
-                        {item.count === 1
-                          ? "Study"
-                          : "Studies"}
-
-                      </small>
-
-                    </div>
+                    <MovementRow
+                      key={
+                        item.label
+                      }
+                      item={
+                        item
+                      }
+                      total={
+                        summary.completed
+                      }
+                    />
                   )
                 )}
 
               </div>
 
-              <p className="accuracy-distribution-note">
-                Distribution based on
-                price movement since
-                publication.
+              <p className="side-footer-text">
+                {summary.completed}{" "}
+                completed studies
               </p>
+
+            </section>
+
+            {/* RISK */}
+
+            <section className="sidebar-disclaimer">
+
+              <div className="sidebar-warning">
+                !
+              </div>
+
+              <div>
+
+                <h3>
+                  Market Risk Note
+                </h3>
+
+                <p>
+                  Historical price movement and
+                  documented reference levels are
+                  presented for research
+                  transparency and should not be
+                  interpreted as assurance of
+                  future performance.
+                </p>
+
+              </div>
 
             </section>
 
           </aside>
 
-        </section>
+        </div>
 
         {/* =================================================
-            DATA TRANSPARENCY
-            MOVED OUTSIDE MAIN GRID
+            BOTTOM INFO
         ================================================= */}
 
-        <section className="accuracy-transparency-wide">
+        <section className="library-bottom-grid">
 
-          <div className="accuracy-shield">
-            ◈
-          </div>
+          <InfoCard
+            icon="◇"
+            title="Data Transparency"
+          >
+            Reference prices are captured from the
+            documented study record at publication.
+            Subsequent price movement is tracked
+            against that original reference for
+            historical evaluation and transparency.
+          </InfoCard>
 
-          <div>
+          <InfoCard
+            icon="◆"
+            title="Learn Before You Invest"
+          >
+            Market studies are intended to help users
+            understand market structure, disciplined
+            decision-making and risk management through
+            documented historical examples.
+          </InfoCard>
 
-            <strong>
-              Data Transparency
-            </strong>
-
-            <p>
-              Reference prices are captured
-              from the documented study
-              record at publication.
-              Subsequent market movement is
-              tracked against that original
-              reference, while completed
-              studies use their documented
-              closing reference.
-            </p>
-
-          </div>
-
-        </section>
-
-        {/* =================================================
-            HOW WE TRACK
-        ================================================= */}
-
-        <section className="accuracy-process-section">
-
-          <h2>
-            How We Track Studies
-          </h2>
-
-          <div className="accuracy-process-grid">
-
-            <ProcessStep
-              number="1"
-              icon="▤"
-              title="Study Published"
-              text="A market study is documented with its publication date, reference price and key reference levels."
-            />
-
-            <ProcessStep
-              number="2"
-              icon="↗"
-              title="Market Progress"
-              text="Subsequent market price movement is tracked from the original documented reference."
-            />
-
-            <ProcessStep
-              number="3"
-              icon="◎"
-              title="Study Outcome"
-              text="The study remains ongoing or is recorded as completed or invalidated according to the documented structure."
-            />
-
-            <ProcessStep
-              number="4"
-              icon="✓"
-              title="Archived"
-              text="Completed studies remain in the historical archive for transparency, research and learning."
-            />
-
-          </div>
+          <InfoCard
+            icon="▤"
+            title="Educational Purpose"
+          >
+            Content available on VTKS is intended
+            solely for educational and research
+            purposes and should not be interpreted as
+            investment advice or a buy or sell
+            recommendation.
+          </InfoCard>
 
         </section>
 
-        {/* =================================================
-            DISCLAIMER
-        ================================================= */}
+        {/* DISCLOSURE */}
 
-        <section className="accuracy-final-disclaimer">
+        <section className="library-sebi-disclosure">
 
-          <div className="accuracy-disclaimer-icon">
+          <div className="library-sebi-icon">
             ⚖
           </div>
 
-          <div>
+          <div className="library-sebi-content">
 
-            <strong>
-              Disclaimer
-            </strong>
+            <h3>
+              Important Securities Market Disclosure
+            </h3>
 
             <p>
-              VTKS Market Studies are
-              presented for educational and
-              research purposes only.
-              Historical price movement is
-              not indicative of future
-              results and should not be
-              interpreted as investment
-              advice, a recommendation, or
-              an assurance of returns.
-              Investing in securities is
-              subject to market risks.
-              Please conduct your own
-              research before making any
-              investment decision.
+              Investments in securities markets are
+              subject to market risks. Historical
+              price movement, documented reference
+              levels and past study outcomes do not
+              guarantee or indicate future
+              performance.
+            </p>
+
+            <p>
+              Information displayed on this page is
+              presented for educational, research and
+              market-study purposes only. It should
+              not be construed as investment advice,
+              a buy or sell recommendation,
+              solicitation, personalised advice or
+              promise of returns. Users should
+              independently evaluate the risks
+              involved, conduct their own research
+              and make informed investment decisions.
             </p>
 
           </div>
+
+        </section>
+
+        {/* FINAL NOTE */}
+
+        <section className="library-bottom-note">
+
+          <span>
+            ⓘ
+          </span>
+
+          <p>
+            VTKS believes that consistent learning,
+            disciplined decision-making and risk
+            management are more valuable than blindly
+            following any single market idea.
+          </p>
 
         </section>
 
@@ -2063,42 +1626,259 @@ export default function Accuracy() {
   );
 }
 
-
 /* =========================================================
-   SUMMARY CARD
+   COMPACT STAT
 ========================================================= */
 
-function SummaryCard({
-  icon,
+function CompactStat({
   value,
-  title,
-  subtitle,
+  label,
   tone,
 }) {
   return (
     <article
-      className={`accuracy-summary-card ${tone}`}
+      className={`library-compact-stat ${tone}`}
     >
+      <strong>
+        {value}
+      </strong>
 
-      <div
-        className={`accuracy-summary-icon ${tone}`}
-      >
-        {icon}
+      <span>
+        {label}
+      </span>
+    </article>
+  );
+}
+
+/* =========================================================
+   STUDY CARD
+========================================================= */
+
+function StudyCard({
+  holding,
+  protectedStudy,
+  completed,
+  movement,
+  formatDate,
+}) {
+  const sector =
+    holding.sector ||
+    "General";
+
+  const studyType =
+    holding.tradeType ||
+    holding.trade_type ||
+    "Swing";
+
+  const entry =
+    getNumber(
+      holding.entry
+    );
+
+  const currentPrice =
+    getNumber(
+      completed
+        ? holding.exitPrice ??
+            holding.exit_price ??
+            holding.cmp
+        : holding.cmp
+    );
+
+  const stopLoss =
+    getNumber(
+      holding.stopLoss,
+      holding.stop_loss
+    );
+
+  const target1 =
+    getNumber(
+      holding.target1
+    );
+
+  const target2 =
+    getNumber(
+      holding.target2
+    );
+
+  const protectedValue = (
+    <span className="locked-value">
+      •••••
+    </span>
+  );
+
+  return (
+    <article className="study-library-card">
+
+      <div className="study-card-header">
+
+        <div className="study-card-identity">
+
+          <div
+            className={`study-card-avatar ${
+              protectedStudy
+                ? "protected"
+                : ""
+            }`}
+          >
+            {protectedStudy
+              ? "🔒"
+              : "◎"}
+          </div>
+
+          <div>
+
+            <div className="study-name-row">
+
+              <h2>
+                {protectedStudy
+                  ? "Protected Market Study"
+                  : holding.stock}
+              </h2>
+
+              <span
+                className={
+                  protectedStudy
+                    ? "study-access protected"
+                    : "study-access public"
+                }
+              >
+                {protectedStudy
+                  ? "Members-Only"
+                  : "Published Study"}
+              </span>
+
+            </div>
+
+            <div className="study-meta">
+
+              <span>
+                {sector}
+              </span>
+
+              <b>•</b>
+
+              <span>
+                {studyType}
+              </span>
+
+              <b>•</b>
+
+              <span>
+                Published{" "}
+                {formatDate(
+                  holding
+                )}
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <div
+          className={`study-card-status ${
+            completed
+              ? "completed"
+              : ""
+          }`}
+        >
+          <span />
+
+          {completed
+            ? "Completed"
+            : "Ongoing"}
+        </div>
+
       </div>
 
-      <div className="accuracy-summary-content">
+      <div className="study-card-content">
 
-        <h2>
-          {value}
-        </h2>
+        <div className="study-stat-grid">
 
-        <strong>
-          {title}
-        </strong>
+          <StudyStat
+            title="Reference Price"
+            value={
+              protectedStudy
+                ? protectedValue
+                : formatPrice(
+                    entry
+                  )
+            }
+          />
 
-        <p>
-          {subtitle}
-        </p>
+          <StudyStat
+            title={
+              completed
+                ? "Closing Reference"
+                : "Current Reference"
+            }
+            value={
+              protectedStudy
+                ? protectedValue
+                : formatPrice(
+                    currentPrice
+                  )
+            }
+          />
+
+          <StudyStat
+            title="Price Movement"
+            value={
+              protectedStudy ? (
+                protectedValue
+              ) : (
+                <span
+                  className={
+                    movement > 0
+                      ? "movement-positive"
+                      : movement < 0
+                        ? "movement-negative"
+                        : "movement-neutral"
+                  }
+                >
+                  {movement > 0
+                    ? "+"
+                    : ""}
+
+                  {movement.toFixed(
+                    2
+                  )}
+
+                  %
+                </span>
+              )
+            }
+          />
+
+        </div>
+
+        <div className="study-reference-panel">
+
+          <h4>
+            Documented Reference Structure
+          </h4>
+
+          {protectedStudy ? (
+            <ProtectedStructure />
+          ) : (
+            <ReferenceStructure
+              stopLoss={
+                stopLoss
+              }
+              entry={
+                entry
+              }
+              target1={
+                target1
+              }
+              target2={
+                target2
+              }
+            />
+          )}
+
+        </div>
 
       </div>
 
@@ -2106,136 +1886,262 @@ function SummaryCard({
   );
 }
 
-
 /* =========================================================
-   PUBLIC STATUS
+   STUDY STAT
 ========================================================= */
 
-function PublicStatusBadge({
-  status,
-}) {
-  const className = normalize(
-    status
-  ).replace(/\s+/g, "-");
-
-  return (
-    <span
-      className={`accuracy-public-status ${className}`}
-    >
-
-      <span className="accuracy-status-dot" />
-
-      {status}
-
-    </span>
-  );
-}
-
-
-/* =========================================================
-   OUTCOME ROW
-========================================================= */
-
-function OutcomeRow({
-  color,
-  label,
+function StudyStat({
+  title,
   value,
-  total,
 }) {
-  const percentage =
-    total > 0
-      ? (
-          (value / total) *
-          100
-        ).toFixed(2)
-      : "0.00";
-
   return (
-    <div className="accuracy-outcome-row">
+    <div className="study-stat">
 
-      <span
-        className={`accuracy-outcome-dot ${color}`}
-      />
-
-      <span className="accuracy-outcome-label">
-        {label}
+      <span>
+        {title}
       </span>
 
       <strong>
-
         {value}
-
-        <small>
-          {" "}
-          ({percentage}%)
-        </small>
-
       </strong>
 
     </div>
   );
 }
 
-
 /* =========================================================
-   MINI TREND
+   PROTECTED STRUCTURE
 ========================================================= */
 
-function MiniTrend({
-  positive,
-}) {
+function ProtectedStructure() {
+  const items = [
+    "Invalidation",
+    "Reference",
+    "Zone 1",
+    "Zone 2",
+  ];
+
   return (
-    <svg
-      className={
-        positive
-          ? "accuracy-mini-trend positive"
-          : "accuracy-mini-trend negative"
-      }
-      viewBox="0 0 72 24"
-      aria-hidden="true"
-    >
-      <polyline
-        points={
-          positive
-            ? "1,20 10,17 17,18 25,12 33,15 42,9 49,11 58,5 71,3"
-            : "1,5 10,8 17,7 25,13 33,10 42,15 49,13 58,19 71,21"
-        }
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+    <div className="protected-structure">
+
+      {items.map(
+        (label) => (
+          <div key={label}>
+
+            <span className="protected-lock">
+              🔒
+            </span>
+
+            <strong>
+              •••••
+            </strong>
+
+            <small>
+              {label}
+            </small>
+
+          </div>
+        )
+      )}
+
+    </div>
   );
 }
 
-
 /* =========================================================
-   PROCESS STEP
+   REFERENCE STRUCTURE
 ========================================================= */
 
-function ProcessStep({
-  number,
+function ReferenceStructure({
+  stopLoss,
+  entry,
+  target1,
+  target2,
+}) {
+  const items = [
+    {
+      value:
+        stopLoss,
+      label:
+        "Invalidation",
+      type:
+        "red",
+    },
+    {
+      value:
+        entry,
+      label:
+        "Reference",
+      type:
+        "blue",
+    },
+    {
+      value:
+        target1,
+      label:
+        "Zone 1",
+      type:
+        "green",
+    },
+    {
+      value:
+        target2,
+      label:
+        "Zone 2",
+      type:
+        "green",
+    },
+  ];
+
+  return (
+    <div className="reference-structure">
+
+      <div className="reference-line" />
+
+      {items.map(
+        (item) => (
+          <div
+            className="reference-point"
+            key={
+              item.label
+            }
+          >
+
+            <span
+              className={`reference-dot ${item.type}`}
+            />
+
+            <strong>
+              {formatPrice(
+                item.value
+              )}
+            </strong>
+
+            <small>
+              {item.label}
+            </small>
+
+          </div>
+        )
+      )}
+
+    </div>
+  );
+}
+
+/* =========================================================
+   OUTCOME
+========================================================= */
+
+function OutcomeRow({
+  label,
+  count,
+  total,
+  type,
+}) {
+  const percentage =
+    total > 0
+      ? (
+          (count / total) *
+          100
+        ).toFixed(2)
+      : "0.00";
+
+  return (
+    <div className="outcome-row">
+
+      <span
+        className={`outcome-dot ${type}`}
+      />
+
+      <strong>
+        {label}
+      </strong>
+
+      <b>
+        {count}
+      </b>
+
+      <small>
+        ({percentage}%)
+      </small>
+
+    </div>
+  );
+}
+
+/* =========================================================
+   MOVEMENT ROW
+========================================================= */
+
+function MovementRow({
+  item,
+  total,
+}) {
+  const percentage =
+    total > 0
+      ? (
+          item.count /
+          total
+        ) * 100
+      : 0;
+
+  return (
+    <div className="movement-row">
+
+      <strong>
+        {item.label}
+      </strong>
+
+      <div className="movement-track">
+
+        <div
+          className={`movement-fill ${item.type}`}
+          style={{
+            width: `${percentage}%`,
+          }}
+        />
+
+      </div>
+
+      <b>
+        {item.count}
+      </b>
+
+      <span>
+        ({percentage.toFixed(
+          2
+        )}%)
+      </span>
+
+    </div>
+  );
+}
+
+/* =========================================================
+   INFO CARD
+========================================================= */
+
+function InfoCard({
   icon,
   title,
-  text,
+  children,
 }) {
   return (
-    <article className="accuracy-process-step">
+    <article className="library-info-card">
 
-      <div className="accuracy-process-icon">
+      <div className="library-info-card-icon">
         {icon}
       </div>
 
       <div>
 
-        <span>
-          {number}. {title}
-        </span>
+        <h3>
+          {title}
+        </h3>
 
         <p>
-          {text}
+          {children}
         </p>
 
       </div>
