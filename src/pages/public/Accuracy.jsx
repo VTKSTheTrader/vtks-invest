@@ -26,8 +26,14 @@ import "./Accuracy.css";
 const ITEMS_PER_PAGE = 3;
 const AUTO_REFRESH_INTERVAL = 60 * 1000;
 
+/* =========================================================
+   HELPERS
+========================================================= */
+
 const normalize = (value) =>
-  String(value || "").trim().toLowerCase();
+  String(value || "")
+    .trim()
+    .toLowerCase();
 
 const getNumber = (...values) => {
   for (const value of values) {
@@ -68,21 +74,53 @@ const formatPrice = (value) => {
   })}`;
 };
 
+const calculateAverage = (values = []) => {
+  const validValues = values
+    .map((value) => Number(value))
+    .filter((value) => Number.isFinite(value));
+
+  if (validValues.length === 0) {
+    return 0;
+  }
+
+  const total = validValues.reduce(
+    (sum, value) => sum + value,
+    0
+  );
+
+  return total / validValues.length;
+};
+
+/* =========================================================
+   MAIN PAGE
+========================================================= */
+
 export default function Accuracy() {
   const [holdings, setHoldings] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+
   const [error, setError] = useState("");
   const [lastUpdated, setLastUpdated] = useState(null);
 
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [accessFilter, setAccessFilter] = useState("all");
-  const [sectorFilter, setSectorFilter] = useState("all");
-  const [sortMode, setSortMode] = useState("newest");
-  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] =
+    useState("all");
 
-  const [currentPage, setCurrentPage] = useState(1);
+  const [accessFilter, setAccessFilter] =
+    useState("all");
+
+  const [sectorFilter, setSectorFilter] =
+    useState("all");
+
+  const [sortMode, setSortMode] =
+    useState("newest");
+
+  const [search, setSearch] =
+    useState("");
+
+  const [currentPage, setCurrentPage] =
+    useState(1);
 
   const mountedRef = useRef(true);
   const requestRef = useRef(false);
@@ -93,7 +131,9 @@ export default function Accuracy() {
 
   const loadData = useCallback(
     async ({ initial = false } = {}) => {
-      if (requestRef.current) return;
+      if (requestRef.current) {
+        return;
+      }
 
       requestRef.current = true;
 
@@ -108,7 +148,9 @@ export default function Accuracy() {
 
         const rows = await getHoldings();
 
-        if (!mountedRef.current) return;
+        if (!mountedRef.current) {
+          return;
+        }
 
         setHoldings(
           (rows || []).map(mapHoldingFromDB)
@@ -146,16 +188,27 @@ export default function Accuracy() {
   useEffect(() => {
     mountedRef.current = true;
 
-    loadData({ initial: true });
+    loadData({
+      initial: true,
+    });
 
-    const interval = window.setInterval(() => {
-      if (document.visibilityState === "visible") {
-        loadData();
-      }
-    }, AUTO_REFRESH_INTERVAL);
+    const interval = window.setInterval(
+      () => {
+        if (
+          document.visibilityState ===
+          "visible"
+        ) {
+          loadData();
+        }
+      },
+      AUTO_REFRESH_INTERVAL
+    );
 
     const handleVisibility = () => {
-      if (document.visibilityState === "visible") {
+      if (
+        document.visibilityState ===
+        "visible"
+      ) {
         loadData();
       }
     };
@@ -171,7 +224,9 @@ export default function Accuracy() {
     );
 
     const channel = supabase
-      .channel("market-study-library-summary")
+      .channel(
+        "market-study-library-summary"
+      )
       .on(
         "postgres_changes",
         {
@@ -210,7 +265,7 @@ export default function Accuracy() {
   }, [loadData]);
 
   /* =========================================================
-     INTERNAL STATUS
+     INTERNAL STUDY STATUS
   ========================================================= */
 
   const getInternalStatus = useCallback(
@@ -295,7 +350,7 @@ export default function Accuracy() {
   );
 
   /* =========================================================
-     COMPLETED
+     COMPLETED STUDY
   ========================================================= */
 
   const isCompleted = useCallback(
@@ -370,7 +425,7 @@ export default function Accuracy() {
   ]);
 
   /* =========================================================
-     PROTECTION
+     PROTECTED STUDY
   ========================================================= */
 
   const isProtected = useCallback(
@@ -402,12 +457,15 @@ export default function Accuracy() {
   );
 
   /* =========================================================
-     SUMMARY + MEDIAN
+     SUMMARY
+     SAME AVERAGE METHOD AS ADMIN DASHBOARD
   ========================================================= */
 
   const summary = useMemo(() => {
     const completed =
-      publishedStudies.filter(isCompleted);
+      publishedStudies.filter(
+        isCompleted
+      );
 
     const ongoing =
       publishedStudies.filter(
@@ -433,33 +491,25 @@ export default function Accuracy() {
           getMovement(holding) === 0
       );
 
-    const movements = completed
-      .map((holding) =>
+    const ongoingMovements =
+      ongoing.map((holding) =>
         getMovement(holding)
-      )
-      .filter(Number.isFinite)
-      .sort((a, b) => a - b);
-
-    let medianMovement = 0;
-
-    if (movements.length > 0) {
-      const middle = Math.floor(
-        movements.length / 2
       );
 
-      if (
-        movements.length % 2 === 0
-      ) {
-        medianMovement =
-          (
-            movements[middle - 1] +
-            movements[middle]
-          ) / 2;
-      } else {
-        medianMovement =
-          movements[middle];
-      }
-    }
+    const completedMovements =
+      completed.map((holding) =>
+        getMovement(holding)
+      );
+
+    const averageOngoingMovement =
+      calculateAverage(
+        ongoingMovements
+      );
+
+    const averageCompletedMovement =
+      calculateAverage(
+        completedMovements
+      );
 
     return {
       total:
@@ -480,7 +530,9 @@ export default function Accuracy() {
       neutral:
         neutral.length,
 
-      medianMovement,
+      averageOngoingMovement,
+
+      averageCompletedMovement,
     };
   }, [
     publishedStudies,
@@ -489,7 +541,7 @@ export default function Accuracy() {
   ]);
 
   /* =========================================================
-     MOVEMENT DISTRIBUTION
+     PRICE MOVEMENT DISTRIBUTION
   ========================================================= */
 
   const movementDistribution =
@@ -578,7 +630,7 @@ export default function Accuracy() {
   }, [publishedStudies]);
 
   /* =========================================================
-     DATE
+     DATE HELPERS
   ========================================================= */
 
   const getDateValue = (
@@ -596,7 +648,9 @@ export default function Accuracy() {
     const value =
       getDateValue(holding);
 
-    if (!value) return "-";
+    if (!value) {
+      return "-";
+    }
 
     const date =
       new Date(value);
@@ -625,7 +679,9 @@ export default function Accuracy() {
     const value =
       getDateValue(holding);
 
-    if (!value) return 0;
+    if (!value) {
+      return 0;
+    }
 
     const timestamp =
       new Date(value).getTime();
@@ -733,9 +789,7 @@ export default function Accuracy() {
               return searchable
                 .join(" ")
                 .toLowerCase()
-                .includes(
-                  query
-                );
+                .includes(query);
             }
           );
       }
@@ -852,7 +906,7 @@ export default function Accuracy() {
     ]);
 
   /* =========================================================
-     DONUT
+     OUTCOME DONUT
   ========================================================= */
 
   const positivePercentage =
@@ -897,6 +951,10 @@ export default function Accuracy() {
     );
   }
 
+  /* =========================================================
+     UI
+  ========================================================= */
+
   return (
     <>
       <SEO
@@ -909,7 +967,7 @@ export default function Accuracy() {
         <div className="study-library-layout">
 
           {/* =================================================
-              LEFT
+              MAIN CONTENT
           ================================================= */}
 
           <div className="study-library-main">
@@ -970,6 +1028,7 @@ export default function Accuracy() {
                 {lastUpdated && (
                   <span>
                     Last updated:{" "}
+
                     {lastUpdated.toLocaleDateString(
                       "en-IN",
                       {
@@ -978,7 +1037,9 @@ export default function Accuracy() {
                         year: "numeric",
                       }
                     )}
+
                     ,{" "}
+
                     {lastUpdated.toLocaleTimeString(
                       "en-IN",
                       {
@@ -999,6 +1060,7 @@ export default function Accuracy() {
                   }
                 >
                   ↻{" "}
+
                   {refreshing
                     ? "Refreshing..."
                     : "Refresh Data"}
@@ -1008,7 +1070,9 @@ export default function Accuracy() {
 
             </section>
 
-            {/* SUMMARY */}
+            {/* =================================================
+                TOP SUMMARY
+            ================================================= */}
 
             <section className="library-compact-summary">
 
@@ -1038,13 +1102,15 @@ export default function Accuracy() {
 
               <CompactStat
                 value={`${summary.positive} / ${summary.completed}`}
-                label="Positive"
+                label="Positive Completed"
                 tone="orange"
               />
 
             </section>
 
-            {/* FILTERS */}
+            {/* =================================================
+                FILTERS
+            ================================================= */}
 
             <section className="library-filter-bar">
 
@@ -1134,6 +1200,7 @@ export default function Accuracy() {
                     )
                   }
                 >
+
                   <option value="all">
                     All Access
                   </option>
@@ -1158,6 +1225,7 @@ export default function Accuracy() {
                     )
                   }
                 >
+
                   <option value="all">
                     All Sectors
                   </option>
@@ -1165,12 +1233,8 @@ export default function Accuracy() {
                   {sectors.map(
                     (sector) => (
                       <option
-                        key={
-                          sector
-                        }
-                        value={
-                          sector
-                        }
+                        key={sector}
+                        value={sector}
                       >
                         {sector}
                       </option>
@@ -1189,6 +1253,7 @@ export default function Accuracy() {
                     )
                   }
                 >
+
                   <option value="newest">
                     Newest First
                   </option>
@@ -1211,13 +1276,17 @@ export default function Accuracy() {
 
             </section>
 
+            {/* ERROR */}
+
             {error && (
               <div className="library-error">
                 {error}
               </div>
             )}
 
-            {/* STUDIES */}
+            {/* =================================================
+                STUDY CARDS
+            ================================================= */}
 
             <section className="study-card-list">
 
@@ -1264,22 +1333,28 @@ export default function Accuracy() {
 
                 <span>
                   Showing{" "}
+
                   {Math.min(
                     (currentPage - 1) *
                       ITEMS_PER_PAGE +
                       1,
                     filteredStudies.length
                   )}{" "}
+
                   to{" "}
+
                   {Math.min(
                     currentPage *
                       ITEMS_PER_PAGE,
                     filteredStudies.length
                   )}{" "}
+
                   of{" "}
+
                   {
                     filteredStudies.length
                   }{" "}
+
                   studies
                 </span>
 
@@ -1301,12 +1376,68 @@ export default function Accuracy() {
           </div>
 
           {/* =================================================
-              RIGHT SIDEBAR
+              SIDEBAR
           ================================================= */}
 
           <aside className="study-library-sidebar">
 
-            {/* MEDIAN */}
+            {/* =================================================
+                1. ONGOING AVERAGE
+            ================================================= */}
+
+            <section className="active-movement-card">
+
+              <div className="active-movement-icon">
+                ↗
+              </div>
+
+              <div className="active-movement-content">
+
+                <span className="active-movement-label">
+                  Average Ongoing Movement
+                </span>
+
+                <strong
+                  className={
+                    summary.averageOngoingMovement > 0
+                      ? "active-movement-positive"
+                      : summary.averageOngoingMovement < 0
+                        ? "active-movement-negative"
+                        : "active-movement-neutral"
+                  }
+                >
+
+                  {summary.averageOngoingMovement > 0
+                    ? "+"
+                    : ""}
+
+                  {summary.averageOngoingMovement.toFixed(
+                    2
+                  )}
+
+                  %
+
+                </strong>
+
+                <small>
+                  Across{" "}
+
+                  {summary.ongoing}{" "}
+
+                  ongoing{" "}
+
+                  {summary.ongoing === 1
+                    ? "study"
+                    : "studies"}
+                </small>
+
+              </div>
+
+            </section>
+
+            {/* =================================================
+                2. COMPLETED AVERAGE
+            ================================================= */}
 
             <section className="median-side-card">
 
@@ -1317,38 +1448,50 @@ export default function Accuracy() {
               <div className="median-side-content">
 
                 <span className="median-side-label">
-                  Median Price Movement
+                  Average Completed Movement
                 </span>
 
                 <strong
                   className={
-                    summary.medianMovement > 0
+                    summary.averageCompletedMovement > 0
                       ? "median-positive"
-                      : summary.medianMovement < 0
+                      : summary.averageCompletedMovement < 0
                         ? "median-negative"
                         : "median-neutral"
                   }
                 >
-                  {summary.medianMovement > 0
+
+                  {summary.averageCompletedMovement > 0
                     ? "+"
                     : ""}
 
-                  {summary.medianMovement.toFixed(
+                  {summary.averageCompletedMovement.toFixed(
                     2
                   )}
 
                   %
+
                 </strong>
 
                 <small>
-                  Based on completed studies
+                  Across{" "}
+
+                  {summary.completed}{" "}
+
+                  completed{" "}
+
+                  {summary.completed === 1
+                    ? "study"
+                    : "studies"}
                 </small>
 
               </div>
 
             </section>
 
-            {/* OUTCOME */}
+            {/* =================================================
+                3. OUTCOME SUMMARY
+            ================================================= */}
 
             <section className="library-side-card">
 
@@ -1436,13 +1579,17 @@ export default function Accuracy() {
 
               <p className="side-footer-text">
                 Based on{" "}
+
                 {summary.completed}{" "}
+
                 completed studies
               </p>
 
             </section>
 
-            {/* DISTRIBUTION */}
+            {/* =================================================
+                4. DISTRIBUTION
+            ================================================= */}
 
             <section className="library-side-card">
 
@@ -1493,39 +1640,12 @@ export default function Accuracy() {
 
             </section>
 
-            {/* RISK */}
-
-            <section className="sidebar-disclaimer">
-
-              <div className="sidebar-warning">
-                !
-              </div>
-
-              <div>
-
-                <h3>
-                  Market Risk Note
-                </h3>
-
-                <p>
-                  Historical price movement and
-                  documented reference levels are
-                  presented for research
-                  transparency and should not be
-                  interpreted as assurance of
-                  future performance.
-                </p>
-
-              </div>
-
-            </section>
-
           </aside>
 
         </div>
 
         {/* =================================================
-            BOTTOM INFO
+            BOTTOM INFORMATION
         ================================================= */}
 
         <section className="library-bottom-grid">
@@ -1534,21 +1654,23 @@ export default function Accuracy() {
             icon="◇"
             title="Data Transparency"
           >
-            Reference prices are captured from the
-            documented study record at publication.
-            Subsequent price movement is tracked
-            against that original reference for
-            historical evaluation and transparency.
+            Reference prices are captured from
+            the documented study record at
+            publication. Subsequent price movement
+            is tracked against that original
+            reference for historical evaluation
+            and transparency.
           </InfoCard>
 
           <InfoCard
             icon="◆"
             title="Learn Before You Invest"
           >
-            Market studies are intended to help users
-            understand market structure, disciplined
-            decision-making and risk management through
-            documented historical examples.
+            Market studies are intended to help
+            users understand market structure,
+            disciplined decision-making and risk
+            management through documented
+            historical examples.
           </InfoCard>
 
           <InfoCard
@@ -1557,14 +1679,16 @@ export default function Accuracy() {
           >
             Content available on VTKS is intended
             solely for educational and research
-            purposes and should not be interpreted as
-            investment advice or a buy or sell
+            purposes and should not be interpreted
+            as investment advice or a buy or sell
             recommendation.
           </InfoCard>
 
         </section>
 
-        {/* DISCLOSURE */}
+        {/* =================================================
+            SECURITIES MARKET DISCLOSURE
+        ================================================= */}
 
         <section className="library-sebi-disclosure">
 
@@ -1589,22 +1713,25 @@ export default function Accuracy() {
 
             <p>
               Information displayed on this page is
-              presented for educational, research and
-              market-study purposes only. It should
-              not be construed as investment advice,
-              a buy or sell recommendation,
+              presented for educational, research
+              and market-study purposes only. It
+              should not be construed as investment
+              advice, a buy or sell recommendation,
               solicitation, personalised advice or
               promise of returns. Users should
               independently evaluate the risks
               involved, conduct their own research
-              and make informed investment decisions.
+              and make informed investment
+              decisions.
             </p>
 
           </div>
 
         </section>
 
-        {/* FINAL NOTE */}
+        {/* =================================================
+            FINAL NOTE
+        ================================================= */}
 
         <section className="library-bottom-note">
 
@@ -1615,8 +1742,9 @@ export default function Accuracy() {
           <p>
             VTKS believes that consistent learning,
             disciplined decision-making and risk
-            management are more valuable than blindly
-            following any single market idea.
+            management are more valuable than
+            blindly following any single market
+            idea.
           </p>
 
         </section>
@@ -1639,6 +1767,7 @@ function CompactStat({
     <article
       className={`library-compact-stat ${tone}`}
     >
+
       <strong>
         {value}
       </strong>
@@ -1646,6 +1775,7 @@ function CompactStat({
       <span>
         {label}
       </span>
+
     </article>
   );
 }
@@ -1755,16 +1885,21 @@ function StudyCard({
                 {sector}
               </span>
 
-              <b>•</b>
+              <b>
+                •
+              </b>
 
               <span>
                 {studyType}
               </span>
 
-              <b>•</b>
+              <b>
+                •
+              </b>
 
               <span>
                 Published{" "}
+
                 {formatDate(
                   holding
                 )}
@@ -1783,11 +1918,13 @@ function StudyCard({
               : ""
           }`}
         >
+
           <span />
 
           {completed
             ? "Completed"
             : "Ongoing"}
+
         </div>
 
       </div>
@@ -1837,6 +1974,7 @@ function StudyCard({
                         : "movement-neutral"
                   }
                 >
+
                   {movement > 0
                     ? "+"
                     : ""}
@@ -1846,6 +1984,7 @@ function StudyCard({
                   )}
 
                   %
+
                 </span>
               )
             }
@@ -1910,7 +2049,7 @@ function StudyStat({
 }
 
 /* =========================================================
-   PROTECTED STRUCTURE
+   PROTECTED REFERENCE STRUCTURE
 ========================================================= */
 
 function ProtectedStructure() {
@@ -1926,7 +2065,11 @@ function ProtectedStructure() {
 
       {items.map(
         (label) => (
-          <div key={label}>
+          <div
+            key={
+              label
+            }
+          >
 
             <span className="protected-lock">
               🔒
@@ -1949,7 +2092,7 @@ function ProtectedStructure() {
 }
 
 /* =========================================================
-   REFERENCE STRUCTURE
+   PUBLIC REFERENCE STRUCTURE
 ========================================================= */
 
 function ReferenceStructure({
@@ -1962,32 +2105,43 @@ function ReferenceStructure({
     {
       value:
         stopLoss,
+
       label:
         "Invalidation",
+
       type:
         "red",
     },
+
     {
       value:
         entry,
+
       label:
         "Reference",
+
       type:
         "blue",
     },
+
     {
       value:
         target1,
+
       label:
         "Zone 1",
+
       type:
         "green",
     },
+
     {
       value:
         target2,
+
       label:
         "Zone 2",
+
       type:
         "green",
     },
@@ -2030,7 +2184,7 @@ function ReferenceStructure({
 }
 
 /* =========================================================
-   OUTCOME
+   OUTCOME ROW
 ========================================================= */
 
 function OutcomeRow({

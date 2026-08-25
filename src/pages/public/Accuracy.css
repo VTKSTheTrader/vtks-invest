@@ -1,5 +1,5 @@
 /* =========================================================
-   SAME WEBSITE FONT
+   SAME FONT AS WEBSITE
 ========================================================= */
 
 .study-library-page,
@@ -19,9 +19,11 @@
 .study-library-page {
   width: 100%;
   min-height: 100vh;
+
   padding: 28px 2.5% 22px;
 
   background: #f8fafc;
+
   color: #0f172a;
 
   box-sizing: border-box;
@@ -30,6 +32,7 @@
 .study-library-layout {
   width: 100%;
   max-width: 1800px;
+
   margin: 0 auto;
 
   display: grid;
@@ -65,6 +68,7 @@
 
 .library-title-row {
   display: flex;
+
   align-items: center;
 
   gap: 13px;
@@ -96,14 +100,17 @@
   border-radius: 999px;
 
   background: #eaf2ff;
+
   color: #1d4ed8;
 
   font-size: 10px;
+
   font-weight: 700;
 }
 
 .library-values {
   display: flex;
+
   align-items: center;
 
   gap: 9px;
@@ -111,6 +118,7 @@
   margin-top: 9px;
 
   font-size: 13px;
+
   font-weight: 700;
 }
 
@@ -138,6 +146,7 @@
   color: #475569;
 
   font-size: 12px;
+
   line-height: 1.55;
 
   font-weight: 500;
@@ -152,6 +161,7 @@
   flex-shrink: 0;
 
   display: flex;
+
   flex-direction: column;
 
   align-items: flex-end;
@@ -163,6 +173,7 @@
   color: #334155;
 
   font-size: 10px;
+
   font-weight: 600;
 }
 
@@ -172,12 +183,15 @@
   padding: 10px 16px;
 
   border: 1px solid #2563eb;
+
   border-radius: 7px;
 
   background: #ffffff;
+
   color: #2563eb;
 
   font-size: 10px;
+
   font-weight: 700;
 
   cursor: pointer;
@@ -185,17 +199,19 @@
 
 .library-refresh button:hover:not(:disabled) {
   background: #2563eb;
+
   color: #ffffff;
 }
 
 .library-refresh button:disabled {
   opacity: 0.6;
+
   cursor: not-allowed;
 }
 
 
 /* =========================================================
-   TOP SUMMARY - 4 CARDS
+   TOP SUMMARY
 ========================================================= */
 
 .library-compact-summary {
@@ -220,11 +236,13 @@
   display: flex;
 
   align-items: center;
+
   justify-content: space-between;
 
   gap: 10px;
 
   border: 1px solid #dbe5f0;
+
   border-radius: 10px;
 
   background: #ffffff;
@@ -236,6 +254,7 @@
 
 .library-compact-stat strong {
   font-size: 22px;
+
   line-height: 1;
 
   font-weight: 800;
@@ -247,6 +266,7 @@
   color: #475569;
 
   font-size: 10px;
+
   font-weight: 600;
 
   white-space: nowrap;
@@ -277,6 +297,7 @@
   display: flex;
 
   justify-content: space-between;
+
   align-items: center;
 
   gap: 12px;
@@ -296,12 +317,15 @@
   padding: 8px 17px;
 
   border: 1px solid #dbe3ee;
+
   border-radius: 6px;
 
   background: #ffffff;
+
   color: #334155;
 
   font-size: 10px;
+
   font-weight: 700;
 
   cursor: pointer;
@@ -311,6 +335,7 @@
   border-color: #2563eb;
 
   background: #2563eb;
+
   color: #ffffff;
 }
 
@@ -332,17 +357,21 @@
   padding: 0 31px 0 11px;
 
   border: 1px solid #cbd5e1;
+
   border-radius: 6px;
 
   background: #ffffff;
+
   color: #0f172a;
 
   font-size: 9px;
+
   font-weight: 600;
 }
 
 .library-search {
   width: 220px;
+
   height: 37px;
 
   position: relative;
@@ -355,6 +384,7 @@
   padding: 0 34px 0 12px;
 
   border: 1px solid #cbd5e1;
+
   border-radius: 6px;
 
   background: #ffffff;
@@ -362,6 +392,7 @@
   box-sizing: border-box;
 
   font-size: 9px;
+
   font-weight: 500;
 }
 
@@ -369,13 +400,16 @@
   position: absolute;
 
   right: 11px;
+
   top: 50%;
 
-  transform: translateY(-50%);
+  transform:
+    translateY(-50%);
 
   color: #071a3d;
 
   font-size: 18px;
+
   font-weight: 700;
 }
 
@@ -394,6 +428,7 @@
   padding: 13px 15px;
 
   border: 1px solid #dce5ef;
+
   border-radius: 10px;
 
   background: #ffffff;
@@ -407,6 +442,7 @@
   display: flex;
 
   align-items: flex-start;
+
   justify-content: space-between;
 
   gap: 20px;
@@ -429,19 +465,23 @@
   flex: 0 0 43px;
 
   display: grid;
+
   place-items: center;
 
   border-radius: 50%;
 
   background: #eaf2ff;
+
   color: #2563eb;
 
   font-size: 19px;
+
   font-weight: 700;
 }
 
 .study-card-avatar.protected {
   background: #fff3e3;
+
   color: #ea580c;
 }
 
@@ -461,6 +501,7 @@
   color: #071a3d;
 
   font-size: 16px;
+
   font-weight: 800;
 }
 
@@ -470,16 +511,19 @@
   border-radius: 999px;
 
   font-size: 8px;
+
   font-weight: 700;
 }
 
 .study-access.public {
   background: #dcfce7;
+
   color: #15803d;
 }
 
 .study-access.protected {
   background: #ffedd5;
+
   color: #ea580c;
 }
 
@@ -495,6 +539,7 @@
   color: #475569;
 
   font-size: 9px;
+
   font-weight: 500;
 }
 
@@ -514,6 +559,7 @@
   color: #059669;
 
   font-size: 9px;
+
   font-weight: 700;
 
   white-space: nowrap;
@@ -521,6 +567,7 @@
 
 .study-card-status > span {
   width: 8px;
+
   height: 8px;
 
   border-radius: 50%;
@@ -563,6 +610,7 @@
     );
 
   border: 1px solid #e2e8f0;
+
   border-radius: 7px;
 
   overflow: hidden;
@@ -578,6 +626,7 @@
   flex-direction: column;
 
   justify-content: center;
+
   align-items: center;
 
   text-align: center;
@@ -596,6 +645,7 @@
   color: #475569;
 
   font-size: 9px;
+
   font-weight: 600;
 }
 
@@ -603,6 +653,7 @@
   color: #071a3d;
 
   font-size: 17px;
+
   font-weight: 800;
 }
 
@@ -645,11 +696,13 @@
   color: #475569;
 
   text-align: center;
+
   text-transform: uppercase;
 
   letter-spacing: 0.025em;
 
   font-size: 8.5px;
+
   font-weight: 700;
 }
 
@@ -673,7 +726,9 @@
   position: absolute;
 
   top: 7px;
+
   left: 10%;
+
   right: 10%;
 
   background:
@@ -701,6 +756,7 @@
 
 .reference-dot {
   width: 10px;
+
   height: 10px;
 
   margin: 2px 0 5px;
@@ -724,6 +780,7 @@
   color: #071a3d;
 
   font-size: 10px;
+
   font-weight: 800;
 }
 
@@ -733,6 +790,7 @@
   color: #64748b;
 
   font-size: 8px;
+
   line-height: 1.2;
 
   font-weight: 500;
@@ -776,6 +834,7 @@
   color: #64748b;
 
   font-size: 11px;
+
   font-weight: 700;
 
   letter-spacing: 2px;
@@ -785,6 +844,7 @@
   color: #94a3b8;
 
   font-size: 7.5px;
+
   font-weight: 500;
 }
 
@@ -797,6 +857,7 @@
   display: flex;
 
   justify-content: space-between;
+
   align-items: center;
 
   gap: 20px;
@@ -806,6 +867,7 @@
   color: #64748b;
 
   font-size: 10px;
+
   font-weight: 500;
 }
 
@@ -822,7 +884,113 @@
 
 
 /* =========================================================
-   MEDIAN SIDEBAR CARD
+   AVERAGE ONGOING MOVEMENT
+========================================================= */
+
+.active-movement-card {
+  min-height: 112px;
+
+  padding: 18px 20px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 17px;
+
+  border: 1px solid #bfdbfe;
+
+  border-radius: 12px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ffffff 0%,
+      #f3f8ff 100%
+    );
+
+  box-shadow:
+    0 5px 18px
+    rgba(15, 23, 42, 0.04);
+}
+
+.active-movement-icon {
+  width: 52px;
+
+  height: 52px;
+
+  flex: 0 0 52px;
+
+  display: grid;
+
+  place-items: center;
+
+  border-radius: 50%;
+
+  background: #dbeafe;
+
+  color: #2563eb;
+
+  font-size: 24px;
+
+  font-weight: 800;
+}
+
+.active-movement-content {
+  min-width: 0;
+
+  display: flex;
+
+  flex-direction: column;
+}
+
+.active-movement-label {
+  margin-bottom: 5px;
+
+  color: #071a3d;
+
+  font-size: 14px;
+
+  font-weight: 700;
+}
+
+.active-movement-content strong {
+  font-size: 29px;
+
+  line-height: 1.05;
+
+  font-weight: 800;
+
+  letter-spacing: -0.4px;
+}
+
+.active-movement-positive {
+  color: #059669;
+}
+
+.active-movement-negative {
+  color: #dc2626;
+}
+
+.active-movement-neutral {
+  color: #64748b;
+}
+
+.active-movement-content small {
+  margin-top: 6px;
+
+  color: #64748b;
+
+  font-size: 10px;
+
+  line-height: 1.4;
+
+  font-weight: 500;
+}
+
+
+/* =========================================================
+   AVERAGE COMPLETED MOVEMENT
 ========================================================= */
 
 .median-side-card {
@@ -837,6 +1005,7 @@
   gap: 17px;
 
   border: 1px solid #ccefe9;
+
   border-radius: 12px;
 
   background:
@@ -853,19 +1022,23 @@
 
 .median-side-icon {
   width: 52px;
+
   height: 52px;
 
   flex: 0 0 52px;
 
   display: grid;
+
   place-items: center;
 
   border-radius: 50%;
 
   background: #ccfbf1;
+
   color: #0f766e;
 
   font-size: 24px;
+
   font-weight: 800;
 }
 
@@ -883,11 +1056,13 @@
   color: #071a3d;
 
   font-size: 14px;
+
   font-weight: 700;
 }
 
 .median-side-content strong {
   font-size: 29px;
+
   line-height: 1.05;
 
   font-weight: 800;
@@ -913,6 +1088,9 @@
   color: #64748b;
 
   font-size: 10px;
+
+  line-height: 1.4;
+
   font-weight: 500;
 }
 
@@ -925,6 +1103,7 @@
   padding: 20px;
 
   border: 1px solid #dce5ef;
+
   border-radius: 12px;
 
   background: #ffffff;
@@ -946,19 +1125,23 @@
 
 .side-card-icon {
   width: 41px;
+
   height: 41px;
 
   flex: 0 0 41px;
 
   display: grid;
+
   place-items: center;
 
   border-radius: 10px;
 
   background: #eaf2ff;
+
   color: #2563eb;
 
   font-size: 18px;
+
   font-weight: 700;
 }
 
@@ -968,6 +1151,7 @@
   color: #071a3d;
 
   font-size: 17px;
+
   line-height: 1.15;
 
   font-weight: 800;
@@ -979,6 +1163,7 @@
   color: #64748b;
 
   font-size: 10px;
+
   font-weight: 500;
 }
 
@@ -997,11 +1182,13 @@
 
 .outcome-donut {
   width: 125px;
+
   height: 125px;
 
   flex: 0 0 125px;
 
   display: grid;
+
   place-items: center;
 
   border-radius: 50%;
@@ -1015,6 +1202,7 @@
   position: absolute;
 
   width: 80px;
+
   height: 80px;
 
   border-radius: 50%;
@@ -1028,6 +1216,7 @@
   z-index: 2;
 
   display: flex;
+
   flex-direction: column;
 
   align-items: center;
@@ -1037,6 +1226,7 @@
   color: #071a3d;
 
   font-size: 27px;
+
   font-weight: 800;
 }
 
@@ -1044,6 +1234,7 @@
   color: #64748b;
 
   font-size: 10px;
+
   font-weight: 500;
 }
 
@@ -1073,6 +1264,7 @@
 
 .outcome-dot {
   width: 8px;
+
   height: 8px;
 
   border-radius: 50%;
@@ -1101,6 +1293,7 @@
   color: #64748b;
 
   font-size: 8px;
+
   font-weight: 500;
 }
 
@@ -1110,12 +1303,13 @@
   color: #64748b;
 
   font-size: 9.5px;
+
   font-weight: 500;
 }
 
 
 /* =========================================================
-   MOVEMENT DISTRIBUTION
+   PRICE MOVEMENT DISTRIBUTION
 ========================================================= */
 
 .movement-list {
@@ -1142,6 +1336,7 @@
   color: #071a3d;
 
   font-size: 9.5px;
+
   line-height: 1.2;
 
   font-weight: 700;
@@ -1149,6 +1344,7 @@
 
 .movement-track {
   width: 100%;
+
   height: 11px;
 
   overflow: hidden;
@@ -1162,6 +1358,9 @@
   height: 100%;
 
   border-radius: 999px;
+
+  transition:
+    width 0.25s ease;
 }
 
 .movement-fill.negative {
@@ -1188,6 +1387,7 @@
   color: #071a3d;
 
   font-size: 10px;
+
   font-weight: 700;
 }
 
@@ -1195,6 +1395,7 @@
   color: #64748b;
 
   font-size: 8px;
+
   font-weight: 500;
 
   white-space: nowrap;
@@ -1202,65 +1403,7 @@
 
 
 /* =========================================================
-   MARKET RISK
-========================================================= */
-
-.sidebar-disclaimer {
-  display: flex;
-
-  align-items: flex-start;
-
-  gap: 11px;
-
-  padding: 16px;
-
-  border: 1px solid #fed7aa;
-  border-radius: 10px;
-
-  background: #fffaf3;
-}
-
-.sidebar-warning {
-  width: 28px;
-  height: 28px;
-
-  flex: 0 0 28px;
-
-  display: grid;
-  place-items: center;
-
-  border-radius: 50%;
-
-  background: #ffedd5;
-  color: #ea580c;
-
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.sidebar-disclaimer h3 {
-  margin: 0 0 6px;
-
-  color: #c2410c;
-
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.sidebar-disclaimer p {
-  margin: 0;
-
-  color: #475569;
-
-  font-size: 9.5px;
-  line-height: 1.55;
-
-  font-weight: 500;
-}
-
-
-/* =========================================================
-   BOTTOM INFO
+   BOTTOM INFORMATION
 ========================================================= */
 
 .library-bottom-grid {
@@ -1292,6 +1435,7 @@
   gap: 13px;
 
   border: 1px solid #dbeafe;
+
   border-radius: 10px;
 
   background: #f8fbff;
@@ -1299,16 +1443,19 @@
 
 .library-info-card-icon {
   width: 38px;
+
   height: 38px;
 
   flex: 0 0 38px;
 
   display: grid;
+
   place-items: center;
 
   border-radius: 50%;
 
   background: #eaf2ff;
+
   color: #2563eb;
 
   font-size: 17px;
@@ -1320,6 +1467,7 @@
   color: #071a3d;
 
   font-size: 14px;
+
   font-weight: 700;
 }
 
@@ -1329,6 +1477,7 @@
   color: #475569;
 
   font-size: 11.5px;
+
   line-height: 1.65;
 
   font-weight: 500;
@@ -1341,6 +1490,7 @@
 
 .library-sebi-disclosure {
   width: 100%;
+
   max-width: 1800px;
 
   margin: 14px auto 0;
@@ -1354,6 +1504,7 @@
   gap: 14px;
 
   border: 1px solid #fed7aa;
+
   border-radius: 10px;
 
   background:
@@ -1366,16 +1517,19 @@
 
 .library-sebi-icon {
   width: 38px;
+
   height: 38px;
 
   flex: 0 0 38px;
 
   display: grid;
+
   place-items: center;
 
   border-radius: 50%;
 
   background: #ffedd5;
+
   color: #c2410c;
 
   font-size: 18px;
@@ -1387,6 +1541,7 @@
   color: #9a3412;
 
   font-size: 14px;
+
   font-weight: 700;
 }
 
@@ -1396,6 +1551,7 @@
   color: #475569;
 
   font-size: 11.5px;
+
   line-height: 1.65;
 
   font-weight: 500;
@@ -1412,6 +1568,7 @@
 
 .library-bottom-note {
   width: 100%;
+
   max-width: 1800px;
 
   margin: 10px auto 0;
@@ -1425,6 +1582,7 @@
   gap: 11px;
 
   border: 1px solid #dbeafe;
+
   border-radius: 8px;
 
   background: #f7faff;
@@ -1442,6 +1600,7 @@
   color: #0f172a;
 
   font-size: 12px;
+
   line-height: 1.55;
 
   font-weight: 800;
@@ -1458,9 +1617,11 @@
   padding: 10px 12px;
 
   border: 1px solid #fecaca;
+
   border-radius: 8px;
 
   background: #fef2f2;
+
   color: #b91c1c;
 
   font-size: 10px;
@@ -1470,9 +1631,11 @@
   padding: 45px 20px;
 
   border: 1px solid #e2e8f0;
+
   border-radius: 10px;
 
   background: #ffffff;
+
   color: #64748b;
 
   text-align: center;
@@ -1482,11 +1645,13 @@
   min-height: 70vh;
 
   display: grid;
+
   place-items: center;
 
   color: #475569;
 
   font-size: 15px;
+
   font-weight: 600;
 }
 
@@ -1523,23 +1688,16 @@
 @media (max-width: 1180px) {
 
   .study-library-layout {
-    grid-template-columns: 1fr;
+    grid-template-columns:
+      1fr;
   }
 
   .study-library-sidebar {
     grid-template-columns:
       repeat(
         2,
-        1fr
+        minmax(0, 1fr)
       );
-  }
-
-  .median-side-card {
-    grid-column: 1 / -1;
-  }
-
-  .sidebar-disclaimer {
-    grid-column: 1 / -1;
   }
 
 }
@@ -1552,54 +1710,66 @@
 @media (max-width: 900px) {
 
   .study-library-page {
-    padding: 22px 18px;
+    padding:
+      22px 18px;
   }
 
   .library-header {
-    flex-direction: column;
+    flex-direction:
+      column;
   }
 
   .library-refresh {
-    align-items: flex-start;
+    align-items:
+      flex-start;
   }
 
   .library-compact-summary {
     grid-template-columns:
       repeat(
         2,
-        1fr
+        minmax(0, 1fr)
       );
   }
 
   .library-filter-bar {
-    flex-direction: column;
+    flex-direction:
+      column;
 
-    align-items: stretch;
+    align-items:
+      stretch;
   }
 
   .library-filters {
-    flex-wrap: wrap;
+    flex-wrap:
+      wrap;
   }
 
   .library-search {
-    flex: 1;
+    flex:
+      1;
 
-    min-width: 220px;
+    min-width:
+      220px;
   }
 
   .study-card-content {
-    grid-template-columns: 1fr;
+    grid-template-columns:
+      1fr;
   }
 
   .study-reference-panel {
-    border-left: 0;
+    border-left:
+      0;
 
     border-top:
-      1px solid #edf1f6;
+      1px solid
+      #edf1f6;
   }
 
   .library-bottom-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns:
+      1fr;
   }
 
 }
@@ -1612,121 +1782,147 @@
 @media (max-width: 650px) {
 
   .study-library-page {
-    padding: 17px 12px;
+    padding:
+      17px 12px;
   }
 
   .library-title-row {
-    flex-direction: column;
+    flex-direction:
+      column;
 
-    align-items: flex-start;
+    align-items:
+      flex-start;
   }
 
   .library-title-row h1 {
-    font-size: 27px;
+    font-size:
+      27px;
   }
 
   .library-values {
-    font-size: 11px;
+    font-size:
+      11px;
   }
 
   .library-description {
-    font-size: 10.5px;
+    font-size:
+      10.5px;
   }
 
   .library-compact-summary {
     grid-template-columns:
       repeat(
         2,
-        1fr
+        minmax(0, 1fr)
       );
   }
 
   .library-compact-stat {
-    min-height: 54px;
+    min-height:
+      54px;
 
-    padding: 9px 10px;
+    padding:
+      9px 10px;
   }
 
   .library-compact-stat strong {
-    font-size: 18px;
+    font-size:
+      18px;
   }
 
   .library-compact-stat > span {
-    font-size: 8px;
+    font-size:
+      8px;
   }
 
   .library-tabs {
-    width: 100%;
+    width:
+      100%;
   }
 
   .library-tabs button {
-    flex: 1;
+    flex:
+      1;
   }
 
   .library-filters {
-    display: grid;
+    display:
+      grid;
 
-    grid-template-columns: 1fr;
+    grid-template-columns:
+      1fr;
   }
 
   .library-search,
   .library-filters select {
-    width: 100%;
+    width:
+      100%;
   }
 
   .study-card-header {
-    flex-direction: column;
+    flex-direction:
+      column;
   }
 
   .study-name-row {
-    flex-direction: column;
+    flex-direction:
+      column;
 
-    align-items: flex-start;
+    align-items:
+      flex-start;
   }
 
   .study-meta {
-    flex-direction: column;
+    flex-direction:
+      column;
 
-    align-items: flex-start;
+    align-items:
+      flex-start;
   }
 
   .study-meta b {
-    display: none;
+    display:
+      none;
   }
 
   .study-stat-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns:
+      1fr;
   }
 
   .study-stat {
-    border-right: 0;
+    border-right:
+      0;
 
     border-bottom:
-      1px solid #e2e8f0;
+      1px solid
+      #e2e8f0;
   }
 
   .study-stat:last-child {
-    border-bottom: 0;
+    border-bottom:
+      0;
   }
 
   .study-library-sidebar {
-    grid-template-columns: 1fr;
+    grid-template-columns:
+      1fr;
   }
 
-  .median-side-card {
-    grid-column: auto;
-  }
-
+  .active-movement-content strong,
   .median-side-content strong {
-    font-size: 25px;
+    font-size:
+      25px;
   }
 
   .outcome-body {
-    flex-direction: column;
+    flex-direction:
+      column;
   }
 
   .outcome-stats {
-    width: 100%;
+    width:
+      100%;
   }
 
   .movement-row {
@@ -1734,20 +1930,27 @@
       82px
       1fr
       18px;
+
+    gap:
+      6px;
   }
 
   .movement-row > span {
-    display: none;
+    display:
+      none;
   }
 
   .library-pagination {
-    flex-direction: column;
+    flex-direction:
+      column;
 
-    align-items: flex-start;
+    align-items:
+      flex-start;
   }
 
   .library-sebi-disclosure {
-    padding: 15px;
+    padding:
+      15px;
   }
 
 }
