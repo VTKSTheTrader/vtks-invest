@@ -182,3 +182,150 @@
   }
 
 }
+/* =========================================================
+   FUND PAGE FILTERS — MOBILE RESPONSIVE FIX
+========================================================= */
+
+/* Desktop */
+.funds-filter-bar,
+.funds-filters,
+.fund-filters,
+.market-study-filters {
+  display: grid;
+  grid-template-columns:
+    minmax(220px, 1.4fr)
+    repeat(4, minmax(150px, 1fr));
+  gap: 12px;
+
+  width: 100%;
+  align-items: center;
+}
+
+/* Make every control behave properly */
+.funds-filter-bar input,
+.funds-filter-bar select,
+.funds-filters input,
+.funds-filters select,
+.fund-filters input,
+.fund-filters select,
+.market-study-filters input,
+.market-study-filters select {
+  width: 100%;
+  min-width: 0;
+
+  height: 54px;
+
+  box-sizing: border-box;
+
+  padding: 0 16px;
+
+  border: 1px solid #cfd9e8;
+  border-radius: 12px;
+
+  background: #ffffff;
+
+  color: #0f172a;
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Search input */
+.funds-filter-bar input[type="search"],
+.funds-filters input[type="search"],
+.fund-filters input[type="search"],
+.market-study-filters input[type="search"] {
+  min-width: 0;
+}
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 1100px) {
+  .funds-filter-bar,
+  .funds-filters,
+  .fund-filters,
+  .market-study-filters {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    gap: 12px;
+  }
+
+  /* Search gets full row */
+  .funds-filter-bar > :first-child,
+  .funds-filters > :first-child,
+  .fund-filters > :first-child,
+  .market-study-filters > :first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 650px) {
+  .funds-filter-bar,
+  .funds-filters,
+  .fund-filters,
+  .market-study-filters {
+    display: grid !important;
+
+    grid-template-columns: 1fr !important;
+
+    gap: 10px !important;
+
+    width: 100% !important;
+
+    margin-top: 18px;
+  }
+
+  .funds-filter-bar > *,
+  .funds-filters > *,
+  .fund-filters > *,
+  .market-study-filters > * {
+    grid-column: 1 !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+
+  .funds-filter-bar input,
+  .funds-filter-bar select,
+  .funds-filters input,
+  .funds-filters select,
+  .fund-filters input,
+  .fund-filters select,
+  .market-study-filters input,
+  .market-study-filters select {
+    width: 100% !important;
+
+    height: 50px;
+
+    padding: 0 14px;
+
+    font-size: 13px;
+  }
+}
+
+/* =========================================================
+   VERY SMALL MOBILE
+========================================================= */
+
+@media (max-width: 420px) {
+  .funds-filter-bar input,
+  .funds-filter-bar select,
+  .funds-filters input,
+  .funds-filters select,
+  .fund-filters input,
+  .fund-filters select,
+  .market-study-filters input,
+  .market-study-filters select {
+    height: 48px;
+
+    font-size: 12px;
+  }
+}
