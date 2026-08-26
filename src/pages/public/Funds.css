@@ -183,149 +183,267 @@
 
 }
 /* =========================================================
-   FUND PAGE FILTERS — MOBILE RESPONSIVE FIX
+   VTKS MARKET STUDIES — FINAL MOBILE WIDTH FIX
 ========================================================= */
 
-/* Desktop */
-.funds-filter-bar,
-.funds-filters,
-.fund-filters,
-.market-study-filters {
-  display: grid;
-  grid-template-columns:
-    minmax(220px, 1.4fr)
-    repeat(4, minmax(150px, 1fr));
-  gap: 12px;
+@media (max-width: 700px) {
 
-  width: 100%;
-  align-items: center;
-}
-
-/* Make every control behave properly */
-.funds-filter-bar input,
-.funds-filter-bar select,
-.funds-filters input,
-.funds-filters select,
-.fund-filters input,
-.fund-filters select,
-.market-study-filters input,
-.market-study-filters select {
-  width: 100%;
-  min-width: 0;
-
-  height: 54px;
-
-  box-sizing: border-box;
-
-  padding: 0 16px;
-
-  border: 1px solid #cfd9e8;
-  border-radius: 12px;
-
-  background: #ffffff;
-
-  color: #0f172a;
-
-  font-size: 14px;
-  font-weight: 600;
-}
-
-/* Search input */
-.funds-filter-bar input[type="search"],
-.funds-filters input[type="search"],
-.fund-filters input[type="search"],
-.market-study-filters input[type="search"] {
-  min-width: 0;
-}
-
-/* =========================================================
-   TABLET
-========================================================= */
-
-@media (max-width: 1100px) {
-  .funds-filter-bar,
-  .funds-filters,
-  .fund-filters,
-  .market-study-filters {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-
-    gap: 12px;
+  html,
+  body {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
   }
 
-  /* Search gets full row */
-  .funds-filter-bar > :first-child,
-  .funds-filters > :first-child,
-  .fund-filters > :first-child,
-  .market-study-filters > :first-child {
-    grid-column: 1 / -1;
+  #root {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
   }
-}
 
-/* =========================================================
-   MOBILE
-========================================================= */
+  /* MAIN PAGE */
+  .funds-page {
+    width: 100% !important;
+    max-width: 100% !important;
 
-@media (max-width: 650px) {
-  .funds-filter-bar,
+    margin: 0 !important;
+    padding: 18px 12px 40px !important;
+
+    box-sizing: border-box !important;
+
+    overflow-x: hidden !important;
+  }
+
+  /* ANY MAIN WRAPPER / CONTAINER */
+  .funds-container,
+  .funds-shell,
+  .funds-content,
+  .funds-main,
+  .fund-list,
+  .funds-list,
+  .market-study-archive,
+  .market-study-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+
+    box-sizing: border-box !important;
+  }
+
+  /* =========================================================
+     HEADER
+  ========================================================= */
+
+  .funds-header,
+  .funds-page-header,
+  .market-study-header {
+    width: 100% !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+
+    gap: 14px !important;
+  }
+
+  .funds-header h1,
+  .funds-page-header h1,
+  .market-study-header h1 {
+    font-size: 28px !important;
+    line-height: 1.2 !important;
+  }
+
+  /* =========================================================
+     FILTERS — ONE COLUMN
+  ========================================================= */
+
   .funds-filters,
   .fund-filters,
+  .funds-filter-bar,
   .market-study-filters {
     display: grid !important;
 
-    grid-template-columns: 1fr !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+
+    gap: 10px !important;
+
+    padding: 12px !important;
+    margin: 16px 0 !important;
+
+    box-sizing: border-box !important;
+
+    overflow: hidden !important;
+  }
+
+  .funds-filters > *,
+  .fund-filters > *,
+  .funds-filter-bar > *,
+  .market-study-filters > * {
+    grid-column: 1 / -1 !important;
+
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+
+    box-sizing: border-box !important;
+  }
+
+  .funds-filters input,
+  .funds-filters select,
+  .fund-filters input,
+  .fund-filters select,
+  .funds-filter-bar input,
+  .funds-filter-bar select,
+  .market-study-filters input,
+  .market-study-filters select {
+    display: block !important;
+
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+
+    height: 50px !important;
+
+    padding: 0 14px !important;
+
+    box-sizing: border-box !important;
+
+    font-size: 14px !important;
+  }
+
+  /* =========================================================
+     STUDY GRID
+  ========================================================= */
+
+  .funds-grid,
+  .fund-grid,
+  .study-grid,
+  .market-study-grid {
+    display: grid !important;
+
+    grid-template-columns: minmax(0, 1fr) !important;
+
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+
+    gap: 14px !important;
+  }
+
+  /* =========================================================
+     STUDY CARDS
+  ========================================================= */
+
+  .fund-card,
+  .funds-card,
+  .study-card,
+  .market-study-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+
+    margin: 0 !important;
+
+    padding: 18px !important;
+
+    box-sizing: border-box !important;
+
+    overflow: hidden !important;
+  }
+
+  .fund-card *,
+  .funds-card *,
+  .study-card *,
+  .market-study-card * {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* =========================================================
+     PRICE DETAILS
+  ========================================================= */
+
+  .fund-values-grid,
+  .study-values-grid,
+  .market-study-values,
+  .study-price-grid {
+    display: grid !important;
+
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr)) !important;
+
+    width: 100% !important;
+
+    gap: 0 !important;
+  }
+
+  /* =========================================================
+     DOCUMENTED REFERENCE STRUCTURE
+  ========================================================= */
+
+  .documented-reference-structure,
+  .reference-structure,
+  .study-reference-structure {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+
+    overflow: hidden !important;
+  }
+
+  /* =========================================================
+     CARD HEADER
+  ========================================================= */
+
+  .fund-card-header,
+  .study-card-header,
+  .market-study-card-header {
+    display: flex !important;
+
+    align-items: flex-start !important;
+    justify-content: space-between !important;
 
     gap: 10px !important;
 
     width: 100% !important;
 
-    margin-top: 18px;
+    flex-wrap: wrap !important;
   }
 
-  .funds-filter-bar > *,
-  .funds-filters > *,
-  .fund-filters > *,
-  .market-study-filters > * {
-    grid-column: 1 !important;
-
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: none !important;
+  .fund-card h2,
+  .fund-card h3,
+  .study-card h2,
+  .study-card h3,
+  .market-study-card h2,
+  .market-study-card h3 {
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
   }
 
-  .funds-filter-bar input,
-  .funds-filter-bar select,
-  .funds-filters input,
-  .funds-filters select,
-  .fund-filters input,
-  .fund-filters select,
-  .market-study-filters input,
-  .market-study-filters select {
+  /* =========================================================
+     PAGINATION
+  ========================================================= */
+
+  .fund-pagination,
+  .funds-pagination,
+  .study-pagination {
     width: 100% !important;
 
-    height: 50px;
+    display: flex !important;
+    justify-content: center !important;
 
-    padding: 0 14px;
+    flex-wrap: wrap !important;
 
-    font-size: 13px;
-  }
-}
-
-/* =========================================================
-   VERY SMALL MOBILE
-========================================================= */
-
-@media (max-width: 420px) {
-  .funds-filter-bar input,
-  .funds-filter-bar select,
-  .funds-filters input,
-  .funds-filters select,
-  .fund-filters input,
-  .fund-filters select,
-  .market-study-filters input,
-  .market-study-filters select {
-    height: 48px;
-
-    font-size: 12px;
+    gap: 6px !important;
   }
 }
