@@ -14,6 +14,7 @@ import { logoutUser } from "../../services/authService";
 import {
   getHoldings,
   mapHoldingFromDB,
+  refreshCMP,
 } from "../../services/holdingService";
 
 import {
@@ -133,6 +134,29 @@ export default function Dashboard() {
           await getSubscriberMembership(
             profileData.email
           );
+
+        /*
+          Refresh Dhan CMP before reading holdings.
+
+          This keeps the subscriber dashboard independent
+          of the Admin page. If the live refresh fails,
+          the dashboard still loads using the last CMP
+          already stored in Supabase.
+        */
+        try {
+          const cmpRefreshResult =
+            await refreshCMP();
+
+          console.log(
+            "Subscriber CMP refresh:",
+            cmpRefreshResult
+          );
+        } catch (cmpError) {
+          console.warn(
+            "Subscriber CMP refresh skipped/failed:",
+            cmpError
+          );
+        }
 
         const [
           holdingRows,
