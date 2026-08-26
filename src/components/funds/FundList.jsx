@@ -19,6 +19,176 @@ const ITEMS_PER_PAGE = 6;
 const AUTO_REFRESH_INTERVAL = 60 * 1000;
 
 
+const FUNDLIST_RESPONSIVE_CSS = `
+  .vtks-fundlist-wrapper {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  @media (max-width: 768px) {
+    .vtks-fundlist-wrapper {
+      padding: 16px !important;
+      border-radius: 18px !important;
+      overflow: hidden !important;
+    }
+
+    .vtks-fundlist-header {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 16px !important;
+    }
+
+    .vtks-fundlist-header-actions {
+      width: 100% !important;
+      align-items: stretch !important;
+    }
+
+    .vtks-fundlist-header-actions > * {
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+      text-align: center !important;
+    }
+
+    .vtks-fundlist-summary {
+      grid-template-columns: 1fr !important;
+      gap: 10px !important;
+      margin-bottom: 18px !important;
+    }
+
+    .vtks-fundlist-filters {
+      grid-template-columns: 1fr !important;
+      gap: 10px !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      margin-bottom: 18px !important;
+    }
+
+    .vtks-fundlist-filters > * {
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      box-sizing: border-box !important;
+    }
+
+    .vtks-fundlist-cards {
+      grid-template-columns: 1fr !important;
+      gap: 14px !important;
+    }
+
+    .vtks-study-card {
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      padding: 16px !important;
+      border-radius: 15px !important;
+      overflow: hidden !important;
+    }
+
+    .vtks-study-card-top {
+      align-items: flex-start !important;
+      gap: 8px !important;
+    }
+
+    .vtks-study-identity {
+      align-items: flex-start !important;
+    }
+
+    .vtks-study-values {
+      grid-template-columns: 1fr !important;
+      overflow: hidden !important;
+    }
+
+    .vtks-study-values > * {
+      width: 100% !important;
+      min-width: 0 !important;
+      min-height: 68px !important;
+      border-right: 0 !important;
+      border-bottom: 1px solid #e2e8f0 !important;
+      box-sizing: border-box !important;
+    }
+
+    .vtks-study-values > *:last-child {
+      border-bottom: 0 !important;
+    }
+
+    .vtks-reference-panel {
+      padding: 12px 10px 10px !important;
+      overflow: hidden !important;
+    }
+
+    .vtks-reference-structure,
+    .vtks-protected-reference-structure {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 12px 8px !important;
+      width: 100% !important;
+      min-width: 0 !important;
+    }
+
+    .vtks-reference-line {
+      display: none !important;
+    }
+
+    .vtks-reference-point,
+    .vtks-protected-reference-point {
+      min-width: 0 !important;
+    }
+
+    .vtks-reference-point strong,
+    .vtks-protected-reference-point strong,
+    .vtks-reference-point small,
+    .vtks-protected-reference-point small {
+      white-space: normal !important;
+      overflow-wrap: anywhere !important;
+    }
+
+    .vtks-study-card-footer {
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 10px !important;
+    }
+
+    .vtks-study-card-footer > * {
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+      text-align: center !important;
+      justify-content: center !important;
+    }
+
+    .vtks-learning-disclosure {
+      flex-direction: column !important;
+      gap: 12px !important;
+      padding: 16px !important;
+    }
+
+    .vtks-pagination-wrap {
+      overflow-x: auto !important;
+      padding-bottom: 4px !important;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .vtks-fundlist-wrapper {
+      padding: 12px !important;
+    }
+
+    .vtks-study-card {
+      padding: 14px !important;
+    }
+
+    .vtks-reference-structure,
+    .vtks-protected-reference-structure {
+      grid-template-columns: 1fr 1fr !important;
+    }
+  }
+`;
+
+
 /* =========================================================
    HELPERS
 ========================================================= */
@@ -945,13 +1115,17 @@ export default function FundList() {
   ========================================================= */
 
   return (
-    <section style={wrapperStyle}>
+    <section
+      style={wrapperStyle}
+      className="vtks-fundlist-wrapper"
+    >
+      <style>{FUNDLIST_RESPONSIVE_CSS}</style>
 
       {/* =====================================================
           HEADER
       ===================================================== */}
 
-      <div style={headerStyle}>
+      <div style={headerStyle} className="vtks-fundlist-header">
 
         <div>
 
@@ -969,7 +1143,7 @@ export default function FundList() {
 
         </div>
 
-        <div style={headerActionsStyle}>
+        <div style={headerActionsStyle} className="vtks-fundlist-header-actions">
 
           <span style={countBadgeStyle}>
             {visibleHoldings.length}{" "}
@@ -1031,7 +1205,7 @@ export default function FundList() {
           SUMMARY
       ===================================================== */}
 
-      <div style={summaryGridStyle}>
+      <div style={summaryGridStyle} className="vtks-fundlist-summary">
 
         <SummaryCard
           value={
@@ -1063,7 +1237,7 @@ export default function FundList() {
           FILTERS
       ===================================================== */}
 
-      <div style={filtersStyle}>
+      <div style={filtersStyle} className="vtks-fundlist-filters">
 
         <input
           type="search"
@@ -1212,7 +1386,7 @@ export default function FundList() {
       ) : (
         <>
 
-          <div style={cardsGridStyle}>
+          <div style={cardsGridStyle} className="vtks-fundlist-cards">
 
             {paginatedHoldings.map(
               (holding) => (
@@ -1244,7 +1418,7 @@ export default function FundList() {
           </div>
 
 
-          <div style={paginationWrapStyle}>
+          <div style={paginationWrapStyle} className="vtks-pagination-wrap">
 
             <Pagination
               currentPage={
@@ -1265,7 +1439,7 @@ export default function FundList() {
               EDUCATIONAL / DISCLOSURE
           ================================================= */}
 
-          <section style={learningDisclosureStyle}>
+          <section style={learningDisclosureStyle} className="vtks-learning-disclosure">
 
             <div style={learningDisclosureIconStyle}>
               🎓
@@ -1331,7 +1505,7 @@ function SummaryCard({
   valueColor = "#2563eb",
 }) {
   return (
-    <div style={summaryCardStyle}>
+    <div style={summaryCardStyle} className="vtks-summary-card">
 
       <h3
         style={{
@@ -1433,13 +1607,13 @@ function MarketStudyCard({
 
 
   return (
-    <article style={studyCardStyle}>
+    <article style={studyCardStyle} className="vtks-study-card">
 
       {/* =====================================================
           CARD HEADER
       ===================================================== */}
 
-      <div style={studyCardTopStyle}>
+      <div style={studyCardTopStyle} className="vtks-study-card-top">
 
         <div>
 
@@ -1472,7 +1646,7 @@ function MarketStudyCard({
           IDENTITY
       ===================================================== */}
 
-      <div style={studyIdentityStyle}>
+      <div style={studyIdentityStyle} className="vtks-study-identity">
 
         <div
           style={
@@ -1521,7 +1695,7 @@ function MarketStudyCard({
           SUMMARY VALUES
       ===================================================== */}
 
-      <div style={studyValuesGridStyle}>
+      <div style={studyValuesGridStyle} className="vtks-study-values">
 
         <StudyValue
           label="Reference Price"
@@ -1590,7 +1764,7 @@ function MarketStudyCard({
           DOCUMENTED REFERENCE STRUCTURE
       ===================================================== */}
 
-      <div style={referencePanelStyle}>
+      <div style={referencePanelStyle} className="vtks-reference-panel">
 
         <p style={referencePanelTitleStyle}>
           DOCUMENTED REFERENCE STRUCTURE
@@ -1622,7 +1796,7 @@ function MarketStudyCard({
           CARD FOOTER
       ===================================================== */}
 
-      <div style={studyCardFooterStyle}>
+      <div style={studyCardFooterStyle} className="vtks-study-card-footer">
 
         <span style={studyTypeBadgeStyle}>
           {studyType}
@@ -1660,7 +1834,7 @@ function StudyValue({
   value,
 }) {
   return (
-    <div style={studyValueStyle}>
+    <div style={studyValueStyle} className="vtks-study-value">
 
       <span style={studyValueLabelStyle}>
         {label}
@@ -1789,17 +1963,16 @@ function ReferenceStructure({
   ];
 
   return (
-    <div style={referenceStructureStyle}>
+    <div style={referenceStructureStyle} className="vtks-reference-structure">
 
-      <div style={referenceLineStyle} />
+      <div style={referenceLineStyle} className="vtks-reference-line" />
 
       {points.map(
         (point) => (
           <div
-            key={
-              point.label
-            }
+            key={point.label}
             style={referencePointStyle}
+            className="vtks-reference-point"
           >
 
             <span
@@ -1843,15 +2016,14 @@ function ProtectedReferenceStructure() {
   ];
 
   return (
-    <div style={protectedStructureStyle}>
+    <div style={protectedStructureStyle} className="vtks-protected-reference-structure">
 
       {points.map(
         (label) => (
           <div
-            key={
-              label
-            }
+            key={label}
             style={protectedReferencePointStyle}
+            className="vtks-protected-reference-point"
           >
 
             <span style={protectedReferenceLockStyle}>
