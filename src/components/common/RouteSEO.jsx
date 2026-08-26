@@ -214,16 +214,33 @@ const normalizePathname = (pathname) => {
 const getPageConfig = (pathname) => {
   const cleanPath = normalizePathname(pathname);
 
-  /* Public trade details */
-  if (cleanPath.startsWith("/trade/")) {
-    return {
-      title: "Market Study Details | VTKS INVEST",
-      description:
-        "View detailed VTKS educational market study information.",
-      indexable: true,
-    };
-  }
+  /* =====================================================
+   PUBLIC MARKET STUDY DETAILS
+===================================================== */
 
+if (cleanPath.startsWith("/market-study/")) {
+  return {
+    title: "Market Study Details | VTKS INVEST",
+    description:
+      "Explore a documented VTKS educational market study with historical chart observations, reference prices and market structure analysis.",
+    indexable: true,
+  };
+}
+
+/* =====================================================
+   LEGACY PUBLIC TRADE DETAILS
+===================================================== */
+
+if (cleanPath.startsWith("/trade/")) {
+  return {
+    title: "Market Study Details | VTKS INVEST",
+    description:
+      "View detailed VTKS educational market study information.",
+    indexable: true,
+  };
+}
+
+/* Subscriber trade details */
   /* Subscriber trade details */
   if (
     cleanPath.startsWith(

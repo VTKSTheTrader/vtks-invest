@@ -1317,7 +1317,7 @@ export default function Dashboard() {
               <div>
 
                 <h2>
-                  📊 VTKS Portfolio Access
+                  📊 VTKS Market Studies
                 </h2>
 
                 <p>
@@ -1329,7 +1329,7 @@ export default function Dashboard() {
               </div>
 
               <span className="subscriber-trade-count">
-                {filteredHoldings.length} Trades
+                {filteredHoldings.length} Studies
               </span>
 
             </div>
@@ -1403,7 +1403,7 @@ export default function Dashboard() {
                 }
               >
                 <option value="all">
-                  📊 All Trade Types
+                  📊 All Study Horizons
                 </option>
 
                 {portfolioTradeTypes.map(
@@ -1440,36 +1440,36 @@ export default function Dashboard() {
                 </option>
 
                 <option value="Active">
-                  Active
-                </option>
+                   Ongoing
+                 </option>
 
                 <option value="Target 1 Hit">
-                  Target 1 Hit
-                </option>
+                   Zone 1 Reached
+                 </option>
 
                 <option value="Target 2 Hit">
-                  Target 2 Hit
-                </option>
+                   Zone 2 Reached
+                 </option>
 
                 <option value="Target 3 Hit">
-                  Target 3 Hit
-                </option>
+                   Zone 3 Reached
+                 </option>
 
                 <option value="Booked Profit">
-                  Booked Profit
-                </option>
+                   Positive Outcome
+                 </option>
 
                 <option value="Booked Loss">
-                  Booked Loss
-                </option>
+                   Negative Outcome
+                 </option>
 
                 <option value="Breakeven">
-                  Breakeven
-                </option>
+                   Neutral Outcome
+                 </option>
 
                 <option value="SL Hit">
-                  SL Hit
-                </option>
+                   Risk Level Reached
+                 </option>
               </select>
 
               <select
@@ -1494,8 +1494,8 @@ export default function Dashboard() {
                 </option>
 
                 <option value="subscriber">
-                  ⭐ Subscriber
-                </option>
+                   🔒 Member
+                 </option>
               </select>
 
               <select
@@ -1516,11 +1516,11 @@ export default function Dashboard() {
                 </option>
 
                 <option value="high">
-                  📈 ROI High → Low
+                  📈 Price Change High → Low
                 </option>
 
                 <option value="low">
-                  📉 ROI Low → High
+                  📉 Price Change Low → High
                 </option>
               </select>
 
@@ -1545,10 +1545,12 @@ export default function Dashboard() {
 
             {filteredHoldings.length ===
             0 ? (
-              <div className="subscriber-empty-state">
+              <div className="subscriber-empty-studies">
 
-                No market studies match
-                the selected filters.
+                <p>
+                  No market studies match
+                  the selected filters.
+                </p>
 
                 {hasActivePortfolioFilters && (
                   <button
@@ -1556,7 +1558,7 @@ export default function Dashboard() {
                     onClick={
                       clearPortfolioFilters
                     }
-                    className="subscriber-empty-clear-button"
+                    className="subscriber-empty-clear-btn"
                   >
                     Clear Filters
                   </button>
@@ -1683,8 +1685,8 @@ export default function Dashboard() {
                                 }
                               >
                                 {isSubscriberTrade
-                                  ? "⭐ Subscriber"
-                                  : "🌐 Public"}
+                                  ? "🔒 Member"
+                                   : "🌐 Public"}
                               </span>
 
                               <span
@@ -1749,26 +1751,26 @@ export default function Dashboard() {
                               >
                                 {tradeStatus ===
                                 "Booked Profit"
-                                  ? "💰 Booked Profit"
+                                  ? "📈 Positive Outcome"
                                   : tradeStatus ===
                                       "Booked Loss"
-                                    ? "📉 Booked Loss"
+                                    ? "📉 Negative Outcome"
                                     : tradeStatus ===
                                         "Breakeven"
-                                      ? "⚖️ Breakeven"
+                                      ? "⚖️ Neutral Outcome"
                                       : tradeStatus ===
                                           "SL Hit"
-                                        ? "🛑 SL Hit"
+                                        ? "⚠️ Risk Level Reached"
                                         : tradeStatus ===
                                             "Target 1 Hit"
-                                          ? "🎯 Target 1 Hit"
+                                          ? "📍 Zone 1 Reached"
                                           : tradeStatus ===
                                               "Target 2 Hit"
-                                            ? "🚀 Target 2 Hit"
+                                            ? "📍 Zone 2 Reached"
                                             : tradeStatus ===
                                                 "Target 3 Hit"
-                                              ? "🏆 Target 3 Hit"
-                                              : "🟢 Active"}
+                                              ? "📍 Zone 3 Reached"
+                                              : "🟢 Ongoing"}
                               </span>
 
                             </div>
@@ -1778,7 +1780,7 @@ export default function Dashboard() {
                           <div className="subscriber-values-grid">
 
                             <ValueItem
-                              label="Entry"
+                              label="Recorded Price"
                               value={
                                 formatPrice(
                                   holding.entry
@@ -1788,9 +1790,9 @@ export default function Dashboard() {
 
                             <ValueItem
                               label={
-                                closedTrade
-                                  ? "Exit Price"
-                                  : "CMP"
+                                 closedTrade
+                                   ? "Close Price"
+                                   : "CMP"
                               }
                               value={
                                 formatPrice(
@@ -1803,13 +1805,9 @@ export default function Dashboard() {
 
                             <ValueItem
                               label={
-                                closedTrade
-                                  ? isLossTrade(
-                                      holding
-                                    )
-                                    ? "Realised Loss"
-                                    : "Realised ROI"
-                                  : "ROI"
+                                 closedTrade
+                                   ? "Price Change"
+                                   : "Price Change"
                               }
                               value={`${
                                 roi >= 0
@@ -1830,7 +1828,7 @@ export default function Dashboard() {
                           <div className="subscriber-target-grid">
 
                             <ValueItem
-                              label="Target 1"
+                              label="Zone-1"
                               value={
                                 formatPrice(
                                   holding.target1
@@ -1839,7 +1837,7 @@ export default function Dashboard() {
                             />
 
                             <ValueItem
-                              label="Stop Loss"
+                              label="Risk Level"
                               value={
                                 formatPrice(
                                   holding.stopLoss
@@ -1853,7 +1851,7 @@ export default function Dashboard() {
                             to={`/dashboard/trade/${holding.id}`}
                             className="subscriber-view-trade"
                           >
-                            View Analysis →
+                            Open Study →
                           </Link>
 
                         </article>

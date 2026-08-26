@@ -1088,3 +1088,72 @@ transform:translateY(-2px);
 .subscriber-clear-filters:active {
   transform: translateY(0);
 }
+/* =========================================
+   EMPTY MARKET STUDIES STATE
+========================================= */
+
+.subscriber-empty-studies {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+
+  width: 100%;
+  min-height: 110px;
+  padding: 24px;
+
+  background: #f8fafc;
+  border: 1px solid #e3eaf5;
+  border-radius: 16px;
+}
+
+.subscriber-empty-studies p {
+  margin: 0;
+  color: #536987;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.subscriber-empty-clear-btn {
+  appearance: none;
+  border: 1px solid #fecaca;
+  background: #fff7f7;
+  color: #dc2626;
+
+  min-height: 42px;
+  padding: 10px 20px;
+
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.subscriber-empty-clear-btn:hover {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  transform: translateY(-1px);
+}
+
+.subscriber-empty-clear-btn:focus-visible {
+  outline: 3px solid rgba(220, 38, 38, 0.15);
+  outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  .subscriber-empty-studies {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .subscriber-empty-clear-btn {
+    width: 100%;
+    max-width: 220px;
+  }
+}

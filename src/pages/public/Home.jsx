@@ -324,26 +324,26 @@ export default function Home() {
 
   const getStatusLabel = (status) => {
     if (status === "Booked Profit") {
-      return "💰 Booked Profit";
+      return "✓ Positive Outcome";
     }
 
     if (status === "SL Hit") {
-      return "🛑 SL Hit";
+      return "Risk Level Reached";
     }
 
     if (status === "Target 1 Hit") {
-      return "🎯 Target 1 Hit";
+      return "✓ Reference Zone 1 Reached";
     }
 
     if (status === "Target 2 Hit") {
-      return "🚀 Target 2 Hit";
+      return "✓ Reference Zone 2 Reached";
     }
 
     if (status === "Target 3 Hit") {
-      return "🏆 Target 3 Hit";
+      return "✓ Reference Zone 3 Reached";
     }
 
-    return "Active";
+    return "Ongoing Study";
   };
 
   const latestTrades = useMemo(() => {
@@ -589,11 +589,11 @@ export default function Home() {
       <section className="latest-section">
         <div className="section-title">
           <span>
-            📊 VTKS Knowledge Portfolio
+            📊 VTKS Market Studies
           </span>
 
           <h2>
-            Latest Insights
+            Latest Market Studies
           </h2>
 
           <p>
@@ -607,7 +607,7 @@ export default function Home() {
 
         {loading ? (
           <p className="home-trade-message">
-            Loading latest ideas...
+            Loading latest market studies...
           </p>
         ) : latestTrades.length > 0 ? (
           <div className="trade-grid">
@@ -630,7 +630,7 @@ export default function Home() {
                 return (
                   <Link
                     key={holding.id}
-                    to={`/trade/${holding.id}`}
+                    to={`/market-study/${holding.id}`}
                     className="trade-card"
                   >
                     <div>
@@ -681,9 +681,9 @@ export default function Home() {
                       >
                         {completedIdea
                           ? roi >= 0
-                            ? "Realised Return"
-                            : "Realised Loss"
-                          : "Live Return"}
+                            ? "Recorded Change"
+                            : "Recorded Change"
+                          : "Observed Change"}
                       </small>
 
                       <span>
@@ -694,7 +694,7 @@ export default function Home() {
 
                     <div className="trade-meta">
                       <span>
-                        Entry{" "}
+                        Reference{" "}
                         {formatPrice(
                           holding.entry
                         )}
@@ -744,7 +744,7 @@ export default function Home() {
                     </div>
 
                     <div className="trade-card-link">
-                      View Analysis →
+                      View Study →
                     </div>
                   </Link>
                 );
@@ -760,7 +760,7 @@ export default function Home() {
 
         <div className="center-btn">
           <Link to="/funds">
-            Explore Complete Analysis →
+            Explore Market Studies →
           </Link>
         </div>
       </section>

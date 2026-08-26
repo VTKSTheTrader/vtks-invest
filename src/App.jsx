@@ -27,7 +27,10 @@ import Login from "./pages/public/Login";
 import Register from "./pages/public/Register";
 import ForgotPassword from "./pages/public/ForgotPassword";
 import ResetPassword from "./pages/public/ResetPassword";
+
 import TradeDetails from "./pages/public/TradeDetails";
+import MarketStudyDetails from "./pages/public/MarketStudyDetails";
+
 import Payment from "./pages/public/Payment";
 import NotFound from "./pages/public/NotFound";
 import PublicTestimonials from "./pages/public/Testimonials";
@@ -50,6 +53,7 @@ import AdminTestimonials from "./pages/admin/Testimonials";
 import MonthlyLevels from "./pages/admin/MonthlyLevels";
 import AdminStockQueries from "./pages/admin/StockQueries";
 import AdminExpenses from "./pages/admin/Expenses";
+
 /* =====================================================
    SUBSCRIBER PAGES
 ===================================================== */
@@ -163,10 +167,29 @@ function App() {
             element={<ResetPassword />}
           />
 
+          {/* =================================================
+              EXISTING PUBLIC TRADE DETAILS
+              DO NOT REMOVE
+          ================================================== */}
+
           <Route
             path="/trade/:id"
             element={<TradeDetails />}
           />
+
+          {/* =================================================
+              NEW PUBLIC MARKET STUDY DETAILS PAGE
+              SAFE TEST ROUTE
+          ================================================== */}
+
+          <Route
+            path="/market-study/:id"
+            element={<MarketStudyDetails />}
+          />
+
+          {/* =================================================
+              404
+          ================================================== */}
 
           <Route
             path="*"
@@ -199,17 +222,18 @@ function App() {
           />
 
           {/* =================================================
-              MEMBERS V2 IS NOW MAIN MEMBERS PAGE
+              MEMBERS
           ================================================= */}
 
           <Route
             path="members"
             element={<MembersV2Test />}
           />
+
           <Route
-  path="expenses"
-  element={<AdminExpenses />}
-/>
+            path="expenses"
+            element={<AdminExpenses />}
+          />
 
           {/* TEMPORARY FALLBACK TEST ROUTE */}
 
@@ -294,6 +318,11 @@ function App() {
             </SubscriberRoute>
           }
         />
+
+        {/* =================================================
+            EXISTING SUBSCRIBER TRADE PAGE
+            COMPLETELY UNTOUCHED
+        ================================================== */}
 
         <Route
           path="/dashboard/trade/:id"

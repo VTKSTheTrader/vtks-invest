@@ -1,0 +1,1325 @@
+/* =========================================================
+   MARKET STUDY DETAILS
+   NEW PUBLIC TEST PAGE
+========================================================= */
+
+.msd-page {
+  min-height: 100vh;
+  padding: 30px 20px 70px;
+  background:
+    radial-gradient(
+      circle at 92% 2%,
+      rgba(37, 99, 235, 0.07),
+      transparent 26%
+    ),
+    linear-gradient(
+      180deg,
+      #f8fbff 0%,
+      #f4f7fb 100%
+    );
+  color: #0f172a;
+}
+
+.msd-container {
+  width: min(1240px, 100%);
+  margin: 0 auto;
+}
+
+/* =========================================================
+   BACK
+========================================================= */
+
+.msd-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 18px;
+  color: #2563eb;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: 0.2s ease;
+}
+
+.msd-back-link:hover {
+  gap: 10px;
+  color: #1d4ed8;
+}
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.msd-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    300px;
+  gap: 32px;
+  align-items: stretch;
+
+  overflow: hidden;
+
+  padding: 34px;
+
+  border: 1px solid
+    rgba(255, 255, 255, 0.1);
+
+  border-radius: 26px;
+
+  color: #ffffff;
+
+  background:
+    linear-gradient(
+      135deg,
+      #06152e 0%,
+      #09285f 56%,
+      #0c4092 100%
+    );
+
+  box-shadow:
+    0 24px 60px
+    rgba(15, 23, 42, 0.13);
+}
+
+.msd-hero::before {
+  content: "";
+  position: absolute;
+  top: -100px;
+  right: 180px;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  background:
+    rgba(59, 130, 246, 0.11);
+  filter: blur(4px);
+}
+
+.msd-hero-left,
+.msd-hero-price-card {
+  position: relative;
+  z-index: 1;
+}
+
+/* =========================================================
+   BADGES
+========================================================= */
+
+.msd-badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-bottom: 22px;
+}
+
+.msd-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 6px 12px;
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.13);
+
+  border-radius: 999px;
+
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.msd-badge-green {
+  color: #bbf7d0;
+  background:
+    rgba(22, 163, 74, 0.16);
+}
+
+.msd-badge-blue {
+  color: #dbeafe;
+  background:
+    rgba(59, 130, 246, 0.17);
+}
+
+.msd-badge-purple {
+  color: #ede9fe;
+  background:
+    rgba(124, 58, 237, 0.18);
+}
+
+/* =========================================================
+   HERO TEXT
+========================================================= */
+
+.msd-hero h1 {
+  margin: 0;
+
+  font-size:
+    clamp(
+      42px,
+      6vw,
+      62px
+    );
+
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.045em;
+}
+
+.msd-hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px;
+
+  margin: 14px 0 0;
+
+  color:
+    rgba(255, 255, 255, 0.86);
+
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.msd-hero-meta span {
+  color:
+    rgba(255, 255, 255, 0.38);
+}
+
+.msd-hero-note {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  margin-top: 23px;
+
+  color:
+    rgba(255, 255, 255, 0.88);
+
+  font-size: 13px;
+}
+
+.msd-hero-note strong {
+  color: #ffffff;
+}
+
+.msd-hero-disclosure {
+  max-width: 620px;
+
+  margin: 14px 0 0;
+
+  color:
+    rgba(255, 255, 255, 0.61);
+
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+/* =========================================================
+   HERO PRICE CARD
+========================================================= */
+
+.msd-hero-price-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  min-height: 200px;
+
+  padding: 25px;
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.15);
+
+  border-radius: 20px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.1),
+      rgba(255, 255, 255, 0.045)
+    );
+
+  backdrop-filter: blur(10px);
+}
+
+.msd-hero-price-card > span {
+  color:
+    rgba(255, 255, 255, 0.7);
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.msd-hero-price-card > strong {
+  margin-top: 7px;
+
+  color: #ffffff;
+
+  font-size: 37px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.msd-hero-divider {
+  width: 100%;
+  height: 1px;
+  margin: 18px 0;
+
+  background:
+    rgba(255, 255, 255, 0.14);
+}
+
+.msd-hero-price-card small {
+  color:
+    rgba(255, 255, 255, 0.61);
+
+  font-size: 11px;
+}
+
+.msd-hero-price-card b {
+  margin-top: 5px;
+  font-size: 23px;
+}
+
+/* =========================================================
+   METRICS
+========================================================= */
+
+.msd-metrics {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      4,
+      minmax(0, 1fr)
+    );
+
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.msd-metric-card {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  min-height: 112px;
+  padding: 19px;
+
+  overflow: hidden;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 8px 28px
+    rgba(15, 23, 42, 0.045);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.msd-metric-card:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 12px 32px
+    rgba(15, 23, 42, 0.075);
+}
+
+.msd-icon {
+  display: grid;
+  place-items: center;
+
+  flex: 0 0 47px;
+
+  width: 47px;
+  height: 47px;
+
+  border-radius: 14px;
+
+  font-size: 20px;
+}
+
+.msd-icon-blue {
+  background: #eaf2ff;
+}
+
+.msd-icon-green {
+  background: #eaf8ef;
+}
+
+.msd-icon-purple {
+  background: #f1ebff;
+}
+
+.msd-icon-orange {
+  background: #fff1df;
+}
+
+.msd-metric-card span {
+  display: block;
+
+  color: #64748b;
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.msd-metric-card strong {
+  display: block;
+
+  margin-top: 5px;
+
+  color: #0f172a;
+
+  font-size: 21px;
+  font-weight: 800;
+}
+
+.msd-metric-card small {
+  display: block;
+
+  margin-top: 4px;
+
+  color: #94a3b8;
+
+  font-size: 10px;
+}
+
+/* =========================================================
+   PANELS
+========================================================= */
+
+.msd-two-column {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
+
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.msd-panel {
+  margin-top: 18px;
+  padding: 23px;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 8px 30px
+    rgba(15, 23, 42, 0.04);
+}
+
+.msd-two-column
+.msd-panel {
+  margin-top: 0;
+}
+
+/* =========================================================
+   SECTION HEADING
+========================================================= */
+
+.msd-section-title {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+
+  padding-bottom: 16px;
+
+  border-bottom:
+    1px solid #edf1f6;
+}
+
+.msd-section-title > span {
+  display: grid;
+  place-items: center;
+
+  width: 36px;
+  height: 36px;
+
+  flex: 0 0 36px;
+
+  border-radius: 10px;
+
+  background: #f1f5f9;
+
+  font-size: 17px;
+}
+
+.msd-section-title h2 {
+  margin: 0;
+
+  color: #101c33;
+
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.msd-section-title p {
+  margin: 4px 0 0;
+
+  color: #8492a6;
+
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+/* =========================================================
+   OVERVIEW
+========================================================= */
+
+.msd-overview-text {
+  margin: 20px 0 0;
+
+  color: #3c4c63;
+
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.msd-info-box {
+  margin-top: 18px;
+
+  padding: 13px 15px;
+
+  border: 1px solid #d8e7fb;
+  border-radius: 11px;
+
+  color: #315a82;
+
+  background:
+    linear-gradient(
+      135deg,
+      #f6faff,
+      #eef6ff
+    );
+
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+/* =========================================================
+   STUDY INFO
+========================================================= */
+
+.msd-study-info {
+  margin: 9px 0 0;
+}
+
+.msd-study-info > div {
+  display: grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap: 18px;
+
+  padding: 10px 2px;
+
+  border-bottom:
+    1px solid #edf1f6;
+}
+
+.msd-study-info
+> div:last-child {
+  border-bottom: 0;
+}
+
+.msd-study-info dt {
+  color: #7b8ba1;
+
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.msd-study-info dd {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+
+  margin: 0;
+
+  color: #16233b;
+
+  font-size: 11px;
+  font-weight: 800;
+
+  text-align: right;
+}
+
+.msd-status-dot {
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+
+  background: #22c55e;
+
+  box-shadow:
+    0 0 0 4px
+    rgba(34, 197, 94, 0.11);
+}
+
+/* =========================================================
+   CHART SECTION
+========================================================= */
+
+.msd-chart-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
+
+  gap: 18px;
+  margin-top: 20px;
+}
+
+.msd-chart-grid-single {
+  grid-template-columns:
+    minmax(0, 760px);
+}
+
+.msd-chart-card {
+  overflow: hidden;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+
+  background: #fafcff;
+}
+
+.msd-chart-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 15px;
+
+  padding: 17px;
+}
+
+.msd-chart-label {
+  display: inline-flex;
+
+  padding: 4px 9px;
+
+  border-radius: 999px;
+
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+}
+
+.msd-before-label {
+  color: #1d4ed8;
+  background: #dbeafe;
+}
+
+.msd-after-label {
+  color: #15803d;
+  background: #dcfce7;
+}
+
+.msd-chart-card h3 {
+  margin: 8px 0 3px;
+
+  color: #15233b;
+
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.msd-chart-card small {
+  color: #8b99ab;
+
+  font-size: 10px;
+}
+
+.msd-chart-card-header button {
+  flex: 0 0 auto;
+
+  padding: 8px 11px;
+
+  border: 1px solid #d5e0ef;
+  border-radius: 8px;
+
+  color: #2563eb;
+
+  background: #ffffff;
+
+  font-size: 10px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.msd-chart-card-header
+button:hover {
+  border-color: #2563eb;
+  background: #eff6ff;
+}
+
+.msd-chart-caption {
+  margin: 0;
+
+  padding:
+    0 17px 15px;
+
+  color: #63748b;
+
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.msd-image-button {
+  display: block;
+
+  width: 100%;
+
+  padding: 0;
+
+  border: 0;
+
+  background: transparent;
+
+  cursor: zoom-in;
+}
+
+.msd-image-button img {
+  display: block;
+
+  width: 100%;
+
+  max-height: 440px;
+
+  object-fit: contain;
+
+  background: #ffffff;
+}
+
+/* =========================================================
+   HISTORICAL PRICE REVIEW
+========================================================= */
+
+.msd-price-review {
+  display: grid;
+
+  grid-template-columns:
+    1fr
+    auto
+    1fr
+    auto
+    1fr;
+
+  gap: 18px;
+  align-items: center;
+
+  margin-top: 20px;
+  padding: 20px;
+
+  border: 1px solid #e7edf5;
+  border-radius: 14px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #fbfdff,
+      #f8fbff
+    );
+}
+
+.msd-price-review > div {
+  text-align: center;
+}
+
+.msd-price-review span {
+  display: block;
+
+  color: #78879c;
+
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.msd-price-review strong {
+  display: block;
+
+  margin-top: 6px;
+
+  color: #10203a;
+
+  font-size: 23px;
+  font-weight: 800;
+}
+
+.msd-price-review small {
+  display: block;
+
+  margin-top: 5px;
+
+  color: #94a3b8;
+
+  font-size: 10px;
+}
+
+.msd-arrow {
+  color: #a7b2c2;
+
+  font-size: 22px;
+}
+
+/* =========================================================
+   NOTES
+========================================================= */
+
+.msd-notes {
+  margin-top: 18px;
+
+  color: #405169;
+
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.msd-notes p {
+  margin: 0 0 13px;
+}
+
+.msd-notes p:last-child {
+  margin-bottom: 0;
+}
+
+/* =========================================================
+   DOCUMENT
+========================================================= */
+
+.msd-document-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 18px;
+
+  margin-top: 18px;
+  padding: 17px;
+
+  border: 1px solid #dce6f2;
+  border-radius: 14px;
+
+  color: #0f172a;
+
+  background:
+    linear-gradient(
+      135deg,
+      #fbfdff,
+      #f4f8fd
+    );
+
+  text-decoration: none;
+
+  transition: 0.2s ease;
+}
+
+.msd-document-row:hover {
+  border-color: #aac8f3;
+
+  transform:
+    translateY(-1px);
+}
+
+.msd-document-row > div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.msd-document-row
+> div > span {
+  display: grid;
+  place-items: center;
+
+  width: 40px;
+  height: 40px;
+
+  border-radius: 11px;
+
+  background: #eaf2ff;
+}
+
+.msd-document-row strong,
+.msd-document-row small {
+  display: block;
+}
+
+.msd-document-row strong {
+  font-size: 12px;
+}
+
+.msd-document-row small {
+  margin-top: 4px;
+
+  color: #8794a7;
+
+  font-size: 10px;
+}
+
+.msd-document-row b {
+  color: #2563eb;
+
+  font-size: 11px;
+}
+
+.msd-empty-document {
+  margin-top: 18px;
+
+  padding: 18px;
+
+  border:
+    1px dashed #cbd5e1;
+
+  border-radius: 12px;
+
+  color: #8492a6;
+
+  background: #fafcff;
+
+  font-size: 12px;
+}
+
+/* =========================================================
+   DISCLOSURE
+========================================================= */
+
+.msd-disclaimer {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+
+  margin-top: 18px;
+  padding: 20px;
+
+  border: 1px solid #fed7aa;
+  border-radius: 17px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #fffaf2,
+      #fff7ed
+    );
+}
+
+.msd-disclaimer-icon {
+  display: grid;
+  place-items: center;
+
+  width: 40px;
+  height: 40px;
+
+  flex: 0 0 40px;
+
+  border-radius: 11px;
+
+  background: #ffedd5;
+
+  font-size: 18px;
+}
+
+.msd-disclaimer strong {
+  color: #9a4d16;
+
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.msd-disclaimer p {
+  margin: 6px 0 0;
+
+  color: #765337;
+
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+/* =========================================================
+   POSITIVE / NEGATIVE
+========================================================= */
+
+.msd-positive {
+  color:
+    #16a34a !important;
+}
+
+.msd-negative {
+  color:
+    #dc2626 !important;
+}
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+.msd-state-page {
+  display: grid;
+
+  min-height: 72vh;
+
+  place-items: center;
+
+  padding: 30px;
+
+  background: #f7f9fc;
+
+  text-align: center;
+}
+
+.msd-loader {
+  width: 38px;
+  height: 38px;
+
+  margin: 0 auto 14px;
+
+  border:
+    4px solid #dbeafe;
+
+  border-top-color:
+    #2563eb;
+
+  border-radius: 50%;
+
+  animation:
+    msd-spin
+    0.8s
+    linear
+    infinite;
+}
+
+@keyframes msd-spin {
+  to {
+    transform:
+      rotate(360deg);
+  }
+}
+
+/* =========================================================
+   NOT FOUND
+========================================================= */
+
+.msd-not-found {
+  width:
+    min(
+      440px,
+      100%
+    );
+
+  padding: 34px;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 20px 50px
+    rgba(15, 23, 42, 0.08);
+}
+
+.msd-not-found > span {
+  font-size: 40px;
+}
+
+.msd-not-found h1 {
+  margin: 13px 0 8px;
+
+  color: #0f172a;
+}
+
+.msd-not-found p {
+  color: #64748b;
+
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.msd-primary-button {
+  display: inline-flex;
+
+  margin-top: 12px;
+
+  padding:
+    11px 17px;
+
+  border-radius: 10px;
+
+  color: #ffffff;
+
+  background: #2563eb;
+
+  font-size: 13px;
+  font-weight: 800;
+
+  text-decoration: none;
+}
+
+/* =========================================================
+   CHART MODAL
+========================================================= */
+
+.msd-modal-backdrop {
+  position: fixed;
+  z-index: 9999;
+  inset: 0;
+
+  display: grid;
+  place-items: center;
+
+  padding: 24px;
+
+  background:
+    rgba(2, 6, 23, 0.84);
+
+  backdrop-filter:
+    blur(4px);
+}
+
+.msd-modal {
+  overflow: hidden;
+
+  width:
+    min(
+      1120px,
+      96vw
+    );
+
+  max-height: 90vh;
+
+  border-radius: 18px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 35px 90px
+    rgba(0, 0, 0, 0.28);
+}
+
+.msd-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding:
+    14px 18px;
+
+  border-bottom:
+    1px solid #e2e8f0;
+}
+
+.msd-modal-header h2 {
+  margin: 0;
+
+  color: #10203a;
+
+  font-size: 17px;
+}
+
+.msd-modal-header button {
+  display: grid;
+  place-items: center;
+
+  width: 34px;
+  height: 34px;
+
+  border: 0;
+  border-radius: 8px;
+
+  color: #475569;
+
+  background: #f1f5f9;
+
+  font-size: 24px;
+
+  cursor: pointer;
+}
+
+.msd-modal img {
+  display: block;
+
+  width: 100%;
+
+  max-height:
+    calc(
+      90vh - 63px
+    );
+
+  object-fit: contain;
+
+  background: #ffffff;
+}
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 1020px) {
+
+  .msd-hero {
+    grid-template-columns:
+      minmax(0, 1fr)
+      260px;
+  }
+
+  .msd-metrics {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+  }
+}
+
+/* =========================================================
+   SMALL TABLET
+========================================================= */
+
+@media (max-width: 820px) {
+
+  .msd-hero {
+    grid-template-columns:
+      1fr;
+
+    padding: 26px;
+  }
+
+  .msd-hero-price-card {
+    min-height: auto;
+  }
+
+  .msd-two-column {
+    grid-template-columns:
+      1fr;
+  }
+
+  .msd-chart-grid {
+    grid-template-columns:
+      1fr;
+  }
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 620px) {
+
+  .msd-page {
+    padding:
+      18px 12px 45px;
+  }
+
+  .msd-hero {
+    padding: 22px;
+
+    border-radius: 20px;
+  }
+
+  .msd-badge-row {
+    margin-bottom: 18px;
+  }
+
+  .msd-hero h1 {
+    font-size: 39px;
+  }
+
+  .msd-hero-meta {
+    font-size: 12px;
+  }
+
+  .msd-hero-price-card {
+    padding: 20px;
+  }
+
+  .msd-hero-price-card
+  > strong {
+    font-size: 31px;
+  }
+
+  .msd-metrics {
+    grid-template-columns:
+      1fr;
+  }
+
+  .msd-panel {
+    padding: 18px;
+  }
+
+  .msd-price-review {
+    grid-template-columns:
+      1fr;
+
+    gap: 12px;
+  }
+
+  .msd-arrow {
+    transform:
+      rotate(90deg);
+  }
+
+  .msd-study-info
+  > div {
+    grid-template-columns:
+      1fr;
+
+    gap: 4px;
+  }
+
+  .msd-study-info dd {
+    justify-content:
+      flex-start;
+
+    text-align: left;
+  }
+
+  .msd-chart-card-header {
+    flex-direction: column;
+  }
+
+  .msd-chart-card-header
+  button {
+    width: 100%;
+  }
+
+  .msd-document-row {
+    align-items:
+      flex-start;
+
+    flex-direction:
+      column;
+  }
+
+  .msd-disclaimer {
+    flex-direction:
+      column;
+  }
+}

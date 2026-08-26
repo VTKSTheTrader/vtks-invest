@@ -201,13 +201,13 @@ export default function TradeDetails() {
       setTrade(selected);
     } catch (error) {
       console.error(
-        "Trade details load error:",
+        "Market study load error:",
         error
       );
 
       alert(
         error?.message ||
-          "Failed to load trade details"
+          "Failed to load market study"
       );
 
       setTrade(null);
@@ -572,56 +572,63 @@ export default function TradeDetails() {
       status ===
         "booked profit"
     ) {
-      return "💰 Booked Profit";
+      return "📈 Positive Outcome";
     }
 
     if (
       status ===
         "booked loss"
     ) {
-      return "📉 Booked Loss";
+      return "📉 Negative Outcome";
     }
 
     if (
       status ===
         "breakeven"
     ) {
-      return "⚖️ Breakeven";
+      return "⚖️ Neutral Outcome";
     }
 
     if (
       status ===
         "sl hit"
     ) {
-      return "🛑 SL Hit";
+      return "⚠️ Risk Level Reached";
     }
 
     if (
       status ===
         "target 1 hit"
     ) {
-      return "🎯 Target 1 Hit";
+      return "✓ Study Zone 1 Reached";
     }
 
     if (
       status ===
         "target 2 hit"
     ) {
-      return "🚀 Target 2 Hit";
+      return "✓ Study Zone 2 Reached";
     }
 
     if (
       status ===
         "target 3 hit"
     ) {
-      return "🏆 Target 3 Hit";
+      return "✓ Study Zone 3 Reached";
     }
 
     if (
       status ===
         "active"
     ) {
-      return "🟢 Active";
+      return "🟢 Ongoing Study";
+    }
+
+    if (
+      status ===
+        "cancelled"
+    ) {
+      return "Study Closed";
     }
 
     return formatStatus(
@@ -689,7 +696,7 @@ export default function TradeDetails() {
       visibility ===
         "community"
     ) {
-      return "⭐ Subscriber Study";
+      return "⭐ Member Study";
     }
 
     if (
@@ -712,7 +719,7 @@ export default function TradeDetails() {
         <div className="trade-loader" />
 
         <p>
-          Loading trade details...
+          Loading market study...
         </p>
       </main>
     );
@@ -798,18 +805,18 @@ export default function TradeDetails() {
 
   const roiLabel =
     isLossOutcome
-      ? "Realised Loss"
+      ? "Recorded Change"
       : isProfitOutcome
-        ? "Realised ROI"
+        ? "Recorded Change"
         : status ===
             "breakeven"
-          ? "Realised ROI"
-          : "Live ROI";
+          ? "Recorded Change"
+          : "Price Change";
 
   const priceLabel =
     isRealisedTrade
-      ? "Exit Price"
-      : "Current Market Price";
+      ? "Closing Price"
+      : "Current Price";
 
   const backPath =
     isSubscriberView
@@ -916,7 +923,7 @@ export default function TradeDetails() {
   const metricCards = [
     {
       label:
-        "Entry Price",
+        "Recorded Price",
 
       value:
         formatCurrency(
@@ -950,14 +957,14 @@ export default function TradeDetails() {
 
     {
       label:
-        "Stop Loss",
+        "Risk Level",
 
       value:
         `${formatCurrency(
           trade.stopLoss
         )}${
           stopLossReached
-            ? " 🛑"
+            ? " ⚠️"
             : ""
         }`,
 
@@ -970,14 +977,14 @@ export default function TradeDetails() {
 
     {
       label:
-        "Target 1",
+        "Study Zone 1",
 
       value:
         `${formatCurrency(
           trade.target1
         )}${
           target1Reached
-            ? " ✅"
+            ? " ✓"
             : ""
         }`,
 
@@ -987,14 +994,14 @@ export default function TradeDetails() {
 
     {
       label:
-        "Target 2",
+        "Study Zone 2",
 
       value:
         `${formatCurrency(
           trade.target2
         )}${
           target2Reached
-            ? " 🚀"
+            ? " ✓"
             : ""
         }`,
 
@@ -1034,7 +1041,7 @@ export default function TradeDetails() {
 
     {
       label:
-        "Study Type",
+        "Study Horizon",
 
       value:
         trade.tradeType ||
@@ -1420,7 +1427,7 @@ export default function TradeDetails() {
                       </span>
 
                       <h3>
-                        Initial Analysis
+                        Original Study
                       </h3>
                     </div>
 
@@ -1486,7 +1493,7 @@ export default function TradeDetails() {
                       </span>
 
                       <h3>
-                        Market Outcome
+                        Market Development
                       </h3>
                     </div>
 
@@ -1556,7 +1563,7 @@ export default function TradeDetails() {
 
             <div>
               <h2>
-                Research Report Available
+                Study Document Available
               </h2>
 
               <p>
@@ -1573,7 +1580,7 @@ export default function TradeDetails() {
               rel="noreferrer"
               className="trade-primary-button"
             >
-              View Research PDF
+              View Study PDF
             </a>
 
           </section>

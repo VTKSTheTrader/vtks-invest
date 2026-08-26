@@ -18,42 +18,123 @@ import Pagination from "../common/Pagination";
 const ITEMS_PER_PAGE = 6;
 const AUTO_REFRESH_INTERVAL = 60 * 1000;
 
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
 const normalize = (value) =>
   String(value || "")
     .trim()
     .toLowerCase();
 
+
+const getNumber = (...values) => {
+  for (const value of values) {
+    if (
+      value !== null &&
+      value !== undefined &&
+      value !== ""
+    ) {
+      const number = Number(value);
+
+      if (Number.isFinite(number)) {
+        return number;
+      }
+    }
+  }
+
+  return 0;
+};
+
+
+const formatPrice = (value) => {
+  if (
+    value === null ||
+    value === undefined ||
+    value === ""
+  ) {
+    return "₹—";
+  }
+
+  const number = Number(value);
+
+  if (!Number.isFinite(number)) {
+    return "₹—";
+  }
+
+  return `₹${number.toLocaleString("en-IN", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  })}`;
+};
+
+
+/* =========================================================
+   MAIN COMPONENT
+========================================================= */
+
 export default function FundList() {
   const navigate = useNavigate();
 
-  const [holdings, setHoldings] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState("");
-  const [refreshing, setRefreshing] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState(null);
+  const [holdings, setHoldings] =
+    useState([]);
 
-  const requestInProgressRef = useRef(false);
-  const mountedRef = useRef(true);
+  const [loading, setLoading] =
+    useState(true);
 
-  const [search, setSearch] = useState("");
-  const [sector, setSector] = useState("All");
-  const [visibilityFilter, setVisibilityFilter] =
+  const [loadError, setLoadError] =
+    useState("");
+
+  const [refreshing, setRefreshing] =
+    useState(false);
+
+  const [lastUpdated, setLastUpdated] =
+    useState(null);
+
+  const requestInProgressRef =
+    useRef(false);
+
+  const mountedRef =
+    useRef(true);
+
+  const [search, setSearch] =
+    useState("");
+
+  const [sector, setSector] =
+    useState("All");
+
+  const [
+    visibilityFilter,
+    setVisibilityFilter,
+  ] = useState("all");
+
+  const [statusFilter, setStatusFilter] =
     useState("all");
-  const [status, setStatus] = useState("All");
-  const [roiSort, setRoiSort] = useState("default");
-  const [currentPage, setCurrentPage] = useState(1);
+
+  const [movementSort, setMovementSort] =
+    useState("newest");
+
+  const [currentPage, setCurrentPage] =
+    useState(1);
+
 
   /* =========================================================
      LOAD DATA
   ========================================================= */
 
   const loadFund = useCallback(
-    async ({ showInitialLoader = false } = {}) => {
-      if (requestInProgressRef.current) {
+    async ({
+      showInitialLoader = false,
+    } = {}) => {
+      if (
+        requestInProgressRef.current
+      ) {
         return;
       }
 
-      requestInProgressRef.current = true;
+      requestInProgressRef.current =
+        true;
 
       try {
         if (showInitialLoader) {
@@ -64,35 +145,45 @@ export default function FundList() {
 
         setLoadError("");
 
-        const rows = await getHoldings();
+        const rows =
+          await getHoldings();
 
         if (!mountedRef.current) {
           return;
         }
 
         setHoldings(
-          (rows || []).map(mapHoldingFromDB)
+          (rows || []).map(
+            mapHoldingFromDB
+          )
         );
 
-        setLastUpdated(new Date());
+        setLastUpdated(
+          new Date()
+        );
       } catch (error) {
         console.error(
-          "Public fund load error:",
+          "Public market studies load error:",
           error
         );
 
-        if (!mountedRef.current) {
+        if (
+          !mountedRef.current
+        ) {
           return;
         }
 
         setLoadError(
           error?.message ||
-            "Failed to load portfolio studies."
+            "Failed to load market studies."
         );
       } finally {
-        requestInProgressRef.current = false;
+        requestInProgressRef.current =
+          false;
 
-        if (mountedRef.current) {
+        if (
+          mountedRef.current
+        ) {
           setLoading(false);
           setRefreshing(false);
         }
@@ -100,6 +191,7 @@ export default function FundList() {
     },
     []
   );
+
 
   /* =========================================================
      AUTO REFRESH
@@ -112,24 +204,28 @@ export default function FundList() {
       showInitialLoader: true,
     });
 
-    const intervalId = window.setInterval(
+    const intervalId =
+      window.setInterval(
+        () => {
+          if (
+            document.visibilityState ===
+            "visible"
+          ) {
+            loadFund();
+          }
+        },
+        AUTO_REFRESH_INTERVAL
+      );
+
+    const handleVisibilityChange =
       () => {
         if (
-          document.visibilityState === "visible"
+          document.visibilityState ===
+          "visible"
         ) {
           loadFund();
         }
-      },
-      AUTO_REFRESH_INTERVAL
-    );
-
-    const handleVisibilityChange = () => {
-      if (
-        document.visibilityState === "visible"
-      ) {
-        loadFund();
-      }
-    };
+      };
 
     const handleWindowFocus = () => {
       loadFund();
@@ -148,7 +244,9 @@ export default function FundList() {
     return () => {
       mountedRef.current = false;
 
-      window.clearInterval(intervalId);
+      window.clearInterval(
+        intervalId
+      );
 
       document.removeEventListener(
         "visibilitychange",
@@ -162,412 +260,527 @@ export default function FundList() {
     };
   }, [loadFund]);
 
+
   /* =========================================================
-     STATUS
+     INTERNAL STATUS
+     DB / ADMIN LOGIC REMAINS UNCHANGED
   ========================================================= */
 
-  const getStatus = (holding) => {
-    const manualStatus = String(
-      holding.tradeStatus ||
-        holding.trade_status ||
-        ""
-    ).trim();
+  const getInternalStatus = useCallback(
+    (holding) => {
+      const manualStatus = String(
+        holding.tradeStatus ||
+          holding.trade_status ||
+          ""
+      ).trim();
 
-    if (
-      [
+      if (
+        [
+          "Booked Profit",
+          "Booked Loss",
+          "Breakeven",
+          "Cancelled",
+        ].includes(manualStatus)
+      ) {
+        return manualStatus;
+      }
+
+      const highestPrice = getNumber(
+        holding.highestPrice,
+        holding.highest_price,
+        holding.cmp
+      );
+
+      const lowestPrice = getNumber(
+        holding.lowestPrice,
+        holding.lowest_price,
+        holding.cmp
+      );
+
+      const stopLoss = getNumber(
+        holding.stopLoss,
+        holding.stop_loss
+      );
+
+      const target1 =
+        getNumber(
+          holding.target1
+        );
+
+      const target2 =
+        getNumber(
+          holding.target2
+        );
+
+      const target3 =
+        getNumber(
+          holding.target3
+        );
+
+      if (
+        stopLoss > 0 &&
+        lowestPrice <= stopLoss
+      ) {
+        return "SL Hit";
+      }
+
+      if (
+        target3 > 0 &&
+        highestPrice >= target3
+      ) {
+        return "Target 3 Hit";
+      }
+
+      if (
+        target2 > 0 &&
+        highestPrice >= target2
+      ) {
+        return "Target 2 Hit";
+      }
+
+      if (
+        target1 > 0 &&
+        highestPrice >= target1
+      ) {
+        return "Target 1 Hit";
+      }
+
+      return "Active";
+    },
+    []
+  );
+
+
+  /* =========================================================
+     PUBLIC STATUS
+  ========================================================= */
+
+  const isCompletedStudy =
+    useCallback(
+      (holding) => {
+        const status =
+          getInternalStatus(
+            holding
+          );
+
+        return [
+          "Booked Profit",
+          "Booked Loss",
+          "Breakeven",
+          "SL Hit",
+        ].includes(status);
+      },
+      [getInternalStatus]
+    );
+
+
+  const getPublicStatus =
+    useCallback(
+      (holding) =>
+        isCompletedStudy(holding)
+          ? "Completed"
+          : "Ongoing",
+      [isCompletedStudy]
+    );
+
+
+  /* =========================================================
+     PRICE MOVEMENT
+  ========================================================= */
+
+  const getMovement = useCallback(
+    (holding) => {
+      const referencePrice =
+        getNumber(
+          holding.entry
+        );
+
+      if (
+        referencePrice <= 0
+      ) {
+        return 0;
+      }
+
+      const internalStatus =
+        getInternalStatus(
+          holding
+        );
+
+      const completed = [
         "Booked Profit",
         "Booked Loss",
         "Breakeven",
-        "Cancelled",
-      ].includes(manualStatus)
-    ) {
-      return manualStatus;
-    }
+        "SL Hit",
+      ].includes(
+        internalStatus
+      );
 
-    const highestPrice = Number(
-      holding.highestPrice ??
-        holding.highest_price ??
-        holding.cmp ??
-        0
-    );
-
-    const lowestPrice = Number(
-      holding.lowestPrice ??
-        holding.lowest_price ??
-        holding.cmp ??
-        0
-    );
-
-    const stopLoss = Number(
-      holding.stopLoss ??
-        holding.stop_loss ??
-        0
-    );
-
-    const target1 = Number(
-      holding.target1 || 0
-    );
-
-    const target2 = Number(
-      holding.target2 || 0
-    );
-
-    const target3 = Number(
-      holding.target3 || 0
-    );
-
-    if (
-      stopLoss > 0 &&
-      lowestPrice <= stopLoss
-    ) {
-      return "SL Hit";
-    }
-
-    if (
-      target3 > 0 &&
-      highestPrice >= target3
-    ) {
-      return "Target 3 Hit";
-    }
-
-    if (
-      target2 > 0 &&
-      highestPrice >= target2
-    ) {
-      return "Target 2 Hit";
-    }
-
-    if (
-      target1 > 0 &&
-      highestPrice >= target1
-    ) {
-      return "Target 1 Hit";
-    }
-
-    return "Active";
-  };
-
-  /* =========================================================
-     ROI
-  ========================================================= */
-
-  const getReturn = (holding) => {
-    const entry = Number(
-      holding.entry || 0
-    );
-
-    if (!entry) {
-      return 0;
-    }
-
-    const tradeStatus = getStatus(holding);
-
-    const isRealisedTrade = [
-      "Booked Profit",
-      "Booked Loss",
-      "Breakeven",
-      "SL Hit",
-    ].includes(tradeStatus);
-
-    if (isRealisedTrade) {
-      const savedRealisedReturn =
-        holding.realisedReturn ??
-        holding.realised_return;
-
-      if (
-        savedRealisedReturn !== null &&
-        savedRealisedReturn !== undefined &&
-        savedRealisedReturn !== ""
-      ) {
-        const realisedReturn = Number(
-          savedRealisedReturn
-        );
+      if (completed) {
+        const savedMovement =
+          holding.realisedReturn ??
+          holding.realised_return;
 
         if (
-          Number.isFinite(realisedReturn)
+          savedMovement !== null &&
+          savedMovement !== undefined &&
+          savedMovement !== ""
         ) {
-          return realisedReturn;
+          const movement =
+            Number(
+              savedMovement
+            );
+
+          if (
+            Number.isFinite(
+              movement
+            )
+          ) {
+            return movement;
+          }
         }
-      }
 
-      const savedExitPrice =
-        holding.exitPrice ??
-        holding.exit_price;
-
-      if (
-        savedExitPrice !== null &&
-        savedExitPrice !== undefined &&
-        savedExitPrice !== ""
-      ) {
-        const exitPrice = Number(
-          savedExitPrice
-        );
+        const exitPrice =
+          getNumber(
+            holding.exitPrice,
+            holding.exit_price
+          );
 
         if (
-          Number.isFinite(exitPrice) &&
           exitPrice > 0
         ) {
           return (
-            ((exitPrice - entry) / entry) *
-            100
-          );
+            (
+              exitPrice -
+              referencePrice
+            ) /
+            referencePrice
+          ) * 100;
         }
       }
-    }
 
-    const livePrice = Number(
-      holding.cmp || entry
-    );
+      const currentReference =
+        getNumber(
+          holding.cmp,
+          referencePrice
+        );
 
-    return (
-      ((livePrice - entry) / entry) *
-      100
-    );
-  };
+      return (
+        (
+          currentReference -
+          referencePrice
+        ) /
+        referencePrice
+      ) * 100;
+    },
+    [getInternalStatus]
+  );
+
 
   /* =========================================================
      PUBLIC VISIBILITY
   ========================================================= */
 
-  const visibleHoldings = useMemo(() => {
-    return holdings.filter((holding) => {
-      const visibility = normalize(
-        holding.visibility
-      );
+  const visibleHoldings =
+    useMemo(() => {
+      return holdings.filter(
+        (holding) => {
+          const visibility =
+            normalize(
+              holding.visibility
+            );
 
-      const publishStatus = normalize(
-        holding.publishStatus
-      );
+          const publishStatus =
+            normalize(
+              holding.publishStatus ||
+                holding.publish_status
+            );
 
-      const allowedVisibility = [
-        "public",
-        "subscriber",
-        "community",
-      ].includes(visibility);
+          const allowedVisibility =
+            [
+              "public",
+              "subscriber",
+              "community",
+            ].includes(
+              visibility
+            );
 
-      return (
-        allowedVisibility &&
-        visibility !== "private" &&
-        publishStatus !== "draft" &&
-        holding.accuracyShow !== false &&
-        getStatus(holding) !== "Cancelled"
+          return (
+            allowedVisibility &&
+            visibility !==
+              "private" &&
+            publishStatus !==
+              "draft" &&
+            holding.accuracyShow !==
+              false &&
+            holding.accuracy_show !==
+              false &&
+            getInternalStatus(
+              holding
+            ) !== "Cancelled"
+          );
+        }
       );
-    });
-  }, [holdings]);
+    }, [
+      holdings,
+      getInternalStatus,
+    ]);
+
+
+  /* =========================================================
+     PROTECTED STUDY
+  ========================================================= */
+
+  const isProtectedStudy =
+    useCallback(
+      (holding) => {
+        const visibility =
+          normalize(
+            holding.visibility
+          );
+
+        const subscriberStudy =
+          visibility ===
+            "subscriber" ||
+          visibility ===
+            "community";
+
+        return (
+          subscriberStudy &&
+          Boolean(
+            holding.accuracyBlur ??
+              holding.accuracy_blur
+          )
+        );
+      },
+      []
+    );
+
 
   /* =========================================================
      SECTORS
   ========================================================= */
 
-  const sectors = useMemo(() => {
-    return [
-      "All",
+  const sectors =
+    useMemo(() => {
+      return [
+        "All",
 
-      ...new Set(
-        visibleHoldings
-          .map(
-            (holding) =>
-              holding.sector || "General"
+        ...Array.from(
+          new Set(
+            visibleHoldings
+              .map(
+                (holding) =>
+                  holding.sector ||
+                  "General"
+              )
+              .filter(Boolean)
           )
-          .sort()
-      ),
-    ];
-  }, [visibleHoldings]);
+        ).sort(),
+      ];
+    }, [
+      visibleHoldings,
+    ]);
+
 
   /* =========================================================
      FILTERS
   ========================================================= */
 
-  const filteredHoldings = useMemo(() => {
-    const query = normalize(search);
-
-    return visibleHoldings.filter(
-      (holding) => {
-        const visibility = normalize(
-          holding.visibility
+  const filteredHoldings =
+    useMemo(() => {
+      const query =
+        normalize(
+          search
         );
 
-        const isSubscriberTrade =
-          visibility === "subscriber" ||
-          visibility === "community";
+      return visibleHoldings.filter(
+        (holding) => {
+          const visibility =
+            normalize(
+              holding.visibility
+            );
 
-        const protectedTrade =
-          isSubscriberTrade &&
-          Boolean(holding.accuracyBlur);
+          const protectedStudy =
+            isProtectedStudy(
+              holding
+            );
 
-        const searchableValues =
-          protectedTrade
-            ? [
-                holding.sector,
-                holding.tradeType,
-                getStatus(holding),
-              ]
-            : [
-                holding.stock,
-                holding.sector,
-                holding.tradeType,
-                getStatus(holding),
-              ];
+          const searchableValues =
+            protectedStudy
+              ? [
+                  holding.sector,
+                  holding.tradeType,
+                  holding.trade_type,
+                  getPublicStatus(
+                    holding
+                  ),
+                ]
+              : [
+                  holding.stock,
+                  holding.symbol,
+                  holding.sector,
+                  holding.tradeType,
+                  holding.trade_type,
+                  getPublicStatus(
+                    holding
+                  ),
+                ];
 
-        const matchesSearch =
-          !query ||
-          searchableValues.some((value) =>
-            normalize(value).includes(query)
+          const matchesSearch =
+            !query ||
+            searchableValues.some(
+              (value) =>
+                normalize(
+                  value
+                ).includes(
+                  query
+                )
+            );
+
+          const matchesSector =
+            sector === "All" ||
+            (
+              holding.sector ||
+              "General"
+            ) === sector;
+
+          const matchesVisibility =
+            visibilityFilter ===
+              "all" ||
+            (
+              visibilityFilter ===
+                "public" &&
+              visibility ===
+                "public"
+            ) ||
+            (
+              visibilityFilter ===
+                "protected" &&
+              [
+                "subscriber",
+                "community",
+              ].includes(
+                visibility
+              )
+            );
+
+          const publicStatus =
+            getPublicStatus(
+              holding
+            );
+
+          const matchesStatus =
+            statusFilter ===
+              "all" ||
+            (
+              statusFilter ===
+                "ongoing" &&
+              publicStatus ===
+                "Ongoing"
+            ) ||
+            (
+              statusFilter ===
+                "completed" &&
+              publicStatus ===
+                "Completed"
+            );
+
+          return (
+            matchesSearch &&
+            matchesSector &&
+            matchesVisibility &&
+            matchesStatus
           );
+        }
+      );
+    }, [
+      visibleHoldings,
+      search,
+      sector,
+      visibilityFilter,
+      statusFilter,
+      getPublicStatus,
+      isProtectedStudy,
+    ]);
 
-        const matchesSector =
-          sector === "All" ||
-          (holding.sector || "General") ===
-            sector;
-
-        /* ===============================================
-           VISIBILITY FILTER
-        =============================================== */
-
-        const matchesVisibility =
-          visibilityFilter === "all" ||
-          (
-            visibilityFilter === "public" &&
-            visibility === "public"
-          ) ||
-          (
-            visibilityFilter === "subscriber" &&
-            [
-              "subscriber",
-              "community",
-            ].includes(visibility)
-          );
-
-        const currentStatus =
-          getStatus(holding);
-
-        const exitPrice = Number(
-          holding.exitPrice ??
-            holding.exit_price ??
-            holding.cmp ??
-            0
-        );
-
-        const target1 = Number(
-          holding.target1 || 0
-        );
-
-        const target2 = Number(
-          holding.target2 || 0
-        );
-
-        const target3 = Number(
-          holding.target3 || 0
-        );
-
-        const hasReachedTarget1 =
-          currentStatus === "Target 1 Hit" ||
-          currentStatus === "Target 2 Hit" ||
-          currentStatus === "Target 3 Hit" ||
-          (
-            [
-              "Booked Profit",
-              "Booked Loss",
-              "Breakeven",
-            ].includes(currentStatus) &&
-            target1 > 0 &&
-            exitPrice >= target1
-          );
-
-        const hasReachedTarget2 =
-          currentStatus === "Target 2 Hit" ||
-          currentStatus === "Target 3 Hit" ||
-          (
-            [
-              "Booked Profit",
-              "Booked Loss",
-              "Breakeven",
-            ].includes(currentStatus) &&
-            target2 > 0 &&
-            exitPrice >= target2
-          );
-
-        const hasReachedTarget3 =
-          currentStatus === "Target 3 Hit" ||
-          (
-            [
-              "Booked Profit",
-              "Booked Loss",
-              "Breakeven",
-            ].includes(currentStatus) &&
-            target3 > 0 &&
-            exitPrice >= target3
-          );
-
-        const matchesStatus =
-          status === "All" ||
-          (
-            status === "Target 1 Hit" &&
-            hasReachedTarget1
-          ) ||
-          (
-            status === "Target 2 Hit" &&
-            hasReachedTarget2
-          ) ||
-          (
-            status === "Target 3 Hit" &&
-            hasReachedTarget3
-          ) ||
-          (
-            ![
-              "Target 1 Hit",
-              "Target 2 Hit",
-              "Target 3 Hit",
-            ].includes(status) &&
-            currentStatus === status
-          );
-
-        return (
-          matchesSearch &&
-          matchesSector &&
-          matchesVisibility &&
-          matchesStatus
-        );
-      }
-    );
-  }, [
-    visibleHoldings,
-    search,
-    sector,
-    visibilityFilter,
-    status,
-  ]);
 
   /* =========================================================
      SORT
   ========================================================= */
 
-  const sortedHoldings = useMemo(() => {
-    const rows = [
-      ...filteredHoldings,
-    ];
+  const sortedHoldings =
+    useMemo(() => {
+      const rows = [
+        ...filteredHoldings,
+      ];
 
-    if (roiSort === "high") {
-      rows.sort(
-        (a, b) =>
-          Number(getReturn(b)) -
-          Number(getReturn(a))
-      );
-    }
+      const getTimestamp = (
+        holding
+      ) => {
+        const dateValue =
+          holding.recommendationDate ||
+          holding.recommendation_date ||
+          holding.createdAt ||
+          holding.created_at;
 
-    if (roiSort === "low") {
-      rows.sort(
-        (a, b) =>
-          Number(getReturn(a)) -
-          Number(getReturn(b))
-      );
-    }
+        if (!dateValue) {
+          return 0;
+        }
 
-    return rows;
-  }, [
-    filteredHoldings,
-    roiSort,
-  ]);
+        const timestamp =
+          new Date(
+            dateValue
+          ).getTime();
+
+        return Number.isNaN(
+          timestamp
+        )
+          ? 0
+          : timestamp;
+      };
+
+      if (
+        movementSort ===
+        "movement-high"
+      ) {
+        rows.sort(
+          (a, b) =>
+            getMovement(b) -
+            getMovement(a)
+        );
+      } else if (
+        movementSort ===
+        "movement-low"
+      ) {
+        rows.sort(
+          (a, b) =>
+            getMovement(a) -
+            getMovement(b)
+        );
+      } else if (
+        movementSort ===
+        "oldest"
+      ) {
+        rows.sort(
+          (a, b) =>
+            getTimestamp(a) -
+            getTimestamp(b)
+        );
+      } else {
+        rows.sort(
+          (a, b) =>
+            getTimestamp(b) -
+            getTimestamp(a)
+        );
+      }
+
+      return rows;
+    }, [
+      filteredHoldings,
+      movementSort,
+      getMovement,
+    ]);
+
 
   /* =========================================================
      RESET PAGE
@@ -579,32 +792,39 @@ export default function FundList() {
     search,
     sector,
     visibilityFilter,
-    status,
-    roiSort,
+    statusFilter,
+    movementSort,
   ]);
+
 
   /* =========================================================
      PAGINATION
   ========================================================= */
 
-  const totalPages = Math.max(
-    1,
-    Math.ceil(
-      sortedHoldings.length /
-        ITEMS_PER_PAGE
-    )
-  );
+  const totalPages =
+    Math.max(
+      1,
+      Math.ceil(
+        sortedHoldings.length /
+          ITEMS_PER_PAGE
+      )
+    );
+
 
   useEffect(() => {
     if (
-      currentPage > totalPages
+      currentPage >
+      totalPages
     ) {
-      setCurrentPage(totalPages);
+      setCurrentPage(
+        totalPages
+      );
     }
   }, [
     currentPage,
     totalPages,
   ]);
+
 
   const paginatedHoldings =
     useMemo(() => {
@@ -622,64 +842,51 @@ export default function FundList() {
       currentPage,
     ]);
 
+
   /* =========================================================
      COUNTS
   ========================================================= */
 
-  const activeCount =
+  const ongoingCount =
     visibleHoldings.filter(
       (holding) =>
-        [
-          "Active",
-          "Target 1 Hit",
-          "Target 2 Hit",
-          "Target 3 Hit",
-        ].includes(
-          getStatus(holding)
+        !isCompletedStudy(
+          holding
         )
     ).length;
+
 
   const completedCount =
     visibleHoldings.filter(
-      (holding) =>
-        [
-          "Booked Profit",
-          "Booked Loss",
-          "Breakeven",
-          "SL Hit",
-        ].includes(
-          getStatus(holding)
-        )
+      isCompletedStudy
     ).length;
 
+
   /* =========================================================
-     FORMATTERS
+     UPDATED TIME
   ========================================================= */
 
-  const formatPrice = (value) =>
-    `₹${Number(
-      value || 0
-    ).toLocaleString(
-      "en-IN",
-      {
-        maximumFractionDigits: 2,
+  const formatUpdatedTime =
+    (value) => {
+      if (!value) {
+        return "";
       }
-    )}`;
 
-  const formatUpdatedTime = (value) => {
-    if (!value) {
-      return "";
-    }
+      return value.toLocaleTimeString(
+        "en-IN",
+        {
+          hour:
+            "2-digit",
 
-    return value.toLocaleTimeString(
-      "en-IN",
-      {
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-      }
-    );
-  };
+          minute:
+            "2-digit",
+
+          second:
+            "2-digit",
+        }
+      );
+    };
+
 
   /* =========================================================
      LOADING
@@ -688,10 +895,11 @@ export default function FundList() {
   if (loading) {
     return (
       <p style={loadingStyle}>
-        Loading portfolio studies...
+        Loading market studies...
       </p>
     );
   }
+
 
   /* =========================================================
      ERROR
@@ -703,8 +911,9 @@ export default function FundList() {
   ) {
     return (
       <section style={errorStyle}>
+
         <h3>
-          Unable to load portfolio
+          Unable to load market studies
         </h3>
 
         <p>
@@ -715,16 +924,21 @@ export default function FundList() {
           type="button"
           onClick={() =>
             loadFund({
-              showInitialLoader: true,
+              showInitialLoader:
+                true,
             })
           }
-          style={retryButtonStyle}
+          style={
+            retryButtonStyle
+          }
         >
           Try Again
         </button>
+
       </section>
     );
   }
+
 
   /* =========================================================
      UI
@@ -733,26 +947,33 @@ export default function FundList() {
   return (
     <section style={wrapperStyle}>
 
-      {/* HEADER */}
+      {/* =====================================================
+          HEADER
+      ===================================================== */}
 
       <div style={headerStyle}>
 
         <div>
+
           <h2 style={titleStyle}>
-            Market Case Studies
+            Market Study Archive
           </h2>
 
           <p style={subtitleStyle}>
-            Educational market ideas are publicly
-            available, while member-exclusive
-            analysis details and price levels are
-            released only after official publication.
+            Documented market observations are
+            presented with their original
+            reference structure and subsequent
+            price behaviour for research,
+            review and learning.
           </p>
+
         </div>
 
         <div style={headerActionsStyle}>
+
           <span style={countBadgeStyle}>
-            {sortedHoldings.length} Ideas
+            {visibleHoldings.length}{" "}
+            Documented Studies
           </span>
 
           <button
@@ -760,7 +981,9 @@ export default function FundList() {
             onClick={() =>
               loadFund()
             }
-            disabled={refreshing}
+            disabled={
+              refreshing
+            }
             style={{
               ...refreshButtonStyle,
 
@@ -787,10 +1010,15 @@ export default function FundList() {
                 )}`
               : "Waiting for latest data"}
           </small>
+
         </div>
+
       </div>
 
-      {/* ERROR */}
+
+      {/* =====================================================
+          INLINE ERROR
+      ===================================================== */}
 
       {loadError && (
         <div style={inlineErrorStyle}>
@@ -798,37 +1026,48 @@ export default function FundList() {
         </div>
       )}
 
-      {/* SUMMARY */}
+
+      {/* =====================================================
+          SUMMARY
+      ===================================================== */}
 
       <div style={summaryGridStyle}>
+
         <SummaryCard
           value={
             visibleHoldings.length
           }
-          label="Total Tracked Studies"
+          label="Documented Studies"
         />
 
         <SummaryCard
-          value={activeCount}
-          label="Active Studies"
+          value={
+            ongoingCount
+          }
+          label="Ongoing Studies"
           valueColor="#16a34a"
         />
 
         <SummaryCard
-          value={completedCount}
+          value={
+            completedCount
+          }
           label="Completed Studies"
+          valueColor="#7c3aed"
         />
+
       </div>
 
-      {/* FILTERS */}
+
+      {/* =====================================================
+          FILTERS
+      ===================================================== */}
 
       <div style={filtersStyle}>
 
-        {/* SEARCH */}
-
         <input
           type="search"
-          placeholder="Search stock, sector or study..."
+          placeholder="Search studies, sectors..."
           value={search}
           onChange={(event) =>
             setSearch(
@@ -838,7 +1077,6 @@ export default function FundList() {
           style={inputStyle}
         />
 
-        {/* SECTOR */}
 
         <select
           value={sector}
@@ -849,6 +1087,7 @@ export default function FundList() {
           }
           style={selectStyle}
         >
+
           {sectors.map(
             (item) => (
               <option
@@ -856,17 +1095,19 @@ export default function FundList() {
                 value={item}
               >
                 {item === "All"
-                  ? "🏢 All Sectors"
+                  ? "All Sectors"
                   : item}
               </option>
             )
           )}
+
         </select>
 
-        {/* VISIBILITY */}
 
         <select
-          value={visibilityFilter}
+          value={
+            visibilityFilter
+          }
           onChange={(event) =>
             setVisibilityFilter(
               event.target.value
@@ -874,220 +1115,211 @@ export default function FundList() {
           }
           style={selectStyle}
         >
+
           <option value="all">
-            👁 All Studies
+            All Access
           </option>
 
           <option value="public">
-            🌐 Public Studies
+            Published Studies
           </option>
 
-          <option value="subscriber">
-            🔒 Subscriber Studies
+          <option value="protected">
+            Members-Only Studies
           </option>
+
         </select>
 
-        {/* STATUS */}
 
         <select
-          value={status}
+          value={
+            statusFilter
+          }
           onChange={(event) =>
-            setStatus(
+            setStatusFilter(
               event.target.value
             )
           }
           style={selectStyle}
         >
-          <option value="All">
-            📌 All Status
+
+          <option value="all">
+            All Status
           </option>
 
-          <option value="Active">
-            Active
+          <option value="ongoing">
+            Ongoing
           </option>
 
-          <option value="Target 1 Hit">
-            Target 1 Hit
+          <option value="completed">
+            Completed
           </option>
 
-          <option value="Target 2 Hit">
-            Target 2 Hit
-          </option>
-
-          <option value="Target 3 Hit">
-            Target 3 Hit
-          </option>
-
-          <option value="Booked Profit">
-            Booked Profit
-          </option>
-
-          <option value="Booked Loss">
-            Booked Loss
-          </option>
-
-          <option value="Breakeven">
-            Breakeven
-          </option>
-
-          <option value="SL Hit">
-            SL Hit
-          </option>
         </select>
 
-        {/* ROI */}
 
         <select
-          value={roiSort}
+          value={
+            movementSort
+          }
           onChange={(event) =>
-            setRoiSort(
+            setMovementSort(
               event.target.value
             )
           }
           style={selectStyle}
         >
-          <option value="default">
-            📈 Sort by ROI
+
+          <option value="newest">
+            Newest First
           </option>
 
-          <option value="high">
-            📈 ROI High → Low
+          <option value="oldest">
+            Oldest First
           </option>
 
-          <option value="low">
-            📉 ROI Low → High
+          <option value="movement-high">
+            Movement High → Low
           </option>
+
+          <option value="movement-low">
+            Movement Low → High
+          </option>
+
         </select>
+
       </div>
 
-      {/* STUDIES */}
 
-      {sortedHoldings.length === 0 ? (
+      {/* =====================================================
+          STUDIES
+      ===================================================== */}
+
+      {sortedHoldings.length ===
+      0 ? (
         <div style={emptyStateStyle}>
+
           <h3>
-            No portfolio studies found
+            No studies found
           </h3>
 
           <p>
-            No study matches the selected filters.
+            No market study matches the
+            selected filters.
           </p>
+
         </div>
       ) : (
         <>
+
           <div style={cardsGridStyle}>
+
             {paginatedHoldings.map(
               (holding) => (
-                <PortfolioCard
-                  key={holding.id}
-                  holding={holding}
-                  status={getStatus(
+                <MarketStudyCard
+                  key={
+                    holding.id
+                  }
+                  holding={
+                    holding
+                  }
+                  protectedStudy={isProtectedStudy(
                     holding
                   )}
-                  roi={getReturn(
+                  publicStatus={getPublicStatus(
                     holding
                   )}
-                  formatPrice={
-                    formatPrice
-                  }
-                  onViewTrade={() =>
-                    navigate(
-                      `/trade/${holding.id}`
-                    )
-                  }
+                  movement={getMovement(
+                    holding
+                  )}
+                  onViewStudy={() =>
+  navigate(
+    `/market-study/${holding.id}`
+  )
+}
                 />
               )
             )}
+
           </div>
 
-          <Pagination
-            currentPage={
-              currentPage
-            }
-            totalPages={
-              totalPages
-            }
-            onPageChange={
-              setCurrentPage
-            }
-          />
 
-          {/* DISCLOSURE */}
+          <div style={paginationWrapStyle}>
 
-          <section
-            style={
-              learningDisclosureStyle
-            }
-          >
-            <div
-              style={
-                learningDisclosureIconStyle
+            <Pagination
+              currentPage={
+                currentPage
               }
-            >
+              totalPages={
+                totalPages
+              }
+              onPageChange={
+                setCurrentPage
+              }
+            />
+
+          </div>
+
+
+          {/* =================================================
+              EDUCATIONAL / DISCLOSURE
+          ================================================= */}
+
+          <section style={learningDisclosureStyle}>
+
+            <div style={learningDisclosureIconStyle}>
               🎓
             </div>
 
-            <div
-              style={
-                learningDisclosureContentStyle
-              }
-            >
-              <h2
-                style={
-                  learningDisclosureTitleStyle
-                }
-              >
+            <div style={learningDisclosureContentStyle}>
+
+              <h2 style={learningDisclosureTitleStyle}>
                 Learn Before You Invest
               </h2>
 
-              <p
-                style={
-                  learningDisclosureTextStyle
-                }
-              >
-                Every market study published on VTKS
-                is intended to help you understand
-                market structure, disciplined
-                decision-making, and risk management
-                through real-world examples. Our
-                objective is to help you build
-                knowledge and confidence—not encourage
-                blind trade execution.
+              <p style={learningDisclosureTextStyle}>
+                Market studies published on VTKS
+                are intended to help users
+                understand market structure,
+                documented reference levels,
+                disciplined decision-making and
+                risk management through
+                historical examples.
               </p>
 
-              <p
-                style={
-                  learningDisclosureTextStyle
-                }
-              >
-                The content on this platform is shared
-                solely for educational and research
-                purposes. It should not be considered
+              <p style={learningDisclosureTextStyle}>
+                Information displayed on this
+                platform is provided solely for
+                educational and research purposes.
+                It should not be construed as
                 investment advice, a buy or sell
-                recommendation, or a guarantee of
-                future returns. Always perform your own
-                research and manage risk according to
-                your financial goals and risk
-                tolerance.
+                recommendation, personalised
+                advice, solicitation or an
+                assurance of future performance.
               </p>
 
-              <p
-                style={
-                  learningDisclosureTextStyle
-                }
-              >
-                VTKS believes that consistent learning,
-                disciplined execution and risk
-                management are more valuable than
-                blindly following any single market
-                idea.
+              <p style={learningDisclosureTextStyle}>
+                Investments in securities markets
+                are subject to market risks.
+                Historical price movement and past
+                study outcomes do not guarantee
+                future results. Users should
+                conduct their own research and
+                independently evaluate risk before
+                making investment decisions.
               </p>
+
             </div>
+
           </section>
+
         </>
       )}
+
     </section>
   );
 }
+
 
 /* =========================================================
    SUMMARY CARD
@@ -1100,10 +1332,12 @@ function SummaryCard({
 }) {
   return (
     <div style={summaryCardStyle}>
+
       <h3
         style={{
           ...summaryValueStyle,
-          color: valueColor,
+          color:
+            valueColor,
         }}
       >
         {value}
@@ -1112,772 +1346,1728 @@ function SummaryCard({
       <p style={summaryLabelStyle}>
         {label}
       </p>
+
     </div>
   );
 }
 
+
 /* =========================================================
-   PORTFOLIO CARD
+   MARKET STUDY CARD
 ========================================================= */
 
-function PortfolioCard({
+function MarketStudyCard({
   holding,
-  status,
-  roi,
-  formatPrice,
-  onViewTrade,
+  protectedStudy,
+  publicStatus,
+  movement,
+  onViewStudy,
 }) {
-  const visibility = normalize(
-    holding.visibility
-  );
-
-  const isSubscriberTrade =
-    visibility === "subscriber" ||
-    visibility === "community";
-
-  const protectedTrade =
-    isSubscriberTrade &&
-    Boolean(
-      holding.accuracyBlur
+  const visibility =
+    normalize(
+      holding.visibility
     );
 
-  const isRealisedTrade = [
-    "Booked Profit",
-    "Booked Loss",
-    "Breakeven",
-    "SL Hit",
-  ].includes(status);
+  const memberStudy =
+    [
+      "subscriber",
+      "community",
+    ].includes(
+      visibility
+    );
+
+  const completed =
+    publicStatus ===
+    "Completed";
 
   const savedExitPrice =
-    holding.exitPrice ??
-    holding.exit_price;
+    getNumber(
+      holding.exitPrice,
+      holding.exit_price
+    );
 
-  const displayPrice =
-    isRealisedTrade &&
-    savedExitPrice
+  const referencePrice =
+    getNumber(
+      holding.entry
+    );
+
+  const currentReference =
+    completed &&
+    savedExitPrice > 0
       ? savedExitPrice
-      : holding.cmp;
+      : getNumber(
+          holding.cmp
+        );
 
-  const displayPriceLabel =
-    isRealisedTrade
-      ? "Exit Price"
-      : "Live CMP";
-
-  const returnLabel =
-    isRealisedTrade
-      ? status === "Booked Loss" ||
-        status === "SL Hit"
-        ? "Realised Loss"
-        : "Realised ROI"
-      : "Live ROI";
-
-  /* =====================================================
-     TARGET DISPLAY LOGIC
-  ====================================================== */
-
-  const referencePrice = Number(
-    isRealisedTrade
-      ? savedExitPrice ||
-          displayPrice ||
-          0
-      : holding.highestPrice ??
-          holding.highest_price ??
-          holding.cmp ??
-          0
-  );
-
-  const target1 = Number(
-    holding.target1 || 0
-  );
-
-  const target2 = Number(
-    holding.target2 || 0
-  );
-
-  const target1Hit =
-    target1 > 0 &&
-    (
-      referencePrice >= target1 ||
-      [
-        "Target 1 Hit",
-        "Target 2 Hit",
-        "Target 3 Hit",
-      ].includes(status)
+  const invalidation =
+    getNumber(
+      holding.stopLoss,
+      holding.stop_loss
     );
 
-  const target2Hit =
-    target2 > 0 &&
-    (
-      referencePrice >= target2 ||
-      [
-        "Target 2 Hit",
-        "Target 3 Hit",
-      ].includes(status)
+  const zone1 =
+    getNumber(
+      holding.target1
     );
 
-  /* =====================================================
-     PROTECTED VALUE
-  ====================================================== */
-
-  const protectedValue = (value) => {
-    if (!protectedTrade) {
-      return value;
-    }
-
-    return (
-      <span
-        style={blurredValueStyle}
-        title="Subscriber study details are protected"
-      >
-        {value}
-      </span>
+  const zone2 =
+    getNumber(
+      holding.target2
     );
-  };
 
-  const handleViewTrade = () => {
-    if (protectedTrade) {
-      return;
-    }
+  const sector =
+    holding.sector ||
+    "General";
 
-    onViewTrade?.();
-  };
+  const studyType =
+    holding.tradeType ||
+    holding.trade_type ||
+    "Swing";
 
-  /* =====================================================
-     CARD
-  ====================================================== */
+
+  const protectedValue = (
+    <span style={protectedDotsStyle}>
+      🔒 •••••
+    </span>
+  );
+
 
   return (
-    <article style={portfolioCardStyle}>
+    <article style={studyCardStyle}>
 
-      {/* TOP */}
+      {/* =====================================================
+          CARD HEADER
+      ===================================================== */}
 
-      <div style={cardTopRowStyle}>
+      <div style={studyCardTopStyle}>
 
-        <span
-          style={
-            protectedTrade
-              ? subscriberBadgeStyle
-              : publicBadgeStyle
-          }
-        >
-          {protectedTrade
-            ? "🔒 Members-Only Market Study"
-            : isSubscriberTrade
-              ? "🌐 Featured Member Study"
-              : "🌐 Published Market Study"}
-        </span>
+        <div>
 
-        <StatusBadge
-          status={status}
-        />
-      </div>
-
-      {/* STOCK */}
-
-      <h2 style={stockNameStyle}>
-        {protectedValue(
-          holding.stock ||
-            "VTKS Study"
-        )}
-      </h2>
-
-      <p style={sectorTextStyle}>
-        {holding.sector ||
-          "General"}
-      </p>
-
-      {/* DETAILS */}
-
-      <div style={detailsGridStyle}>
-
-        <Detail
-          label="Entry"
-          value={protectedValue(
-            formatPrice(
-              holding.entry
-            )
-          )}
-        />
-
-        <Detail
-          label={
-            displayPriceLabel
-          }
-          value={protectedValue(
-            displayPrice
-              ? formatPrice(
-                  displayPrice
-                )
-              : "₹—"
-          )}
-        />
-
-        <Detail
-          label={returnLabel}
-          value={protectedValue(
-            <strong
-              style={{
-                color:
-                  roi > 0
-                    ? "#16a34a"
-                    : roi < 0
-                      ? "#dc2626"
-                      : "#64748b",
-              }}
-            >
-              {roi > 0
-                ? "+"
-                : ""}
-
-              {Number(
-                roi || 0
-              ).toFixed(2)}
-              %
-            </strong>
-          )}
-        />
-
-        {/* TARGET 1 */}
-
-        <Detail
-          label="Target 1"
-          value={protectedValue(
-            holding.target1 ? (
-              <>
-                {formatPrice(
-                  holding.target1
-                )}
-
-                {target1Hit && (
-                  <span
-                    style={{
-                      marginLeft: "6px",
-                      fontSize: "16px",
-                    }}
-                  >
-                    ✅
-                  </span>
-                )}
-              </>
-            ) : (
-              "₹—"
-            )
-          )}
-        />
-
-        {/* TARGET 2 */}
-
-        <Detail
-          label="Target 2"
-          value={protectedValue(
-            holding.target2 ? (
-              <>
-                {formatPrice(
-                  holding.target2
-                )}
-
-                {target2Hit && (
-                  <span
-                    style={{
-                      marginLeft: "6px",
-                      fontSize: "16px",
-                    }}
-                  >
-                    ✅
-                  </span>
-                )}
-              </>
-            ) : (
-              "₹—"
-            )
-          )}
-        />
-
-        {/* STOP LOSS */}
-
-        <Detail
-          label="Stop Loss"
-          value={protectedValue(
-            holding.stopLoss
-              ? formatPrice(
-                  holding.stopLoss
-                )
-              : "₹—"
-          )}
-        />
-      </div>
-
-      {/* FOOTER */}
-
-      <div style={cardFooterStyle}>
-
-        <span style={tradeTypeStyle}>
-          {holding.tradeType ||
-            "Swing"}
-        </span>
-
-        {protectedTrade ? (
           <span
             style={
-              protectedNoticeStyle
+              protectedStudy
+                ? memberBadgeStyle
+                : publishedBadgeStyle
             }
           >
-            🔒 Details protected
+            {protectedStudy
+              ? "🔒 Members-Only Study"
+              : memberStudy
+                ? "🌐 Published Study"
+                : "🌐 Published Study"}
+          </span>
+
+        </div>
+
+        <PublicStatusBadge
+          status={
+            publicStatus
+          }
+        />
+
+      </div>
+
+
+      {/* =====================================================
+          IDENTITY
+      ===================================================== */}
+
+      <div style={studyIdentityStyle}>
+
+        <div
+          style={
+            protectedStudy
+              ? protectedStudyIconStyle
+              : publicStudyIconStyle
+          }
+        >
+          {protectedStudy
+            ? "🔒"
+            : "◎"}
+        </div>
+
+        <div style={{ minWidth: 0 }}>
+
+          <h2 style={studyNameStyle}>
+            {protectedStudy
+              ? "Protected Market Study"
+              : holding.stock ||
+                holding.symbol ||
+                "Market Study"}
+          </h2>
+
+          <div style={studyMetaStyle}>
+
+            <span>
+              {sector}
+            </span>
+
+            <span style={metaDotStyle}>
+              •
+            </span>
+
+            <span>
+              {studyType}
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      {/* =====================================================
+          SUMMARY VALUES
+      ===================================================== */}
+
+      <div style={studyValuesGridStyle}>
+
+        <StudyValue
+          label="Reference Price"
+          value={
+            protectedStudy
+              ? protectedValue
+              : formatPrice(
+                  referencePrice
+                )
+          }
+        />
+
+        <StudyValue
+          label={
+            completed
+              ? "Closing Reference"
+              : "Current Reference"
+          }
+          value={
+            protectedStudy
+              ? protectedValue
+              : formatPrice(
+                  currentReference
+                )
+          }
+        />
+
+        <StudyValue
+          label="Price Movement"
+          value={
+            protectedStudy ? (
+              protectedValue
+            ) : (
+              <span
+                style={{
+                  color:
+                    movement > 0
+                      ? "#16a34a"
+                      : movement < 0
+                        ? "#dc2626"
+                        : "#64748b",
+
+                  fontWeight:
+                    900,
+                }}
+              >
+                {movement > 0
+                  ? "+"
+                  : ""}
+
+                {Number(
+                  movement || 0
+                ).toFixed(
+                  2
+                )}
+                %
+              </span>
+            )
+          }
+        />
+
+      </div>
+
+
+      {/* =====================================================
+          DOCUMENTED REFERENCE STRUCTURE
+      ===================================================== */}
+
+      <div style={referencePanelStyle}>
+
+        <p style={referencePanelTitleStyle}>
+          DOCUMENTED REFERENCE STRUCTURE
+        </p>
+
+        {protectedStudy ? (
+          <ProtectedReferenceStructure />
+        ) : (
+          <ReferenceStructure
+            invalidation={
+              invalidation
+            }
+            reference={
+              referencePrice
+            }
+            zone1={
+              zone1
+            }
+            zone2={
+              zone2
+            }
+          />
+        )}
+
+      </div>
+
+
+      {/* =====================================================
+          CARD FOOTER
+      ===================================================== */}
+
+      <div style={studyCardFooterStyle}>
+
+        <span style={studyTypeBadgeStyle}>
+          {studyType}
+        </span>
+
+        {protectedStudy ? (
+          <span style={protectedNoticeStyle}>
+            🔒 Study details protected
           </span>
         ) : (
           <button
             type="button"
             onClick={
-              handleViewTrade
+              onViewStudy
             }
-            style={
-              viewTradeButtonStyle
-            }
+            style={viewStudyButtonStyle}
           >
-            View Analysis →
+            View Study →
           </button>
         )}
+
       </div>
+
     </article>
   );
 }
 
+
 /* =========================================================
-   DETAIL
+   STUDY VALUE
 ========================================================= */
 
-function Detail({
+function StudyValue({
   label,
   value,
 }) {
   return (
-    <div>
-      <span
-        style={
-          detailLabelStyle
-        }
-      >
+    <div style={studyValueStyle}>
+
+      <span style={studyValueLabelStyle}>
         {label}
       </span>
 
-      <div
-        style={
-          detailValueStyle
-        }
-      >
+      <div style={studyValueNumberStyle}>
         {value}
       </div>
+
     </div>
   );
 }
 
+
 /* =========================================================
-   STATUS BADGE
+   PUBLIC STATUS
 ========================================================= */
 
-function StatusBadge({
+function PublicStatusBadge({
   status,
 }) {
-  const statusStyles = {
-    Active: {
-      background: "#dcfce7",
-      color: "#166534",
-    },
-
-    "Target 1 Hit": {
-      background: "#dbeafe",
-      color: "#1d4ed8",
-    },
-
-    "Target 2 Hit": {
-      background: "#dbeafe",
-      color: "#1d4ed8",
-    },
-
-    "Target 3 Hit": {
-      background: "#dcfce7",
-      color: "#166534",
-    },
-
-    "Booked Profit": {
-      background: "#dcfce7",
-      color: "#166534",
-    },
-
-    "Booked Loss": {
-      background: "#fee2e2",
-      color: "#991b1b",
-    },
-
-    Breakeven: {
-      background: "#f1f5f9",
-      color: "#475569",
-    },
-
-    "SL Hit": {
-      background: "#fee2e2",
-      color: "#991b1b",
-    },
-  };
-
-  const style =
-    statusStyles[status] ||
-    statusStyles.Active;
+  const completed =
+    status ===
+    "Completed";
 
   return (
     <span
       style={{
-        ...statusBadgeBaseStyle,
-        ...style,
+        ...publicStatusBaseStyle,
+
+        background:
+          completed
+            ? "#dbeafe"
+            : "#dcfce7",
+
+        color:
+          completed
+            ? "#1d4ed8"
+            : "#166534",
       }}
     >
+      <span
+        style={{
+          width:
+            "7px",
+
+          height:
+            "7px",
+
+          borderRadius:
+            "50%",
+
+          background:
+            completed
+              ? "#2563eb"
+              : "#16a34a",
+
+          display:
+            "inline-block",
+
+          marginRight:
+            "6px",
+        }}
+      />
+
       {status}
     </span>
   );
 }
+
+
+/* =========================================================
+   REFERENCE STRUCTURE
+========================================================= */
+
+function ReferenceStructure({
+  invalidation,
+  reference,
+  zone1,
+  zone2,
+}) {
+  const points = [
+    {
+      label:
+        "Invalidation",
+
+      value:
+        invalidation,
+
+      color:
+        "#ef4444",
+    },
+
+    {
+      label:
+        "Reference",
+
+      value:
+        reference,
+
+      color:
+        "#2563eb",
+    },
+
+    {
+      label:
+        "Zone 1",
+
+      value:
+        zone1,
+
+      color:
+        "#16a34a",
+    },
+
+    {
+      label:
+        "Zone 2",
+
+      value:
+        zone2,
+
+      color:
+        "#059669",
+    },
+  ];
+
+  return (
+    <div style={referenceStructureStyle}>
+
+      <div style={referenceLineStyle} />
+
+      {points.map(
+        (point) => (
+          <div
+            key={
+              point.label
+            }
+            style={referencePointStyle}
+          >
+
+            <span
+              style={{
+                ...referencePointDotStyle,
+
+                background:
+                  point.color,
+              }}
+            />
+
+            <strong style={referencePriceStyle}>
+              {formatPrice(
+                point.value
+              )}
+            </strong>
+
+            <small style={referenceLabelStyle}>
+              {point.label}
+            </small>
+
+          </div>
+        )
+      )}
+
+    </div>
+  );
+}
+
+
+/* =========================================================
+   PROTECTED REFERENCE STRUCTURE
+========================================================= */
+
+function ProtectedReferenceStructure() {
+  const points = [
+    "Invalidation",
+    "Reference",
+    "Zone 1",
+    "Zone 2",
+  ];
+
+  return (
+    <div style={protectedStructureStyle}>
+
+      {points.map(
+        (label) => (
+          <div
+            key={
+              label
+            }
+            style={protectedReferencePointStyle}
+          >
+
+            <span style={protectedReferenceLockStyle}>
+              🔒
+            </span>
+
+            <strong style={protectedReferenceDotsStyle}>
+              •••••
+            </strong>
+
+            <small style={referenceLabelStyle}>
+              {label}
+            </small>
+
+          </div>
+        )
+      )}
+
+    </div>
+  );
+}
+
 
 /* =========================================================
    STYLES
 ========================================================= */
 
 const loadingStyle = {
-  textAlign: "center",
-  padding: "50px",
-  color: "#64748b",
+  textAlign:
+    "center",
+
+  padding:
+    "50px",
+
+  color:
+    "#64748b",
 };
+
 
 const errorStyle = {
-  maxWidth: "700px",
-  margin: "40px auto",
-  padding: "35px",
-  borderRadius: "20px",
-  background: "#ffffff",
-  textAlign: "center",
-  color: "#64748b",
+  maxWidth:
+    "700px",
+
+  margin:
+    "40px auto",
+
+  padding:
+    "35px",
+
+  borderRadius:
+    "20px",
+
+  background:
+    "#ffffff",
+
+  textAlign:
+    "center",
+
+  color:
+    "#64748b",
 };
+
 
 const retryButtonStyle = {
-  marginTop: "12px",
-  border: "none",
-  borderRadius: "10px",
-  padding: "11px 18px",
-  background: "#2563eb",
-  color: "#ffffff",
-  fontWeight: 800,
-  cursor: "pointer",
+  marginTop:
+    "12px",
+
+  border:
+    "none",
+
+  borderRadius:
+    "10px",
+
+  padding:
+    "11px 18px",
+
+  background:
+    "#2563eb",
+
+  color:
+    "#ffffff",
+
+  fontWeight:
+    800,
+
+  cursor:
+    "pointer",
 };
+
 
 const wrapperStyle = {
-  width: "100%",
-  maxWidth: "1280px",
-  margin: "0 auto",
-  padding: "clamp(16px, 3vw, 30px)",
-  borderRadius: "26px",
-  background: "#ffffff",
+  width:
+    "100%",
+
+  maxWidth:
+    "1500px",
+
+  margin:
+    "0 auto",
+
+  padding:
+    "clamp(18px, 2.5vw, 30px)",
+
+  borderRadius:
+    "24px",
+
+  background:
+    "#ffffff",
+
   boxShadow:
-    "0 15px 40px rgba(15,23,42,.06)",
-  boxSizing: "border-box",
+    "0 15px 40px rgba(15,23,42,.055)",
+
+  boxSizing:
+    "border-box",
 };
+
 
 const headerStyle = {
-  display: "flex",
-  alignItems: "flex-start",
-  justifyContent: "space-between",
-  gap: "20px",
-  marginBottom: "24px",
-  flexWrap: "wrap",
+  display:
+    "flex",
+
+  alignItems:
+    "flex-start",
+
+  justifyContent:
+    "space-between",
+
+  gap:
+    "24px",
+
+  marginBottom:
+    "22px",
+
+  flexWrap:
+    "wrap",
 };
+
 
 const headerActionsStyle = {
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "flex-end",
-  gap: "9px",
-  minWidth: 0,
+  display:
+    "flex",
+
+  flexDirection:
+    "column",
+
+  alignItems:
+    "flex-end",
+
+  gap:
+    "8px",
+
+  minWidth:
+    0,
 };
+
 
 const titleStyle = {
-  margin: "0 0 8px",
-  color: "#0f172a",
-  fontSize: "32px",
+  margin:
+    "0 0 7px",
+
+  color:
+    "#071a3d",
+
+  fontSize:
+    "clamp(25px, 2vw, 32px)",
+
+  lineHeight:
+    1.15,
+
+  fontWeight:
+    800,
 };
+
 
 const subtitleStyle = {
-  maxWidth: "760px",
-  margin: 0,
-  color: "#64748b",
-  lineHeight: 1.7,
+  maxWidth:
+    "820px",
+
+  margin:
+    0,
+
+  color:
+    "#64748b",
+
+  fontSize:
+    "14px",
+
+  lineHeight:
+    1.65,
+
+  fontWeight:
+    500,
 };
+
 
 const countBadgeStyle = {
-  flexShrink: 0,
-  padding: "9px 15px",
-  borderRadius: "999px",
-  background: "#dbeafe",
-  color: "#1e40af",
-  fontSize: "13px",
-  fontWeight: 800,
+  flexShrink:
+    0,
+
+  padding:
+    "8px 14px",
+
+  borderRadius:
+    "999px",
+
+  background:
+    "#eaf2ff",
+
+  color:
+    "#1e40af",
+
+  fontSize:
+    "12px",
+
+  fontWeight:
+    800,
 };
+
 
 const refreshButtonStyle = {
-  border: "1px solid #2563eb",
-  borderRadius: "10px",
-  padding: "10px 15px",
-  background: "#ffffff",
-  color: "#2563eb",
-  fontSize: "13px",
-  fontWeight: 800,
+  border:
+    "1px solid #2563eb",
+
+  borderRadius:
+    "9px",
+
+  padding:
+    "10px 15px",
+
+  background:
+    "#ffffff",
+
+  color:
+    "#2563eb",
+
+  fontSize:
+    "12px",
+
+  fontWeight:
+    800,
 };
+
 
 const updatedTextStyle = {
-  color: "#64748b",
-  fontSize: "12px",
+  color:
+    "#64748b",
+
+  fontSize:
+    "10px",
 };
+
 
 const inlineErrorStyle = {
-  marginBottom: "18px",
-  padding: "12px 14px",
-  borderRadius: "10px",
-  background: "#fee2e2",
-  color: "#991b1b",
-  fontSize: "13px",
-  fontWeight: 700,
+  marginBottom:
+    "18px",
+
+  padding:
+    "12px 14px",
+
+  borderRadius:
+    "10px",
+
+  background:
+    "#fee2e2",
+
+  color:
+    "#991b1b",
+
+  fontSize:
+    "12px",
+
+  fontWeight:
+    700,
 };
+
+
+/* =========================================================
+   SUMMARY
+========================================================= */
 
 const summaryGridStyle = {
-  display: "grid",
+  display:
+    "grid",
+
   gridTemplateColumns:
     "repeat(auto-fit, minmax(190px, 1fr))",
-  gap: "16px",
-  marginBottom: "24px",
+
+  gap:
+    "14px",
+
+  marginBottom:
+    "22px",
 };
+
 
 const summaryCardStyle = {
-  padding: "20px",
-  border: "1px solid #e2e8f0",
-  borderRadius: "18px",
-  background: "#f8fafc",
+  padding:
+    "18px 20px",
+
+  border:
+    "1px solid #dbe5f0",
+
+  borderRadius:
+    "14px",
+
+  background:
+    "#f8fafc",
 };
+
 
 const summaryValueStyle = {
-  margin: "0 0 5px",
-  fontSize: "28px",
+  margin:
+    "0 0 5px",
+
+  fontSize:
+    "26px",
+
+  fontWeight:
+    800,
 };
+
 
 const summaryLabelStyle = {
-  margin: 0,
-  color: "#64748b",
+  margin:
+    0,
+
+  color:
+    "#64748b",
+
+  fontSize:
+    "13px",
+
+  fontWeight:
+    600,
 };
+
+
+/* =========================================================
+   FILTERS
+========================================================= */
 
 const filtersStyle = {
-  display: "flex",
-  flexWrap: "wrap",
-  gap: "14px",
-  marginBottom: "28px",
+  display:
+    "grid",
+
+  gridTemplateColumns:
+    "minmax(220px, 1.4fr) repeat(4, minmax(150px, 1fr))",
+
+  gap:
+    "10px",
+
+  marginBottom:
+    "24px",
 };
+
 
 const inputStyle = {
-  flex: "1 1 260px",
-  width: "100%",
-  minWidth: 0,
-  padding: "13px 15px",
-  border: "1px solid #d1d5db",
-  borderRadius: "12px",
-  boxSizing: "border-box",
+  width:
+    "100%",
+
+  minWidth:
+    0,
+
+  height:
+    "44px",
+
+  padding:
+    "0 14px",
+
+  border:
+    "1px solid #cbd5e1",
+
+  borderRadius:
+    "10px",
+
+  background:
+    "#ffffff",
+
+  color:
+    "#0f172a",
+
+  boxSizing:
+    "border-box",
+
+  fontSize:
+    "12px",
 };
+
 
 const selectStyle = {
-  flex: "1 1 180px",
-  width: "100%",
-  minWidth: 0,
-  padding: "13px 15px",
-  border: "1px solid #d1d5db",
-  borderRadius: "12px",
-  background: "#ffffff",
-  boxSizing: "border-box",
+  width:
+    "100%",
+
+  minWidth:
+    0,
+
+  height:
+    "44px",
+
+  padding:
+    "0 12px",
+
+  border:
+    "1px solid #cbd5e1",
+
+  borderRadius:
+    "10px",
+
+  background:
+    "#ffffff",
+
+  color:
+    "#0f172a",
+
+  boxSizing:
+    "border-box",
+
+  fontSize:
+    "12px",
+
+  fontWeight:
+    600,
 };
+
+
+/* =========================================================
+   CARDS GRID
+========================================================= */
 
 const cardsGridStyle = {
-  display: "grid",
+  display:
+    "grid",
+
   gridTemplateColumns:
-    "repeat(auto-fit, minmax(min(100%, 310px), 1fr))",
-  gap: "22px",
+    "repeat(auto-fit, minmax(min(100%, 440px), 1fr))",
+
+  gap:
+    "18px",
 };
 
-const portfolioCardStyle = {
-  display: "flex",
-  flexDirection: "column",
-  width: "100%",
-  minWidth: 0,
-  minHeight: "390px",
-  padding: "clamp(20px, 3vw, 28px)",
-  border: "1px solid #dbe3ee",
-  borderRadius: "22px",
-  background: "#ffffff",
+
+const studyCardStyle = {
+  width:
+    "100%",
+
+  minWidth:
+    0,
+
+  padding:
+    "20px",
+
+  display:
+    "flex",
+
+  flexDirection:
+    "column",
+
+  border:
+    "1px solid #dbe5f0",
+
+  borderRadius:
+    "18px",
+
+  background:
+    "#ffffff",
+
   boxShadow:
-    "0 14px 34px rgba(15,23,42,.07)",
-  boxSizing: "border-box",
+    "0 9px 24px rgba(15,23,42,.045)",
+
+  boxSizing:
+    "border-box",
 };
 
-const cardTopRowStyle = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  gap: "12px",
-  marginBottom: "20px",
-  flexWrap: "wrap",
+
+const studyCardTopStyle = {
+  display:
+    "flex",
+
+  alignItems:
+    "center",
+
+  justifyContent:
+    "space-between",
+
+  gap:
+    "12px",
+
+  marginBottom:
+    "17px",
+
+  flexWrap:
+    "wrap",
 };
 
-const publicBadgeStyle = {
-  padding: "7px 11px",
-  borderRadius: "999px",
-  background: "#dbeafe",
-  color: "#1e40af",
-  fontSize: "12px",
-  fontWeight: 800,
+
+const publishedBadgeStyle = {
+  display:
+    "inline-flex",
+
+  alignItems:
+    "center",
+
+  padding:
+    "6px 10px",
+
+  borderRadius:
+    "999px",
+
+  background:
+    "#dcfce7",
+
+  color:
+    "#15803d",
+
+  fontSize:
+    "10px",
+
+  fontWeight:
+    800,
 };
 
-const subscriberBadgeStyle = {
-  padding: "7px 11px",
-  borderRadius: "999px",
-  background: "#fef3c7",
-  color: "#92400e",
-  fontSize: "12px",
-  fontWeight: 800,
+
+const memberBadgeStyle = {
+  display:
+    "inline-flex",
+
+  alignItems:
+    "center",
+
+  padding:
+    "6px 10px",
+
+  borderRadius:
+    "999px",
+
+  background:
+    "#fef3c7",
+
+  color:
+    "#92400e",
+
+  fontSize:
+    "10px",
+
+  fontWeight:
+    800,
 };
 
-const statusBadgeBaseStyle = {
-  padding: "7px 11px",
-  borderRadius: "999px",
-  fontSize: "12px",
-  fontWeight: 800,
-  whiteSpace: "nowrap",
+
+const publicStatusBaseStyle = {
+  display:
+    "inline-flex",
+
+  alignItems:
+    "center",
+
+  padding:
+    "6px 10px",
+
+  borderRadius:
+    "999px",
+
+  fontSize:
+    "10px",
+
+  fontWeight:
+    800,
+
+  whiteSpace:
+    "nowrap",
 };
 
-const stockNameStyle = {
-  margin: "0 0 5px",
-  color: "#0f172a",
-  fontSize: "clamp(24px, 4vw, 27px)",
-  wordBreak: "break-word",
+
+/* =========================================================
+   IDENTITY
+========================================================= */
+
+const studyIdentityStyle = {
+  display:
+    "flex",
+
+  alignItems:
+    "center",
+
+  gap:
+    "12px",
+
+  marginBottom:
+    "17px",
 };
 
-const sectorTextStyle = {
-  margin: "0 0 25px",
-  color: "#64748b",
+
+const publicStudyIconStyle = {
+  width:
+    "44px",
+
+  height:
+    "44px",
+
+  flex:
+    "0 0 44px",
+
+  display:
+    "grid",
+
+  placeItems:
+    "center",
+
+  borderRadius:
+    "50%",
+
+  background:
+    "#eaf2ff",
+
+  color:
+    "#2563eb",
+
+  fontSize:
+    "19px",
+
+  fontWeight:
+    800,
 };
 
-const detailsGridStyle = {
-  display: "grid",
+
+const protectedStudyIconStyle = {
+  ...publicStudyIconStyle,
+
+  background:
+    "#fff3e3",
+
+  color:
+    "#ea580c",
+};
+
+
+const studyNameStyle = {
+  margin:
+    0,
+
+  color:
+    "#071a3d",
+
+  fontSize:
+    "20px",
+
+  lineHeight:
+    1.2,
+
+  fontWeight:
+    800,
+
+  wordBreak:
+    "break-word",
+};
+
+
+const studyMetaStyle = {
+  display:
+    "flex",
+
+  alignItems:
+    "center",
+
+  gap:
+    "7px",
+
+  marginTop:
+    "5px",
+
+  color:
+    "#64748b",
+
+  fontSize:
+    "10px",
+
+  fontWeight:
+    600,
+
+  flexWrap:
+    "wrap",
+};
+
+
+const metaDotStyle = {
+  color:
+    "#94a3b8",
+};
+
+
+/* =========================================================
+   STUDY VALUES
+========================================================= */
+
+const studyValuesGridStyle = {
+  display:
+    "grid",
+
   gridTemplateColumns:
-    "repeat(2, minmax(0, 1fr))",
-  gap: "22px 18px",
+    "repeat(3, minmax(0, 1fr))",
+
+  border:
+    "1px solid #e2e8f0",
+
+  borderRadius:
+    "10px",
+
+  overflow:
+    "hidden",
+
+  marginBottom:
+    "16px",
 };
 
-const detailLabelStyle = {
-  display: "block",
-  marginBottom: "5px",
-  color: "#64748b",
-  fontSize: "13px",
+
+const studyValueStyle = {
+  minWidth:
+    0,
+
+  minHeight:
+    "78px",
+
+  padding:
+    "12px 10px",
+
+  display:
+    "flex",
+
+  flexDirection:
+    "column",
+
+  justifyContent:
+    "center",
+
+  alignItems:
+    "center",
+
+  textAlign:
+    "center",
+
+  borderRight:
+    "1px solid #e2e8f0",
 };
 
-const detailValueStyle = {
-  color: "#0f172a",
-  fontSize: "18px",
-  fontWeight: 800,
-  wordBreak: "break-word",
+
+const studyValueLabelStyle = {
+  display:
+    "block",
+
+  marginBottom:
+    "7px",
+
+  color:
+    "#64748b",
+
+  fontSize:
+    "9px",
+
+  lineHeight:
+    1.3,
+
+  fontWeight:
+    700,
 };
 
-const blurredValueStyle = {
-  display: "inline-block",
-  filter: "blur(6px)",
-  opacity: 0.82,
-  userSelect: "none",
-  pointerEvents: "none",
+
+const studyValueNumberStyle = {
+  color:
+    "#071a3d",
+
+  fontSize:
+    "16px",
+
+  lineHeight:
+    1.2,
+
+  fontWeight:
+    800,
+
+  wordBreak:
+    "break-word",
 };
 
-const cardFooterStyle = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  gap: "10px",
-  marginTop: "auto",
-  paddingTop: "25px",
-  flexWrap: "wrap",
+
+const protectedDotsStyle = {
+  color:
+    "#64748b",
+
+  fontSize:
+    "11px",
+
+  fontWeight:
+    700,
+
+  letterSpacing:
+    "1px",
 };
 
-const tradeTypeStyle = {
-  padding: "7px 10px",
-  borderRadius: "999px",
-  background: "#f1f5f9",
-  color: "#334155",
-  fontSize: "12px",
-  fontWeight: 800,
+
+/* =========================================================
+   REFERENCE PANEL
+========================================================= */
+
+const referencePanelStyle = {
+  padding:
+    "14px 14px 10px",
+
+  borderRadius:
+    "10px",
+
+  background:
+    "#f8fafc",
+
+  border:
+    "1px solid #eef2f7",
 };
+
+
+const referencePanelTitleStyle = {
+  margin:
+    "0 0 13px",
+
+  color:
+    "#475569",
+
+  fontSize:
+    "8.5px",
+
+  fontWeight:
+    800,
+
+  letterSpacing:
+    ".025em",
+
+  textAlign:
+    "center",
+};
+
+
+const referenceStructureStyle = {
+  position:
+    "relative",
+
+  display:
+    "grid",
+
+  gridTemplateColumns:
+    "repeat(4, minmax(0, 1fr))",
+
+  gap:
+    "6px",
+};
+
+
+const referenceLineStyle = {
+  position:
+    "absolute",
+
+  top:
+    "6px",
+
+  left:
+    "10%",
+
+  right:
+    "10%",
+
+  height:
+    "2px",
+
+  background:
+    "linear-gradient(90deg,#ef4444 0 33%,#2563eb 33% 58%,#22c55e 58% 100%)",
+};
+
+
+const referencePointStyle = {
+  position:
+    "relative",
+
+  zIndex:
+    2,
+
+  display:
+    "flex",
+
+  flexDirection:
+    "column",
+
+  alignItems:
+    "center",
+
+  minWidth:
+    0,
+
+  textAlign:
+    "center",
+};
+
+
+const referencePointDotStyle = {
+  width:
+    "10px",
+
+  height:
+    "10px",
+
+  margin:
+    "1px 0 5px",
+
+  borderRadius:
+    "50%",
+};
+
+
+const referencePriceStyle = {
+  color:
+    "#071a3d",
+
+  fontSize:
+    "10px",
+
+  fontWeight:
+    800,
+
+  whiteSpace:
+    "nowrap",
+};
+
+
+const referenceLabelStyle = {
+  marginTop:
+    "3px",
+
+  color:
+    "#64748b",
+
+  fontSize:
+    "8px",
+
+  lineHeight:
+    1.2,
+
+  fontWeight:
+    500,
+};
+
+
+/* =========================================================
+   PROTECTED REFERENCE STRUCTURE
+========================================================= */
+
+const protectedStructureStyle = {
+  display:
+    "grid",
+
+  gridTemplateColumns:
+    "repeat(4, minmax(0, 1fr))",
+
+  gap:
+    "8px",
+};
+
+
+const protectedReferencePointStyle = {
+  display:
+    "flex",
+
+  flexDirection:
+    "column",
+
+  alignItems:
+    "center",
+
+  minWidth:
+    0,
+
+  textAlign:
+    "center",
+};
+
+
+const protectedReferenceLockStyle = {
+  fontSize:
+    "10px",
+};
+
+
+const protectedReferenceDotsStyle = {
+  marginTop:
+    "3px",
+
+  color:
+    "#64748b",
+
+  fontSize:
+    "10px",
+
+  fontWeight:
+    700,
+
+  letterSpacing:
+    "1px",
+};
+
+
+/* =========================================================
+   CARD FOOTER
+========================================================= */
+
+const studyCardFooterStyle = {
+  display:
+    "flex",
+
+  alignItems:
+    "center",
+
+  justifyContent:
+    "space-between",
+
+  gap:
+    "10px",
+
+  marginTop:
+    "16px",
+
+  flexWrap:
+    "wrap",
+};
+
+
+const studyTypeBadgeStyle = {
+  padding:
+    "6px 10px",
+
+  borderRadius:
+    "999px",
+
+  background:
+    "#f1f5f9",
+
+  color:
+    "#334155",
+
+  fontSize:
+    "10px",
+
+  fontWeight:
+    800,
+};
+
 
 const protectedNoticeStyle = {
-  color: "#92400e",
-  fontSize: "12px",
-  fontWeight: 800,
+  color:
+    "#92400e",
+
+  fontSize:
+    "10px",
+
+  fontWeight:
+    800,
 };
 
-const viewTradeButtonStyle = {
-  border: "none",
-  borderRadius: "12px",
-  padding: "11px 18px",
-  background: "#2563eb",
-  color: "#ffffff",
-  fontSize: "13px",
-  fontWeight: 900,
-  cursor: "pointer",
+
+const viewStudyButtonStyle = {
+  border:
+    "1px solid #2563eb",
+
+  borderRadius:
+    "9px",
+
+  padding:
+    "8px 13px",
+
+  background:
+    "#ffffff",
+
+  color:
+    "#2563eb",
+
+  fontSize:
+    "10px",
+
+  fontWeight:
+    800,
+
+  cursor:
+    "pointer",
 };
+
+
+/* =========================================================
+   PAGINATION / EMPTY
+========================================================= */
+
+const paginationWrapStyle = {
+  marginTop:
+    "22px",
+};
+
 
 const emptyStateStyle = {
-  padding: "35px",
-  borderRadius: "18px",
-  background: "#f8fafc",
-  color: "#64748b",
-  textAlign: "center",
+  padding:
+    "35px",
+
+  borderRadius:
+    "16px",
+
+  background:
+    "#f8fafc",
+
+  color:
+    "#64748b",
+
+  textAlign:
+    "center",
 };
+
+
+/* =========================================================
+   DISCLOSURE
+========================================================= */
 
 const learningDisclosureStyle = {
-  display: "flex",
-  alignItems: "flex-start",
-  gap: "20px",
-  marginTop: "42px",
-  padding: "32px",
-  borderRadius: "22px",
-  background: "#f8fbff",
-  border: "1px solid #dbeafe",
+  display:
+    "flex",
+
+  alignItems:
+    "flex-start",
+
+  gap:
+    "18px",
+
+  marginTop:
+    "34px",
+
+  padding:
+    "26px",
+
+  borderRadius:
+    "18px",
+
+  background:
+    "#f8fbff",
+
+  border:
+    "1px solid #dbeafe",
+
   boxShadow:
-    "0 15px 35px rgba(15,23,42,.05)",
+    "0 10px 28px rgba(15,23,42,.04)",
 };
+
 
 const learningDisclosureIconStyle = {
-  width: "58px",
-  height: "58px",
-  borderRadius: "16px",
-  background: "#dbeafe",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  fontSize: "30px",
-  flexShrink: 0,
+  width:
+    "50px",
+
+  height:
+    "50px",
+
+  borderRadius:
+    "14px",
+
+  background:
+    "#dbeafe",
+
+  display:
+    "flex",
+
+  alignItems:
+    "center",
+
+  justifyContent:
+    "center",
+
+  fontSize:
+    "25px",
+
+  flexShrink:
+    0,
 };
+
 
 const learningDisclosureContentStyle = {
-  flex: 1,
+  flex:
+    1,
 };
+
 
 const learningDisclosureTitleStyle = {
-  margin: "0 0 12px",
-  color: "#1e3a8a",
-  fontSize: "24px",
-  fontWeight: 800,
+  margin:
+    "0 0 10px",
+
+  color:
+    "#1e3a8a",
+
+  fontSize:
+    "19px",
+
+  fontWeight:
+    800,
 };
 
+
 const learningDisclosureTextStyle = {
-  margin: "0 0 12px",
-  color: "#475569",
-  fontSize: "16px",
-  lineHeight: 1.8,
+  margin:
+    "0 0 9px",
+
+  color:
+    "#475569",
+
+  fontSize:
+    "12px",
+
+  lineHeight:
+    1.7,
+
+  fontWeight:
+    500,
 };
