@@ -20,49 +20,46 @@ import {
   mapResourceFromDB,
 } from "../../services/libraryService";
 
+import "./Library.css";
+
 const ITEMS_PER_PAGE = 5;
 
+/* =====================================================
+   LIBRARY
+===================================================== */
+
 export default function Library() {
-  const [showModal, setShowModal] =
-    useState(false);
+  const [showModal, setShowModal] = useState(false);
 
-  const [
-    editingResource,
-    setEditingResource,
-  ] = useState(null);
+  const [editingResource, setEditingResource] =
+    useState(null);
 
-  const [
-    previewResource,
-    setPreviewResource,
-  ] = useState(null);
+  const [previewResource, setPreviewResource] =
+    useState(null);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [loading, setLoading] = useState(true);
 
-  const [saving, setSaving] =
-    useState(false);
+  const [saving, setSaving] = useState(false);
 
-  const [search, setSearch] =
-    useState("");
+  const [search, setSearch] = useState("");
 
-  const [
-    categoryFilter,
-    setCategoryFilter,
-  ] = useState("All");
+  const [categoryFilter, setCategoryFilter] =
+    useState("All");
 
   const [typeFilter, setTypeFilter] =
     useState("All");
 
-  const [
-    accessFilter,
-    setAccessFilter,
-  ] = useState("All");
+  const [accessFilter, setAccessFilter] =
+    useState("All");
 
-  const [resources, setResources] =
-    useState([]);
+  const [resources, setResources] = useState([]);
 
   const [currentPage, setCurrentPage] =
     useState(1);
+
+  /* ===================================================
+     LOAD RESOURCES
+  =================================================== */
 
   useEffect(() => {
     loadResources();
@@ -85,100 +82,94 @@ export default function Library() {
 
       alert(
         error?.message ||
-          "Failed to load library resources from Supabase"
+          "Failed to load library resources."
       );
     } finally {
       setLoading(false);
     }
   };
 
+  /* ===================================================
+     YOUTUBE THUMBNAIL
+  =================================================== */
+
   const getYouTubeThumbnail = (url) => {
     if (!url) return "";
 
-    let videoId = "";
+    try {
+      let videoId = "";
 
-    if (url.includes("watch?v=")) {
-      videoId = url
-        .split("watch?v=")[1]
-        .split("&")[0];
-    } else if (url.includes("youtu.be/")) {
-      videoId = url
-        .split("youtu.be/")[1]
-        .split("?")[0];
-    } else if (
-      url.includes("youtube.com/embed/")
-    ) {
-      videoId = url
-        .split("youtube.com/embed/")[1]
-        .split("?")[0];
+      if (url.includes("watch?v=")) {
+        videoId = url
+          .split("watch?v=")[1]
+          .split("&")[0];
+      } else if (url.includes("youtu.be/")) {
+        videoId = url
+          .split("youtu.be/")[1]
+          .split("?")[0];
+      } else if (
+        url.includes("youtube.com/embed/")
+      ) {
+        videoId = url
+          .split("youtube.com/embed/")[1]
+          .split("?")[0];
+      } else if (
+        url.includes("youtube.com/shorts/")
+      ) {
+        videoId = url
+          .split("youtube.com/shorts/")[1]
+          .split("?")[0];
+      }
+
+      return videoId
+        ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`
+        : "";
+    } catch {
+      return "";
     }
-
-    return videoId
-      ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`
-      : "";
   };
 
-  const badge = (value) => {
-    const colors = {
-      Video: ["#fee2e2", "#991b1b"],
-      PDF: ["#dbeafe", "#1e40af"],
-      Link: ["#dcfce7", "#166534"],
+  /* ===================================================
+     BADGE
+  =================================================== */
 
-      Subscriber: [
-        "#dbeafe",
-        "#1e40af",
-      ],
-
-      Public: ["#dcfce7", "#166534"],
-      Private: ["#fee2e2", "#991b1b"],
-
-      Published: [
-        "#dcfce7",
-        "#166534",
-      ],
-
-      Draft: ["#fef3c7", "#92400e"],
-      Hidden: ["#fee2e2", "#991b1b"],
-    };
-
-    const [background, color] =
-      colors[value] ||
-      ["#f1f5f9", "#334155"];
+  const renderBadge = (value) => {
+    const badgeClass =
+      String(value || "")
+        .toLowerCase()
+        .replace(/\s+/g, "-");
 
     return (
       <span
-        style={{
-          background,
-          color,
-          padding: "6px 10px",
-          borderRadius: "20px",
-          fontWeight: 600,
-          fontSize: "13px",
-          whiteSpace: "nowrap",
-        }}
+        className={`library-badge library-badge-${badgeClass}`}
       >
         {value || "-"}
       </span>
     );
   };
 
-  const handleSave = async (
-    resource
-  ) => {
+  /* ===================================================
+     SAVE RESOURCE
+  =================================================== */
+
+  const handleSave = async (resource) => {
     try {
       setSaving(true);
 
-      let finalUrl =
-        resource.url || "";
+      let finalUrl = resource.url || "";
+
+      /*
+        Upload only when a new file
+        has actually been selected.
+      */
 
       if (
         resource.sourceType === "Upload" &&
         resource.file
       ) {
-        finalUrl =
-          await uploadLibraryFile(
-            resource.file
-          );
+        finalUrl = await uploadLibraryFile(
+          resource.file
+        );
       }
 
       const cleanResource = {
@@ -188,14 +179,22 @@ export default function Library() {
           resource.title || ""
         ).trim(),
 
+        stockName:
+          resource.category === "Stock Analysis"
+            ? String(
+                resource.stockName || ""
+              ).trim()
+            : "",
+
         category:
-          resource.category || "General",
+          resource.category ||
+          "Beginner Course",
 
         type:
-          resource.type || "Link",
+          resource.type || "Video",
 
         sourceType:
-          resource.sourceType || "URL",
+          resource.sourceType || "Link",
 
         access:
           resource.access || "Subscriber",
@@ -207,7 +206,7 @@ export default function Library() {
           resource.description || ""
         ).trim(),
 
-        url: finalUrl,
+        url: String(finalUrl || "").trim(),
 
         views: Number(
           resource.views || 0
@@ -224,34 +223,41 @@ export default function Library() {
 
       delete cleanResource.file;
 
+      /* EDIT */
+
       if (editingResource) {
-        const updated =
-          await updateResource(
-            editingResource.id,
-            cleanResource
-          );
+        const updated = await updateResource(
+          editingResource.id,
+          cleanResource
+        );
+
+        const mapped =
+          mapResourceFromDB(updated);
 
         setResources((previous) =>
-          previous.map(
-            (currentResource) =>
-              currentResource.id ===
-              editingResource.id
-                ? mapResourceFromDB(
-                    updated
-                  )
-                : currentResource
+          previous.map((item) =>
+            item.id === editingResource.id
+              ? mapped
+              : item
           )
         );
 
         setEditingResource(null);
+
         return;
       }
 
-      const inserted =
-        await addResource(cleanResource);
+      /* ADD */
+
+      const inserted = await addResource(
+        cleanResource
+      );
+
+      const mapped =
+        mapResourceFromDB(inserted);
 
       setResources((previous) => [
-        mapResourceFromDB(inserted),
+        mapped,
         ...previous,
       ]);
 
@@ -264,7 +270,7 @@ export default function Library() {
 
       alert(
         error?.message ||
-          "Failed to save resource"
+          "Failed to save resource."
       );
 
       throw error;
@@ -273,11 +279,14 @@ export default function Library() {
     }
   };
 
+  /* ===================================================
+     DELETE RESOURCE
+  =================================================== */
+
   const handleDelete = async (id) => {
-    const confirmed =
-      window.confirm(
-        "Delete this resource?"
-      );
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this resource?"
+    );
 
     if (!confirmed) return;
 
@@ -298,26 +307,33 @@ export default function Library() {
 
       alert(
         error?.message ||
-          "Failed to delete resource"
+          "Failed to delete resource."
       );
     }
   };
 
-  const toggleFeatured = async (
-    row
-  ) => {
+  /* ===================================================
+     TOGGLE FEATURED
+  =================================================== */
+
+  const toggleFeatured = async (row) => {
     try {
-      const updated =
-        await updateResource(row.id, {
+      const updated = await updateResource(
+        row.id,
+        {
           ...row,
           featured: !row.featured,
-        });
+        }
+      );
+
+      const mapped =
+        mapResourceFromDB(updated);
 
       setResources((previous) =>
-        previous.map((resource) =>
-          resource.id === row.id
-            ? mapResourceFromDB(updated)
-            : resource
+        previous.map((item) =>
+          item.id === row.id
+            ? mapped
+            : item
         )
       );
     } catch (error) {
@@ -328,24 +344,33 @@ export default function Library() {
 
       alert(
         error?.message ||
-          "Failed to update featured status"
+          "Failed to update featured status."
       );
     }
   };
 
+  /* ===================================================
+     TOGGLE PIN
+  =================================================== */
+
   const togglePinned = async (row) => {
     try {
-      const updated =
-        await updateResource(row.id, {
+      const updated = await updateResource(
+        row.id,
+        {
           ...row,
           pinned: !row.pinned,
-        });
+        }
+      );
+
+      const mapped =
+        mapResourceFromDB(updated);
 
       setResources((previous) =>
-        previous.map((resource) =>
-          resource.id === row.id
-            ? mapResourceFromDB(updated)
-            : resource
+        previous.map((item) =>
+          item.id === row.id
+            ? mapped
+            : item
         )
       );
     } catch (error) {
@@ -356,147 +381,166 @@ export default function Library() {
 
       alert(
         error?.message ||
-          "Failed to update pinned status"
+          "Failed to update pin status."
       );
     }
   };
 
-  const handlePreview = async (
-    row
-  ) => {
-    try {
-      const updated =
-        await updateResource(row.id, {
-          ...row,
+  /* ===================================================
+     PREVIEW
+  =================================================== */
 
+  const handlePreview = async (row) => {
+    /*
+      Show preview immediately.
+      View count update happens separately.
+    */
+
+    setPreviewResource(row);
+
+    try {
+      const updated = await updateResource(
+        row.id,
+        {
+          ...row,
           views:
             Number(row.views || 0) + 1,
-        });
+        }
+      );
 
       const mapped =
         mapResourceFromDB(updated);
 
       setResources((previous) =>
-        previous.map((resource) =>
-          resource.id === row.id
+        previous.map((item) =>
+          item.id === row.id
             ? mapped
-            : resource
+            : item
         )
       );
 
       setPreviewResource(mapped);
     } catch (error) {
       console.error(
-        "Preview update error:",
+        "View update error:",
         error
       );
-
-      setPreviewResource(row);
     }
   };
 
-  const sortedResources = useMemo(
-    () =>
-      [...resources].sort(
-        (first, second) => {
-          if (
-            first.pinned &&
-            !second.pinned
-          ) {
-            return -1;
-          }
+  /* ===================================================
+     SORT RESOURCES
+  =================================================== */
 
-          if (
-            !first.pinned &&
-            second.pinned
-          ) {
-            return 1;
-          }
+  const sortedResources = useMemo(() => {
+    return [...resources].sort(
+      (first, second) => {
+        /*
+          Pinned first
+        */
 
-          if (
-            first.featured &&
-            !second.featured
-          ) {
-            return -1;
-          }
-
-          if (
-            !first.featured &&
-            second.featured
-          ) {
-            return 1;
-          }
-
-          const firstDate =
-            new Date(
-              first.updatedAt ||
-                first.uploaded ||
-                0
-            ).getTime();
-
-          const secondDate =
-            new Date(
-              second.updatedAt ||
-                second.uploaded ||
-                0
-            ).getTime();
-
-          return secondDate - firstDate;
+        if (
+          first.pinned &&
+          !second.pinned
+        ) {
+          return -1;
         }
-      ),
-    [resources]
-  );
 
-  const filteredResources = useMemo(
-    () => {
-      const query = search
-        .trim()
-        .toLowerCase();
-
-      return sortedResources.filter(
-        (item) => {
-          const matchesSearch =
-            !query ||
-            String(item.title || "")
-              .toLowerCase()
-              .includes(query) ||
-            String(item.category || "")
-              .toLowerCase()
-              .includes(query) ||
-            String(item.description || "")
-              .toLowerCase()
-              .includes(query);
-
-          const matchesCategory =
-            categoryFilter === "All" ||
-            item.category ===
-              categoryFilter;
-
-          const matchesType =
-            typeFilter === "All" ||
-            item.type === typeFilter;
-
-          const matchesAccess =
-            accessFilter === "All" ||
-            item.access === accessFilter;
-
-          return (
-            matchesSearch &&
-            matchesCategory &&
-            matchesType &&
-            matchesAccess
-          );
+        if (
+          !first.pinned &&
+          second.pinned
+        ) {
+          return 1;
         }
-      );
-    },
-    [
-      sortedResources,
-      search,
-      categoryFilter,
-      typeFilter,
-      accessFilter,
-    ]
-  );
+
+        /*
+          Featured second
+        */
+
+        if (
+          first.featured &&
+          !second.featured
+        ) {
+          return -1;
+        }
+
+        if (
+          !first.featured &&
+          second.featured
+        ) {
+          return 1;
+        }
+
+        /*
+          Latest IDs first
+        */
+
+        return (
+          Number(second.id || 0) -
+          Number(first.id || 0)
+        );
+      }
+    );
+  }, [resources]);
+
+  /* ===================================================
+     FILTER RESOURCES
+  =================================================== */
+
+  const filteredResources = useMemo(() => {
+    const query = search
+      .trim()
+      .toLowerCase();
+
+    return sortedResources.filter(
+      (item) => {
+        const matchesSearch =
+          !query ||
+          String(item.title || "")
+            .toLowerCase()
+            .includes(query) ||
+          String(item.stockName || "")
+            .toLowerCase()
+            .includes(query) ||
+          String(item.category || "")
+            .toLowerCase()
+            .includes(query) ||
+          String(item.description || "")
+            .toLowerCase()
+            .includes(query);
+
+        const matchesCategory =
+          categoryFilter === "All" ||
+          item.category ===
+            categoryFilter;
+
+        const matchesType =
+          typeFilter === "All" ||
+          item.type === typeFilter;
+
+        const matchesAccess =
+          accessFilter === "All" ||
+          item.access === accessFilter;
+
+        return (
+          matchesSearch &&
+          matchesCategory &&
+          matchesType &&
+          matchesAccess
+        );
+      }
+    );
+  }, [
+    sortedResources,
+    search,
+    categoryFilter,
+    typeFilter,
+    accessFilter,
+  ]);
+
+  /* ===================================================
+     RESET PAGE WHEN FILTER CHANGES
+  =================================================== */
 
   useEffect(() => {
     setCurrentPage(1);
@@ -506,6 +550,10 @@ export default function Library() {
     typeFilter,
     accessFilter,
   ]);
+
+  /* ===================================================
+     PAGINATION
+  =================================================== */
 
   const totalPages = Math.max(
     1,
@@ -519,7 +567,10 @@ export default function Library() {
     if (currentPage > totalPages) {
       setCurrentPage(totalPages);
     }
-  }, [currentPage, totalPages]);
+  }, [
+    currentPage,
+    totalPages,
+  ]);
 
   const paginatedResources =
     useMemo(() => {
@@ -529,7 +580,8 @@ export default function Library() {
 
       return filteredResources.slice(
         startIndex,
-        startIndex + ITEMS_PER_PAGE
+        startIndex +
+          ITEMS_PER_PAGE
       );
     }, [
       filteredResources,
@@ -548,6 +600,10 @@ export default function Library() {
     filteredResources.length
   );
 
+  /* ===================================================
+     STATS
+  =================================================== */
+
   const totalVideos =
     resources.filter(
       (resource) =>
@@ -560,10 +616,18 @@ export default function Library() {
         resource.type === "PDF"
     ).length;
 
+  const stockAnalysisCount =
+    resources.filter(
+      (resource) =>
+        resource.category ===
+        "Stock Analysis"
+    ).length;
+
   const subscriberOnly =
     resources.filter(
       (resource) =>
-        resource.access === "Subscriber"
+        resource.access ===
+        "Subscriber"
     ).length;
 
   const pinnedCount =
@@ -572,12 +636,17 @@ export default function Library() {
         resource.pinned
     ).length;
 
-  const totalViews = resources.reduce(
-    (sum, resource) =>
-      sum +
-      Number(resource.views || 0),
-    0
-  );
+  const totalViews =
+    resources.reduce(
+      (total, resource) =>
+        total +
+        Number(resource.views || 0),
+      0
+    );
+
+  /* ===================================================
+     TABLE COLUMNS
+  =================================================== */
 
   const columns = [
     {
@@ -585,36 +654,47 @@ export default function Library() {
       label: "Preview",
 
       render: (row) => {
-        const thumbnail =
-          getYouTubeThumbnail(row.url);
+        const youtubeThumbnail =
+          getYouTubeThumbnail(
+            row.url
+          );
 
-        if (thumbnail) {
+        if (youtubeThumbnail) {
           return (
             <img
-              src={thumbnail}
+              className="library-thumbnail"
+              src={youtubeThumbnail}
               alt={row.title}
-              style={{
-                width: "90px",
-                height: "55px",
-                objectFit: "cover",
-                borderRadius: "8px",
-              }}
+            />
+          );
+        }
+
+        if (
+          row.type === "Image" &&
+          row.url
+        ) {
+          return (
+            <img
+              className="library-thumbnail"
+              src={row.url}
+              alt={
+                row.stockName ||
+                row.title
+              }
             />
           );
         }
 
         return (
-          <span
-            style={{
-              fontSize: "26px",
-            }}
-          >
+          <div className="library-type-icon">
             {row.type === "Video"
               ? "🎥"
               : row.type === "PDF"
                 ? "📄"
-                : "🔗"}
-          </span>
+                : row.type === "Image"
+                  ? "📊"
+                  : "🔗"}
+          </div>
         );
       },
     },
@@ -622,32 +702,68 @@ export default function Library() {
     {
       key: "title",
       label: "Title",
+
+      render: (row) => (
+        <div className="library-title-cell">
+          <strong>
+            {row.title || "-"}
+          </strong>
+
+          {row.category ===
+            "Stock Analysis" &&
+            row.stockName && (
+              <span className="library-stock-inline">
+                {row.stockName}
+              </span>
+            )}
+        </div>
+      ),
+    },
+
+    {
+      key: "stockName",
+      label: "Stock",
+
+      render: (row) =>
+        row.category ===
+        "Stock Analysis"
+          ? row.stockName || "-"
+          : "-",
     },
 
     {
       key: "category",
       label: "Category",
+
+      render: (row) => (
+        <span className="library-category-text">
+          {row.category || "-"}
+        </span>
+      ),
     },
 
     {
       key: "type",
       label: "Type",
+
       render: (row) =>
-        badge(row.type),
+        renderBadge(row.type),
     },
 
     {
       key: "access",
       label: "Access",
+
       render: (row) =>
-        badge(row.access),
+        renderBadge(row.access),
     },
 
     {
       key: "status",
       label: "Status",
+
       render: (row) =>
-        badge(row.status),
+        renderBadge(row.status),
     },
 
     {
@@ -657,22 +773,19 @@ export default function Library() {
       render: (row) => (
         <button
           type="button"
+          className="library-icon-button"
           onClick={() =>
             togglePinned(row)
           }
           title={
             row.pinned
-              ? "Remove pin"
-              : "Pin resource"
+              ? "Remove Pin"
+              : "Pin Resource"
           }
-          style={{
-            border: "none",
-            background: "transparent",
-            fontSize: "20px",
-            cursor: "pointer",
-          }}
         >
-          {row.pinned ? "📌" : "📍"}
+          {row.pinned
+            ? "📌"
+            : "📍"}
         </button>
       ),
     },
@@ -684,22 +797,19 @@ export default function Library() {
       render: (row) => (
         <button
           type="button"
+          className="library-icon-button"
           onClick={() =>
             toggleFeatured(row)
           }
           title={
             row.featured
-              ? "Remove featured status"
-              : "Feature resource"
+              ? "Remove Featured"
+              : "Mark Featured"
           }
-          style={{
-            border: "none",
-            background: "transparent",
-            fontSize: "20px",
-            cursor: "pointer",
-          }}
         >
-          {row.featured ? "⭐" : "☆"}
+          {row.featured
+            ? "⭐"
+            : "☆"}
         </button>
       ),
     },
@@ -707,13 +817,18 @@ export default function Library() {
     {
       key: "views",
       label: "Views",
-      render: (row) =>
-        Number(row.views || 0),
+
+      render: (row) => (
+        <span className="library-views">
+          {Number(row.views || 0)}
+        </span>
+      ),
     },
 
     {
       key: "updatedAt",
       label: "Updated",
+
       render: (row) =>
         row.updatedAt ||
         row.uploaded ||
@@ -721,25 +836,16 @@ export default function Library() {
     },
 
     {
-      key: "previewAction",
+      key: "watch",
       label: "Watch",
 
       render: (row) => (
         <button
           type="button"
+          className="library-preview-button"
           onClick={() =>
             handlePreview(row)
           }
-          style={{
-            border: "none",
-            background: "#16a34a",
-            color: "#ffffff",
-            padding: "8px 14px",
-            borderRadius: "8px",
-            cursor: "pointer",
-            fontWeight: 600,
-            whiteSpace: "nowrap",
-          }}
         >
           ▶ Preview
         </button>
@@ -747,36 +853,22 @@ export default function Library() {
     },
 
     {
-      key: "open",
+      key: "link",
       label: "Link",
 
       render: (row) => (
         <button
           type="button"
+          className="library-open-button"
+          disabled={!row.url}
           onClick={() => {
-            if (!row.url) {
-              alert(
-                "No resource URL available."
-              );
-
-              return;
-            }
+            if (!row.url) return;
 
             window.open(
               row.url,
               "_blank",
               "noopener,noreferrer"
             );
-          }}
-          style={{
-            border: "none",
-            background: "#2563eb",
-            color: "#ffffff",
-            padding: "8px 14px",
-            borderRadius: "8px",
-            cursor: "pointer",
-            fontWeight: 600,
-            whiteSpace: "nowrap",
           }}
         >
           🔗 Open
@@ -789,28 +881,16 @@ export default function Library() {
       label: "Action",
 
       render: (row) => (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "flex-start",
-            gap: "7px",
-            minWidth: "90px",
-          }}
-        >
+        <div className="library-action-buttons">
           <button
             type="button"
+            className="library-edit-button"
             onClick={() => {
-              setEditingResource(row);
+              setEditingResource(
+                row
+              );
+
               setShowModal(true);
-            }}
-            style={{
-              border: "none",
-              background: "transparent",
-              cursor: "pointer",
-              color: "#2563eb",
-              fontWeight: 700,
-              padding: 0,
             }}
           >
             ✏️ Edit
@@ -818,17 +898,10 @@ export default function Library() {
 
           <button
             type="button"
+            className="library-delete-button"
             onClick={() =>
               handleDelete(row.id)
             }
-            style={{
-              border: "none",
-              background: "transparent",
-              cursor: "pointer",
-              color: "#dc2626",
-              fontWeight: 700,
-              padding: 0,
-            }}
           >
             🗑 Delete
           </button>
@@ -837,14 +910,9 @@ export default function Library() {
     },
   ];
 
-  const filterStyle = {
-    minHeight: "48px",
-    padding: "11px 13px",
-    border: "1px solid #d1d5db",
-    borderRadius: "10px",
-    background: "#ffffff",
-    boxSizing: "border-box",
-  };
+  /* ===================================================
+     CLEAR FILTERS
+  =================================================== */
 
   const clearFilters = () => {
     setSearch("");
@@ -854,219 +922,319 @@ export default function Library() {
     setCurrentPage(1);
   };
 
+  /* ===================================================
+     OPEN ADD MODAL
+  =================================================== */
+
+  const openAddModal = () => {
+    setEditingResource(null);
+    setShowModal(true);
+  };
+
+  /* ===================================================
+     CLOSE MODAL
+  =================================================== */
+
+  const closeModal = () => {
+    setShowModal(false);
+    setEditingResource(null);
+  };
+
+  /* ===================================================
+     PAGE
+  =================================================== */
+
   return (
-    <>
+    <div className="library-admin-page">
       <PageHeader
         title="VTKS Knowledge Vault"
-        subtitle="Manage videos, PDFs, courses and learning resources."
+        subtitle="Manage videos, stock analysis, PDFs, courses and learning resources."
         action={
           <PrimaryButton
-            onClick={() => {
-              setEditingResource(null);
-              setShowModal(true);
-            }}
+            onClick={openAddModal}
             disabled={saving}
           >
-            {saving
-              ? "Saving..."
-              : "+ Add Resource"}
+            + Add Resource
           </PrimaryButton>
         }
       />
 
       {loading ? (
-        <p>Loading resources...</p>
+        <div className="library-loading">
+          Loading resources...
+        </div>
       ) : (
         <>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns:
-                "repeat(auto-fit, minmax(180px, 1fr))",
-              gap: "20px",
-              marginBottom: "30px",
-            }}
-          >
-            <div className="admin-card">
-              <h2>{resources.length}</h2>
-              <p>Total Resources</p>
+          {/* ==========================================
+              STATS
+          ========================================== */}
+
+          <div className="library-stats-grid">
+            <div className="library-stat-card">
+              <div className="library-stat-icon">
+                📚
+              </div>
+
+              <div>
+                <h2>
+                  {resources.length}
+                </h2>
+
+                <p>
+                  Total Resources
+                </p>
+              </div>
             </div>
 
-            <div className="admin-card">
-              <h2>{totalVideos}</h2>
-              <p>Videos</p>
+            <div className="library-stat-card">
+              <div className="library-stat-icon">
+                🎥
+              </div>
+
+              <div>
+                <h2>
+                  {totalVideos}
+                </h2>
+
+                <p>Videos</p>
+              </div>
             </div>
 
-            <div className="admin-card">
-              <h2>{totalPdfs}</h2>
-              <p>PDFs</p>
+            <div className="library-stat-card">
+              <div className="library-stat-icon">
+                📈
+              </div>
+
+              <div>
+                <h2>
+                  {stockAnalysisCount}
+                </h2>
+
+                <p>
+                  Stock Analysis
+                </p>
+              </div>
             </div>
 
-            <div className="admin-card">
-              <h2>
-                {subscriberOnly}
-              </h2>
-              <p>Subscriber Only</p>
+            <div className="library-stat-card">
+              <div className="library-stat-icon">
+                📄
+              </div>
+
+              <div>
+                <h2>
+                  {totalPdfs}
+                </h2>
+
+                <p>PDFs</p>
+              </div>
             </div>
 
-            <div className="admin-card">
-              <h2>{pinnedCount}</h2>
-              <p>Pinned</p>
+            <div className="library-stat-card">
+              <div className="library-stat-icon">
+                👥
+              </div>
+
+              <div>
+                <h2>
+                  {subscriberOnly}
+                </h2>
+
+                <p>
+                  Subscriber Only
+                </p>
+              </div>
             </div>
 
-            <div className="admin-card">
-              <h2>{totalViews}</h2>
-              <p>Total Views</p>
+            <div className="library-stat-card">
+              <div className="library-stat-icon">
+                📌
+              </div>
+
+              <div>
+                <h2>
+                  {pinnedCount}
+                </h2>
+
+                <p>Pinned</p>
+              </div>
+            </div>
+
+            <div className="library-stat-card">
+              <div className="library-stat-icon">
+                👁
+              </div>
+
+              <div>
+                <h2>
+                  {totalViews}
+                </h2>
+
+                <p>Total Views</p>
+              </div>
             </div>
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              gap: "15px",
-              marginBottom: "25px",
-              flexWrap: "wrap",
-              alignItems: "center",
-            }}
-          >
-            <input
-              type="search"
-              placeholder="🔍 Search Resource..."
-              value={search}
-              onChange={(event) =>
-                setSearch(
-                  event.target.value
-                )
-              }
-              style={{
-                ...filterStyle,
-                minWidth: "280px",
-                flex: "1 1 280px",
-              }}
-            />
+          {/* ==========================================
+              FILTERS
+          ========================================== */}
 
-            <select
-              value={categoryFilter}
-              onChange={(event) =>
-                setCategoryFilter(
-                  event.target.value
-                )
-              }
-              style={filterStyle}
-            >
-              <option value="All">
-                📂 All Categories
-              </option>
-              <option value="Beginner Course">
-                Beginner Course
-              </option>
-              <option value="Live Sessions">
-                Live Sessions
-              </option>
-              <option value="Swing Trading">
-                Swing Trading
-              </option>
-              <option value="Investment">
-                Investment
-              </option>
-              <option value="STF 2.0">
-                STF 2.0
-              </option>
-              <option value="Psychology">
-                Psychology
-              </option>
-              <option value="PDF Notes">
-                PDF Notes
-              </option>
-              <option value="Case Studies">
-                Case Studies
-              </option>
-              <option value="Recordings">
-                Recordings
-              </option>
-              <option value="Bonus">
-                Bonus
-              </option>
-            </select>
+          <div className="library-filter-panel">
+            <div className="library-filter-row">
+              <div className="library-search-wrapper">
+                <span className="library-search-icon">
+                  🔍
+                </span>
 
-            <select
-              value={typeFilter}
-              onChange={(event) =>
-                setTypeFilter(
-                  event.target.value
-                )
-              }
-              style={filterStyle}
-            >
-              <option value="All">
-                🎞 All Types
-              </option>
-              <option value="Video">
-                Video
-              </option>
-              <option value="PDF">
-                PDF
-              </option>
-              <option value="Link">
-                Link
-              </option>
-            </select>
+                <input
+                  type="search"
+                  className="library-search-input"
+                  placeholder="Search Resource or Stock..."
+                  value={search}
+                  onChange={(event) =>
+                    setSearch(
+                      event.target.value
+                    )
+                  }
+                />
+              </div>
 
-            <select
-              value={accessFilter}
-              onChange={(event) =>
-                setAccessFilter(
-                  event.target.value
-                )
-              }
-              style={filterStyle}
-            >
-              <option value="All">
-                👁 All Access
-              </option>
-              <option value="Subscriber">
-                Subscriber
-              </option>
-              <option value="Public">
-                Public
-              </option>
-              <option value="Private">
-                Private
-              </option>
-            </select>
+              <select
+                className="library-filter-select library-category-filter"
+                value={categoryFilter}
+                onChange={(event) =>
+                  setCategoryFilter(
+                    event.target.value
+                  )
+                }
+              >
+                <option value="All">
+                  📂 All Categories
+                </option>
 
-            <button
-              type="button"
-              onClick={clearFilters}
-              style={{
-                ...filterStyle,
-                cursor: "pointer",
-                color: "#475569",
-                fontWeight: 700,
-              }}
-            >
-              Clear Filters
-            </button>
+                <option value="Stock Analysis">
+                  📈 Stock Analysis
+                </option>
+
+                <option value="Beginner Course">
+                  Beginner Course
+                </option>
+
+                <option value="Live Sessions">
+                  Live Sessions
+                </option>
+
+                <option value="Swing Trading">
+                  Swing Trading
+                </option>
+
+                <option value="Investment">
+                  Investment
+                </option>
+
+                <option value="STF 2.0">
+                  STF
+                </option>
+
+                <option value="Psychology">
+                  Psychology
+                </option>
+
+                <option value="PDF Notes">
+                  PDF Notes
+                </option>
+
+                <option value="Case Studies">
+                  Case Studies
+                </option>
+
+                <option value="Recordings">
+                  Recordings
+                </option>
+
+                <option value="Bonus">
+                  Bonus
+                </option>
+              </select>
+
+              <select
+                className="library-filter-select"
+                value={typeFilter}
+                onChange={(event) =>
+                  setTypeFilter(
+                    event.target.value
+                  )
+                }
+              >
+                <option value="All">
+                  🎞 All Types
+                </option>
+
+                <option value="Video">
+                  Video
+                </option>
+
+                <option value="Image">
+                  Chart / Image
+                </option>
+
+                <option value="PDF">
+                  PDF
+                </option>
+
+                <option value="Link">
+                  Link
+                </option>
+              </select>
+
+              <select
+                className="library-filter-select"
+                value={accessFilter}
+                onChange={(event) =>
+                  setAccessFilter(
+                    event.target.value
+                  )
+                }
+              >
+                <option value="All">
+                  👁 All Access
+                </option>
+
+                <option value="Subscriber">
+                  Subscriber
+                </option>
+
+                <option value="Public">
+                  Public
+                </option>
+
+                <option value="Private">
+                  Private
+                </option>
+              </select>
+
+              <button
+                type="button"
+                className="library-clear-button"
+                onClick={clearFilters}
+              >
+                Clear Filters
+              </button>
+            </div>
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              justifyContent:
-                "space-between",
-              alignItems: "center",
-              gap: "15px",
-              marginBottom: "12px",
-              color: "#64748b",
-              fontSize: "14px",
-              flexWrap: "wrap",
-            }}
-          >
+          {/* ==========================================
+              RESULT COUNT
+          ========================================== */}
+
+          <div className="library-result-info">
             <span>
               Showing{" "}
               {firstVisibleRecord}–
               {lastVisibleRecord} of{" "}
-              {filteredResources.length}{" "}
+              {
+                filteredResources.length
+              }{" "}
               resources
             </span>
 
@@ -1076,25 +1244,64 @@ export default function Library() {
             </span>
           </div>
 
-          <DataTable
-            columns={columns}
-            data={paginatedResources}
-          />
+          {/* ==========================================
+              TABLE
+          ========================================== */}
 
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-          />
+          {filteredResources.length ===
+          0 ? (
+            <div className="library-empty-state">
+              <div className="library-empty-icon">
+                📚
+              </div>
+
+              <h3>
+                No resources found
+              </h3>
+
+              <p>
+                Try changing your
+                search or filters.
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="library-table-container">
+                <DataTable
+                  columns={columns}
+                  data={
+                    paginatedResources
+                  }
+                />
+              </div>
+
+              {totalPages > 1 && (
+                <div className="library-pagination">
+                  <Pagination
+                    currentPage={
+                      currentPage
+                    }
+                    totalPages={
+                      totalPages
+                    }
+                    onPageChange={
+                      setCurrentPage
+                    }
+                  />
+                </div>
+              )}
+            </>
+          )}
         </>
       )}
 
+      {/* ==============================================
+          ADD / EDIT MODAL
+      ============================================== */}
+
       {showModal && (
         <LibraryModal
-          onClose={() => {
-            setShowModal(false);
-            setEditingResource(null);
-          }}
+          onClose={closeModal}
           onSave={handleSave}
           editingResource={
             editingResource
@@ -1102,14 +1309,22 @@ export default function Library() {
         />
       )}
 
+      {/* ==============================================
+          PREVIEW MODAL
+      ============================================== */}
+
       {previewResource && (
         <PreviewModal
-          resource={previewResource}
+          resource={
+            previewResource
+          }
           onClose={() =>
-            setPreviewResource(null)
+            setPreviewResource(
+              null
+            )
           }
         />
       )}
-    </>
+    </div>
   );
 }
