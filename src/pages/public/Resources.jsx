@@ -1219,7 +1219,7 @@ export default function Resources() {
             </strong>
 
             <span>
-              Videos
+              Learning Videos
             </span>
           </div>
 
@@ -1274,7 +1274,7 @@ export default function Resources() {
                 )
               }
             >
-              🎥 Videos
+              🎥 Learning Videos
               <span>
                 {videos.length}
               </span>
