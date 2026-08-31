@@ -493,59 +493,75 @@ export default function Resources() {
         );
 
       /*
-        STOCK ANALYSIS DATE SORT
+        DATE SORT
+        Applies to Videos, Stock Analysis and Scanners.
       */
 
-      if (
-        activeTab ===
-        "Stock Analysis"
-      ) {
-        result = [
-          ...result,
-        ].sort(
-          (
-            first,
-            second
-          ) => {
-            const firstDate =
-              first.analysisDate
-                ? new Date(
-                    `${first.analysisDate}T00:00:00`
-                  ).getTime()
-                : first.createdAt
-                  ? new Date(
-                      first.createdAt
-                    ).getTime()
-                  : 0;
+      const getItemTimestamp = (item) => {
+        const dateValue =
+          item.analysisDate ||
+          item.createdAt ||
+          item.created_at ||
+          item.updatedAt ||
+          item.updated_at ||
+          "";
 
-            const secondDate =
-              second.analysisDate
-                ? new Date(
-                    `${second.analysisDate}T00:00:00`
-                  ).getTime()
-                : second.createdAt
-                  ? new Date(
-                      second.createdAt
-                    ).getTime()
-                  : 0;
+        if (!dateValue) {
+          return 0;
+        }
 
-            if (
-              dateSort ===
-              "Oldest"
-            ) {
-              return (
-                firstDate -
-                secondDate
-              );
-            }
+        const normalizedDate =
+          /^\\d{4}-\\d{2}-\\d{2}$/.test(
+            String(dateValue)
+          )
+            ? `${dateValue}T00:00:00`
+            : dateValue;
 
+        const timestamp =
+          new Date(
+            normalizedDate
+          ).getTime();
+
+        return Number.isFinite(
+          timestamp
+        )
+          ? timestamp
+          : 0;
+      };
+
+      result = [
+        ...result,
+      ].sort(
+        (
+          first,
+          second
+        ) => {
+          const firstDate =
+            getItemTimestamp(
+              first
+            );
+
+          const secondDate =
+            getItemTimestamp(
+              second
+            );
+
+          if (
+            dateSort ===
+            "Oldest"
+          ) {
             return (
-              secondDate -
-              firstDate
+              firstDate -
+              secondDate
             );
           }
-        );
-      }
+
+          return (
+            secondDate -
+            firstDate
+          );
+        }
+      );
 
       return result;
     }, [
@@ -1139,7 +1155,9 @@ export default function Resources() {
   const hasNormalFilters =
     search ||
     categoryFilter !==
-      "All";
+      "All" ||
+    dateSort !==
+      "Latest";
 
   /* ===================================================
      LOADING
@@ -1503,6 +1521,28 @@ export default function Resources() {
                     </option>
                   )
                 )}
+              </select>
+
+              <select
+                value={
+                  dateSort
+                }
+                onChange={(
+                  event
+                ) =>
+                  setDateSort(
+                    event.target
+                      .value
+                  )
+                }
+              >
+                <option value="Latest">
+                  📅 Latest First
+                </option>
+
+                <option value="Oldest">
+                  📅 Oldest First
+                </option>
               </select>
 
               {hasNormalFilters && (
