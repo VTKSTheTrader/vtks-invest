@@ -264,13 +264,15 @@ export default function Accuracy() {
     [holdings]
   );
 
-  const completedStudies = useMemo(
-    () =>
-      publicStudies.filter(
-        isCompleted
-      ),
-    [publicStudies]
-  );
+ const completedStudies = useMemo(
+  () =>
+    holdings.filter(
+      (holding) =>
+        isCompleted(holding) &&
+        normalize(holding.visibility) !== "private"
+    ),
+  [holdings]
+);
 
   const ongoingStudies = useMemo(
     () =>

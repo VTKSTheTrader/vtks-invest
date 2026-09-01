@@ -884,52 +884,59 @@ const breakevenCount = data.filter(
       },
     },
     {
-      key: "exitPrice",
-      label: "Exit Price",
-      render: (row) => {
-        const currentStatus =
-          getDisplayStatus(row);
+  key: "exitPrice",
+  label: "Exit Price",
+  render: (row) => {
+    const currentStatus =
+      getDisplayStatus(row);
 
-        const isCompleted =
-          currentStatus === "Booked Profit";
+    const isCompleted = [
+      "Booked Profit",
+      "Booked Loss",
+      "Breakeven",
+      "SL Hit",
+    ].includes(currentStatus);
 
-        if (!isCompleted) {
-          return "₹—";
-        }
+    if (!isCompleted) {
+      return "₹—";
+    }
 
-        const exitPrice = Number(
-          row.exitPrice ??
-            row.exit_price ??
-            0
-        );
+    const exitPrice = Number(
+      row.exitPrice ??
+        row.exit_price ??
+        0
+    );
 
-        if (!Number.isFinite(exitPrice) || exitPrice <= 0) {
-          return (
-            <span
-              style={{
-                color: "#94a3b8",
-                fontSize: "12px",
-                fontWeight: 700,
-              }}
-            >
-              Not added
-            </span>
-          );
-        }
+    if (
+      !Number.isFinite(exitPrice) ||
+      exitPrice <= 0
+    ) {
+      return (
+        <span
+          style={{
+            color: "#94a3b8",
+            fontSize: "12px",
+            fontWeight: 700,
+          }}
+        >
+          Not added
+        </span>
+      );
+    }
 
-        return (
-          <strong>
-            ₹
-            {exitPrice.toLocaleString(
-              "en-IN",
-              {
-                maximumFractionDigits: 2,
-              }
-            )}
-          </strong>
-        );
-      },
-    },
+    return (
+      <strong>
+        ₹
+        {exitPrice.toLocaleString(
+          "en-IN",
+          {
+            maximumFractionDigits: 2,
+          }
+        )}
+      </strong>
+    );
+  },
+},
     {
       key: "stopLoss",
       label: "SL",
