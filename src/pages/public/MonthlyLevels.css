@@ -1314,3 +1314,79 @@
     min-width: 0;
   }
 }
+/* =====================================================
+   MARKET OUTLOOK SORT FILTER
+===================================================== */
+
+.public-monthly-levels-filters select {
+  height: 50px;
+  padding: 0 42px 0 20px;
+
+  border: 1px solid #d4ddec;
+  border-radius: 13px;
+
+  background: #ffffff;
+  color: #334155;
+
+  font-size: 16px;
+  font-weight: 700;
+  font-family: inherit;
+
+  cursor: pointer;
+  outline: none;
+
+  appearance: none;
+  -webkit-appearance: none;
+
+  background-image:
+    linear-gradient(45deg, transparent 50%, #475569 50%),
+    linear-gradient(135deg, #475569 50%, transparent 50%);
+
+  background-position:
+    calc(100% - 19px) 21px,
+    calc(100% - 14px) 21px;
+
+  background-size:
+    5px 5px,
+    5px 5px;
+
+  background-repeat: no-repeat;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.public-monthly-levels-filters select:hover {
+  border-color: #2563eb;
+  background-color: #f8fbff;
+}
+
+.public-monthly-levels-filters select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* Keep buttons + sort aligned */
+.public-monthly-levels-filters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .public-monthly-levels-filters {
+    width: 100%;
+    gap: 8px;
+  }
+
+  .public-monthly-levels-filters select {
+    height: 46px;
+    font-size: 14px;
+    padding-left: 16px;
+    padding-right: 38px;
+  }
+}

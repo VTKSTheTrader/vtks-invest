@@ -378,7 +378,7 @@ export default function MarketStudyDetails() {
           </p>
 
           <Link
-            to="/funds"
+            to="/accuracy"
             className="msd-primary-button"
           >
             Back to Market Studies
@@ -485,7 +485,7 @@ export default function MarketStudyDetails() {
         {/* BACK */}
 
         <Link
-          to="/funds"
+          to="/accuracy"
           className="msd-back-link"
         >
           ← Back to Market Studies

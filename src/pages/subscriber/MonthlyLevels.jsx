@@ -41,6 +41,54 @@ const capitalize = (value) => {
   );
 };
 
+const MONTH_INDEX = {
+  january: 0,
+  february: 1,
+  march: 2,
+  april: 3,
+  may: 4,
+  june: 5,
+  july: 6,
+  august: 7,
+  september: 8,
+  october: 9,
+  november: 10,
+  december: 11,
+};
+
+const getLevelSortDate = (level) => {
+  const monthText = String(level?.month || "")
+    .trim()
+    .toLowerCase();
+
+  const monthName = Object.keys(MONTH_INDEX).find(
+    (name) => monthText.includes(name)
+  );
+
+  const monthIndex =
+    monthName !== undefined
+      ? MONTH_INDEX[monthName]
+      : 0;
+
+  const yearFromMonth =
+    String(level?.month || "").match(/\b(20\d{2})\b/)?.[1];
+
+  const year =
+    Number(
+      level?.year ||
+        yearFromMonth ||
+        new Date(
+          level?.createdAt ||
+            level?.created_at ||
+            level?.updatedAt ||
+            level?.updated_at ||
+            Date.now()
+        ).getFullYear()
+    ) || new Date().getFullYear();
+
+  return new Date(year, monthIndex, 1).getTime();
+};
+
 const ITEMS_PER_PAGE = 6;
 
 export default function SubscriberMonthlyLevels() {
@@ -53,6 +101,9 @@ export default function SubscriberMonthlyLevels() {
 
   const [categoryFilter, setCategoryFilter] =
     useState("all");
+
+  const [sortOrder, setSortOrder] =
+    useState("newest");
 
   const [selectedLevel, setSelectedLevel] =
     useState(null);
@@ -95,19 +146,27 @@ export default function SubscriberMonthlyLevels() {
   };
 
   const filteredLevels = useMemo(() => {
-    if (categoryFilter === "all") {
-      return levels;
-    }
+    const filtered =
+      categoryFilter === "all"
+        ? [...levels]
+        : levels.filter(
+            (level) =>
+              level.category === categoryFilter
+          );
 
-    return levels.filter(
-      (level) =>
-        level.category === categoryFilter
-    );
-  }, [levels, categoryFilter]);
+    return filtered.sort((a, b) => {
+      const firstDate = getLevelSortDate(a);
+      const secondDate = getLevelSortDate(b);
+
+      return sortOrder === "oldest"
+        ? firstDate - secondDate
+        : secondDate - firstDate;
+    });
+  }, [levels, categoryFilter, sortOrder]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [categoryFilter]);
+  }, [categoryFilter, sortOrder]);
 
   const totalPages = Math.max(
     1,
@@ -236,6 +295,22 @@ export default function SubscriberMonthlyLevels() {
             >
               Commodities
             </button>
+
+            <select
+              value={sortOrder}
+              onChange={(event) =>
+                setSortOrder(event.target.value)
+              }
+              aria-label="Sort market levels"
+            >
+              <option value="newest">
+                Newest First
+              </option>
+
+              <option value="oldest">
+                Oldest First
+              </option>
+            </select>
           </div>
         </div>
 

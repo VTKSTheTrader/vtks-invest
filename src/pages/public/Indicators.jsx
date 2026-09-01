@@ -120,7 +120,7 @@ export default function Indicators() {
 
         <div className="indicator-actions">
           <a className="primary" href="/funds">Explore VTKS Analysis</a>
-          <a href="/accuracy" className="outline">View Accuracy</a>
+         
         </div>
       </section>
 

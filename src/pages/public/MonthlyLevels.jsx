@@ -43,6 +43,31 @@ const capitalize = (value) => {
 
 const ITEMS_PER_PAGE = 6;
 
+const getMonthSortValue = (level) => {
+  const rawMonth = String(level?.month || "").trim();
+
+  if (rawMonth) {
+    const parsedMonth = new Date(`1 ${rawMonth}`);
+
+    if (!Number.isNaN(parsedMonth.getTime())) {
+      return parsedMonth.getTime();
+    }
+  }
+
+  const fallbackDate =
+    level?.createdAt ||
+    level?.created_at ||
+    level?.updatedAt ||
+    level?.updated_at ||
+    0;
+
+  const parsedFallback = new Date(fallbackDate).getTime();
+
+  return Number.isNaN(parsedFallback)
+    ? 0
+    : parsedFallback;
+};
+
 export default function MonthlyLevels() {
   const [levels, setLevels] = useState([]);
   const [loading, setLoading] =
@@ -53,6 +78,9 @@ export default function MonthlyLevels() {
 
   const [categoryFilter, setCategoryFilter] =
     useState("all");
+
+  const [sortOrder, setSortOrder] =
+    useState("newest");
 
   const [selectedLevel, setSelectedLevel] =
     useState(null);
@@ -93,19 +121,36 @@ export default function MonthlyLevels() {
   };
 
   const filteredLevels = useMemo(() => {
-    if (categoryFilter === "all") {
-      return levels;
-    }
+    let rows =
+      categoryFilter === "all"
+        ? [...levels]
+        : levels.filter(
+            (level) =>
+              level.category === categoryFilter
+          );
 
-    return levels.filter(
-      (level) =>
-        level.category === categoryFilter
-    );
-  }, [levels, categoryFilter]);
+    rows.sort((first, second) => {
+      const firstValue =
+        getMonthSortValue(first);
+
+      const secondValue =
+        getMonthSortValue(second);
+
+      return sortOrder === "oldest"
+        ? firstValue - secondValue
+        : secondValue - firstValue;
+    });
+
+    return rows;
+  }, [
+    levels,
+    categoryFilter,
+    sortOrder,
+  ]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [categoryFilter]);
+  }, [categoryFilter, sortOrder]);
 
   const totalPages = Math.max(
     1,
@@ -216,6 +261,23 @@ export default function MonthlyLevels() {
             >
               Commodities
             </button>
+
+            <select
+              className="public-monthly-levels-sort"
+              value={sortOrder}
+              onChange={(event) =>
+                setSortOrder(event.target.value)
+              }
+              aria-label="Sort market outlook"
+            >
+              <option value="newest">
+                Newest First
+              </option>
+
+              <option value="oldest">
+                Oldest First
+              </option>
+            </select>
           </div>
         </div>
 

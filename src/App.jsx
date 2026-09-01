@@ -2,6 +2,7 @@ import {
   BrowserRouter,
   Routes,
   Route,
+  Navigate,
 } from "react-router-dom";
 
 import ProtectedRoute from "./components/auth/ProtectedRoute";
@@ -16,7 +17,6 @@ import AdminLayout from "./layouts/AdminLayout";
 ===================================================== */
 
 import Home from "./pages/public/Home";
-import Funds from "./pages/public/Funds";
 import Indicators from "./pages/public/Indicators";
 import Pricing from "./pages/public/Pricing";
 import Accuracy from "./pages/public/Accuracy";
@@ -87,9 +87,19 @@ function App() {
             element={<Home />}
           />
 
+          {/* =================================================
+              OLD FUNDS ROUTE
+              Redirect to Market Studies / Accuracy
+          ================================================== */}
+
           <Route
             path="/funds"
-            element={<Funds />}
+            element={
+              <Navigate
+                to="/accuracy"
+                replace
+              />
+            }
           />
 
           <Route
@@ -107,9 +117,22 @@ function App() {
             element={<Payment />}
           />
 
+          {/* =================================================
+              MAIN PUBLIC MARKET STUDIES PAGE
+          ================================================== */}
+
           <Route
             path="/accuracy"
             element={<Accuracy />}
+          />
+
+          {/* =================================================
+              INDIVIDUAL MARKET STUDY
+          ================================================== */}
+
+          <Route
+            path="/market-study/:id"
+            element={<MarketStudyDetails />}
           />
 
           <Route
@@ -168,23 +191,13 @@ function App() {
           />
 
           {/* =================================================
-              EXISTING PUBLIC TRADE DETAILS
-              DO NOT REMOVE
+              LEGACY PUBLIC TRADE DETAILS
+              KEEP FOR EXISTING / OLD LINKS
           ================================================== */}
 
           <Route
             path="/trade/:id"
             element={<TradeDetails />}
-          />
-
-          {/* =================================================
-              NEW PUBLIC MARKET STUDY DETAILS PAGE
-              SAFE TEST ROUTE
-          ================================================== */}
-
-          <Route
-            path="/market-study/:id"
-            element={<MarketStudyDetails />}
           />
 
           {/* =================================================
@@ -223,7 +236,7 @@ function App() {
 
           {/* =================================================
               MEMBERS
-          ================================================= */}
+          ================================================== */}
 
           <Route
             path="members"
@@ -320,8 +333,8 @@ function App() {
         />
 
         {/* =================================================
-            EXISTING SUBSCRIBER TRADE PAGE
-            COMPLETELY UNTOUCHED
+            SUBSCRIBER TRADE DETAILS
+            KEEP UNTOUCHED
         ================================================== */}
 
         <Route

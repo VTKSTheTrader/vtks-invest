@@ -4,6 +4,8 @@ import {
   useState,
 } from "react";
 
+import { Link } from "react-router-dom";
+
 import {
   getHoldings,
   mapHoldingFromDB,
@@ -844,12 +846,25 @@ export default function Accuracy() {
                                   </div>
 
                                   <div>
-                                    <strong>
-                                      {protectedStudy
-                                        ? "Protected Market Study"
-                                        : holding.stock ||
-                                          "Market Study"}
-                                    </strong>
+                                    {protectedStudy ? (
+                                      <strong>
+                                        Protected Market Study
+                                      </strong>
+                                    ) : (
+                                      <Link
+                                        to={`/market-study/${holding.id}`}
+                                        className="accuracy-stock-link"
+                                        title={`View ${
+                                          holding.stock ||
+                                          "market"
+                                        } study`}
+                                      >
+                                        <strong>
+                                          {holding.stock ||
+                                            "Market Study"}
+                                        </strong>
+                                      </Link>
+                                    )}
 
                                     <span>
                                       {holding.sector ||
@@ -890,7 +905,7 @@ export default function Accuracy() {
                                         ? null
                                         : structure.risk
                                     }
-                                    label="Invalidation"
+                                    label="Risk Level"
                                     locked={
                                       protectedStudy
                                     }
@@ -905,7 +920,7 @@ export default function Accuracy() {
                                         ? null
                                         : structure.reference
                                     }
-                                    label="Reference"
+                                    label="Study Price"
                                     locked={
                                       protectedStudy
                                     }
@@ -920,7 +935,7 @@ export default function Accuracy() {
                                         ? null
                                         : structure.zone1
                                     }
-                                    label="Zone 1"
+                                    label="Level 1"
                                     locked={
                                       protectedStudy
                                     }
@@ -935,7 +950,7 @@ export default function Accuracy() {
                                         ? null
                                         : structure.zone2
                                     }
-                                    label="Zone 2"
+                                    label="Level 2"
                                     locked={
                                       protectedStudy
                                     }
