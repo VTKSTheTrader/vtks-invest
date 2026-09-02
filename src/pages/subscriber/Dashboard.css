@@ -1174,3 +1174,252 @@ transform:translateY(-2px);
     justify-content: flex-start;
   }
 }
+/* =========================================================
+   SUBSCRIBER MARKET STUDIES TABLE
+========================================================= */
+
+.subscriber-study-table-wrapper {
+  width: 100%;
+  margin-top: 4px;
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+  -webkit-overflow-scrolling: touch;
+}
+
+.subscriber-study-table {
+  width: 100%;
+  min-width: 1180px;
+  border-collapse: collapse;
+  background: #ffffff;
+}
+
+.subscriber-study-table thead {
+  background: #f8fafc;
+}
+
+.subscriber-study-table th {
+  padding: 15px 14px;
+  border-bottom: 1px solid #dbe3ee;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.3;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  white-space: nowrap;
+}
+
+.subscriber-study-table td {
+  padding: 16px 14px;
+  border-bottom: 1px solid #edf2f7;
+  color: #334155;
+  font-size: 14px;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.subscriber-study-table tbody tr {
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.subscriber-study-table tbody tr:hover {
+  background: #f8fbff;
+}
+
+.subscriber-study-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+
+/* STOCK */
+
+.subscriber-study-stock {
+  min-width: 130px;
+}
+
+.subscriber-study-stock strong {
+  display: block;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+
+/* SECTOR */
+
+.subscriber-study-sector {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+
+/* NUMERIC VALUES */
+
+.subscriber-study-number {
+  color: #0f172a !important;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+
+/* PRICE CHANGE */
+
+.subscriber-study-change {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 72px;
+  padding: 6px 9px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.subscriber-study-change.positive {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.subscriber-study-change.negative {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+
+/* STATUS */
+
+.subscriber-study-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.subscriber-study-status.ongoing {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.subscriber-study-status.positive {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.subscriber-study-status.negative {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.subscriber-study-status.neutral {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.subscriber-study-status.target {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+
+/* ACCESS */
+
+.subscriber-study-table .subscriber-access-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 6px 10px;
+}
+
+
+/* VIEW ANALYSIS */
+
+.subscriber-study-view-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 8px 13px;
+  border: 1px solid #2563eb;
+  border-radius: 9px;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.subscriber-study-view-button:hover {
+  border-color: #1d4ed8;
+  background: #1d4ed8;
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.18);
+}
+
+
+/* =========================================================
+   TABLET / MOBILE
+========================================================= */
+
+@media (max-width: 900px) {
+  .subscriber-study-table-wrapper {
+    border-radius: 14px;
+  }
+
+  .subscriber-study-table th {
+    padding: 13px 12px;
+  }
+
+  .subscriber-study-table td {
+    padding: 14px 12px;
+  }
+}
+
+@media (max-width: 600px) {
+  .subscriber-study-table-wrapper {
+    width: 100%;
+    border-radius: 12px;
+  }
+
+  .subscriber-study-table {
+    min-width: 1080px;
+  }
+
+  .subscriber-study-table th {
+    padding: 12px 10px;
+    font-size: 11px;
+  }
+
+  .subscriber-study-table td {
+    padding: 13px 10px;
+    font-size: 13px;
+  }
+
+  .subscriber-study-view-button {
+    min-height: 34px;
+    padding: 7px 11px;
+    font-size: 11px;
+  }
+}

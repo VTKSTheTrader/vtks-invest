@@ -35,7 +35,7 @@ import {
 
 import "./Dashboard.css";
 
-const PORTFOLIO_ITEMS_PER_PAGE = 4;
+const PORTFOLIO_ITEMS_PER_PAGE = 5;
 const DASHBOARD_PREVIEW_ITEMS = 3;
 
 const normalize = (value) =>
@@ -1626,267 +1626,181 @@ export default function Dashboard() {
 
                 </div>
 
-                <div className="subscriber-trade-grid">
+                <div className="subscriber-study-table-wrapper">
+  <table className="subscriber-study-table">
+    <thead>
+      <tr>
+        <th>Stock</th>
+        <th>Sector</th>
+        <th>Recorded Price</th>
+        <th>CMP / Close</th>
+        <th>Price Change</th>
+        <th>Zone-1</th>
+        <th>Risk Level</th>
+        <th>Status</th>
+        <th>Access</th>
+        <th>Action</th>
+      </tr>
+    </thead>
 
-                  {paginatedHoldings.map(
-                    (holding) => {
-                      const roi =
-                        calculateReturn(
-                          holding
-                        );
+    <tbody>
+      {paginatedHoldings.map((holding) => {
+        const roi = calculateReturn(holding);
 
-                      const tradeStatus =
-                        getTradeStatus(
-                          holding
-                        );
+        const tradeStatus = getTradeStatus(holding);
 
-                      const closedTrade =
-                        isClosedTrade(
-                          holding
-                        );
+        const closedTrade = isClosedTrade(holding);
 
-                      const exitPrice =
-                        getExitPrice(
-                          holding
-                        );
+        const exitPrice = getExitPrice(holding);
 
-                      const visibility =
-                        normalize(
-                          holding.visibility
-                        );
+        const visibility = normalize(
+          holding.visibility
+        );
 
-                      const isSubscriberTrade =
-                        visibility ===
-                          "subscriber" ||
-                        visibility ===
-                          "community";
+        const isSubscriberTrade =
+          visibility === "subscriber" ||
+          visibility === "community";
 
-                      return (
-                        <article
-                          key={
-                            holding.id
-                          }
-                          className="subscriber-trade-card"
-                        >
+        const getStatusClass = () => {
+          if (
+            tradeStatus === "Booked Loss" ||
+            tradeStatus === "SL Hit"
+          ) {
+            return "negative";
+          }
 
-                          <div className="subscriber-trade-header">
+          if (tradeStatus === "Booked Profit") {
+            return "positive";
+          }
 
-                            <div>
+          if (tradeStatus === "Breakeven") {
+            return "neutral";
+          }
 
-                              <h3>
-                                {holding.stock ||
-                                  "Stock"}
-                              </h3>
+          if (tradeStatus.includes("Target")) {
+            return "target";
+          }
 
-                              <p>
-                                {holding.sector ||
-                                  "General"}
-                              </p>
+          return "ongoing";
+        };
 
-                            </div>
+        const getStatusLabel = () => {
+          if (tradeStatus === "Booked Profit") {
+            return "📈 Positive Outcome";
+          }
 
-                            <div
-                              style={{
-                                display:
-                                  "flex",
+          if (tradeStatus === "Booked Loss") {
+            return "📉 Negative Outcome";
+          }
 
-                                alignItems:
-                                  "center",
+          if (tradeStatus === "Breakeven") {
+            return "⚖️ Neutral Outcome";
+          }
 
-                                justifyContent:
-                                  "flex-end",
+          if (tradeStatus === "SL Hit") {
+            return "⚠️ Risk Level Reached";
+          }
 
-                                flexWrap:
-                                  "wrap",
+          if (tradeStatus === "Target 1 Hit") {
+            return "📍 Zone 1 Reached";
+          }
 
-                                gap:
-                                  "8px",
-                              }}
-                            >
+          if (tradeStatus === "Target 2 Hit") {
+            return "📍 Zone 2 Reached";
+          }
 
-                              <span
-                                className={
-                                  isSubscriberTrade
-                                    ? "subscriber-access-badge premium"
-                                    : "subscriber-access-badge public"
-                                }
-                              >
-                                {isSubscriberTrade
-                                  ? "🔒 Member"
-                                   : "🌐 Public"}
-                              </span>
+          if (tradeStatus === "Target 3 Hit") {
+            return "📍 Zone 3 Reached";
+          }
 
-                              <span
-                                style={{
-                                  display:
-                                    "inline-flex",
+          return "🟢 Ongoing";
+        };
 
-                                  alignItems:
-                                    "center",
+        return (
+          <tr key={holding.id}>
+            <td>
+              <div className="subscriber-study-stock">
+                <strong>
+                  {holding.stock || "Stock"}
+                </strong>
+              </div>
+            </td>
 
-                                  padding:
-                                    "7px 11px",
+            <td>
+              <span className="subscriber-study-sector">
+                {holding.sector || "General"}
+              </span>
+            </td>
 
-                                  borderRadius:
-                                    "999px",
+            <td className="subscriber-study-number">
+              {formatPrice(holding.entry)}
+            </td>
 
-                                  background:
-                                    tradeStatus ===
-                                      "Booked Loss" ||
-                                    tradeStatus ===
-                                      "SL Hit"
-                                      ? "#fee2e2"
-                                      : tradeStatus ===
-                                          "Booked Profit"
-                                        ? "#dcfce7"
-                                        : tradeStatus ===
-                                            "Breakeven"
-                                          ? "#f1f5f9"
-                                          : tradeStatus.includes(
-                                                "Target"
-                                              )
-                                            ? "#dbeafe"
-                                            : "#dcfce7",
+            <td className="subscriber-study-number">
+              {formatPrice(
+                closedTrade
+                  ? exitPrice
+                  : holding.cmp
+              )}
+            </td>
 
-                                  color:
-                                    tradeStatus ===
-                                      "Booked Loss" ||
-                                    tradeStatus ===
-                                      "SL Hit"
-                                      ? "#991b1b"
-                                      : tradeStatus ===
-                                          "Booked Profit"
-                                        ? "#166534"
-                                        : tradeStatus ===
-                                            "Breakeven"
-                                          ? "#475569"
-                                          : tradeStatus.includes(
-                                                "Target"
-                                              )
-                                            ? "#1d4ed8"
-                                            : "#166534",
+            <td>
+              <span
+                className={`subscriber-study-change ${
+                  roi >= 0
+                    ? "positive"
+                    : "negative"
+                }`}
+              >
+                {roi >= 0 ? "+" : ""}
+                {roi.toFixed(2)}%
+              </span>
+            </td>
 
-                                  fontSize:
-                                    "12px",
+            <td className="subscriber-study-number">
+              {formatPrice(holding.target1)}
+            </td>
 
-                                  fontWeight:
-                                    800,
+            <td className="subscriber-study-number">
+              {formatPrice(holding.stopLoss)}
+            </td>
 
-                                  whiteSpace:
-                                    "nowrap",
-                                }}
-                              >
-                                {tradeStatus ===
-                                "Booked Profit"
-                                  ? "📈 Positive Outcome"
-                                  : tradeStatus ===
-                                      "Booked Loss"
-                                    ? "📉 Negative Outcome"
-                                    : tradeStatus ===
-                                        "Breakeven"
-                                      ? "⚖️ Neutral Outcome"
-                                      : tradeStatus ===
-                                          "SL Hit"
-                                        ? "⚠️ Risk Level Reached"
-                                        : tradeStatus ===
-                                            "Target 1 Hit"
-                                          ? "📍 Zone 1 Reached"
-                                          : tradeStatus ===
-                                              "Target 2 Hit"
-                                            ? "📍 Zone 2 Reached"
-                                            : tradeStatus ===
-                                                "Target 3 Hit"
-                                              ? "📍 Zone 3 Reached"
-                                              : "🟢 Ongoing"}
-                              </span>
+            <td>
+              <span
+                className={`subscriber-study-status ${getStatusClass()}`}
+              >
+                {getStatusLabel()}
+              </span>
+            </td>
 
-                            </div>
+            <td>
+              <span
+                className={
+                  isSubscriberTrade
+                    ? "subscriber-access-badge premium"
+                    : "subscriber-access-badge public"
+                }
+              >
+                {isSubscriberTrade
+                  ? "🔒 Member"
+                  : "🌐 Public"}
+              </span>
+            </td>
 
-                          </div>
-
-                          <div className="subscriber-values-grid">
-
-                            <ValueItem
-                              label="Recorded Price"
-                              value={
-                                formatPrice(
-                                  holding.entry
-                                )
-                              }
-                            />
-
-                            <ValueItem
-                              label={
-                                 closedTrade
-                                   ? "Close Price"
-                                   : "CMP"
-                              }
-                              value={
-                                formatPrice(
-                                  closedTrade
-                                    ? exitPrice
-                                    : holding.cmp
-                                )
-                              }
-                            />
-
-                            <ValueItem
-                              label={
-                                 closedTrade
-                                   ? "Price Change"
-                                   : "Price Change"
-                              }
-                              value={`${
-                                roi >= 0
-                                  ? "+"
-                                  : ""
-                              }${roi.toFixed(
-                                2
-                              )}%`}
-                              tone={
-                                roi >= 0
-                                  ? "green"
-                                  : "red"
-                              }
-                            />
-
-                          </div>
-
-                          <div className="subscriber-target-grid">
-
-                            <ValueItem
-                              label="Zone-1"
-                              value={
-                                formatPrice(
-                                  holding.target1
-                                )
-                              }
-                            />
-
-                            <ValueItem
-                              label="Risk Level"
-                              value={
-                                formatPrice(
-                                  holding.stopLoss
-                                )
-                              }
-                            />
-
-                          </div>
-
-                          <Link
-                            to={`/dashboard/trade/${holding.id}`}
-                            className="subscriber-view-trade"
-                          >
-                            Open Study →
-                          </Link>
-
-                        </article>
-                      );
-                    }
-                  )}
-
-                </div>
+            <td>
+              <Link
+                to={`/dashboard/trade/${holding.id}`}
+                className="subscriber-study-view-button"
+              >
+                View Analysis →
+              </Link>
+            </td>
+          </tr>
+        );
+      })}
+    </tbody>
+  </table>
+</div>
 
                 <Pagination
                   currentPage={
