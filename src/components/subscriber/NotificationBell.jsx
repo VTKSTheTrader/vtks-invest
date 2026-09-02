@@ -72,9 +72,45 @@ const formatTimeAgo = (dateValue) => {
 };
 
 const getNotificationIcon = (type) => {
-  const normalized = String(
-    type || ""
-  ).toLowerCase();
+  const normalized = String(type || "")
+    .trim()
+    .toLowerCase();
+
+  // =========================
+  // MARKET STUDY OUTCOMES
+  // =========================
+
+  if (normalized === "target_1_hit") {
+    return "🎯";
+  }
+
+  if (normalized === "target_2_hit") {
+    return "🚀";
+  }
+
+  if (normalized === "target_3_hit") {
+    return "🏆";
+  }
+
+  if (normalized === "sl_hit") {
+    return "🛑";
+  }
+
+  if (normalized === "booked_profit") {
+    return "💰";
+  }
+
+  if (normalized === "booked_loss") {
+    return "📉";
+  }
+
+  if (normalized === "breakeven") {
+    return "⚖️";
+  }
+
+  // =========================
+  // EXISTING NOTIFICATIONS
+  // =========================
 
   if (
     normalized.includes("study") ||
@@ -102,9 +138,7 @@ const getNotificationIcon = (type) => {
     return "🎬";
   }
 
-  if (
-    normalized.includes("community")
-  ) {
+  if (normalized.includes("community")) {
     return "📢";
   }
 
