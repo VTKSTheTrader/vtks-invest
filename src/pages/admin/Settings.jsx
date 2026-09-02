@@ -123,6 +123,10 @@ export default function Settings() {
         settings.website.showScanner
       ),
 
+      showETF: Boolean(
+        settings.website.showETF
+      ),
+
       showMonthlyLevels: Boolean(
         settings.website.showMonthlyLevels
       ),
@@ -674,6 +678,21 @@ export default function Settings() {
               update(
                 "website",
                 "showScanner",
+                checked
+              )
+            }
+          />
+
+          <CheckboxRow
+            label="Show ETF Portfolio Page"
+            checked={Boolean(
+              settings.website
+                .showETF
+            )}
+            onChange={(checked) =>
+              update(
+                "website",
+                "showETF",
                 checked
               )
             }

@@ -56,6 +56,14 @@ const seoConfig = {
     indexable: true,
   },
 
+  "/etf": {
+    title:
+      "VTKS ETF Portfolio | Structured ETF Accumulation & Analysis",
+    description:
+      "Explore the VTKS ETF Portfolio with published accumulation studies, average prices, portfolio performance and structured ETF analysis.",
+    indexable: true,
+  },
+
   "/resources": {
     title:
       "VTKS Learning Resources | Videos, PDFs & Market Scanners",
@@ -160,35 +168,40 @@ const seoConfig = {
   ===================================================== */
 
   "/dashboard": {
-    title: "Subscriber Dashboard | VTKS INVEST",
+    title:
+      "Subscriber Dashboard | VTKS INVEST",
     description:
       "Access your VTKS INVEST subscriber dashboard.",
     indexable: false,
   },
 
   "/dashboard/monthly-levels": {
-    title: "Subscriber Market Levels | VTKS INVEST",
+    title:
+      "Subscriber Market Levels | VTKS INVEST",
     description:
       "Access VTKS INVEST subscriber market levels.",
     indexable: false,
   },
 
   "/dashboard/library": {
-    title: "Subscriber Library | VTKS INVEST",
+    title:
+      "Subscriber Library | VTKS INVEST",
     description:
       "Access VTKS INVEST subscriber learning resources.",
     indexable: false,
   },
 
   "/dashboard/scanner": {
-    title: "Subscriber Scanners | VTKS INVEST",
+    title:
+      "Subscriber Scanners | VTKS INVEST",
     description:
       "Access VTKS INVEST subscriber market scanners.",
     indexable: false,
   },
 
   "/subscriber/feedback": {
-    title: "Subscriber Feedback | VTKS INVEST",
+    title:
+      "Subscriber Feedback | VTKS INVEST",
     description:
       "Submit feedback about your VTKS INVEST subscriber experience.",
     indexable: false,
@@ -215,33 +228,48 @@ const getPageConfig = (pathname) => {
   const cleanPath = normalizePathname(pathname);
 
   /* =====================================================
-   PUBLIC MARKET STUDY DETAILS
-===================================================== */
+     PUBLIC ETF ANALYSIS
+  ===================================================== */
 
-if (cleanPath.startsWith("/market-study/")) {
-  return {
-    title: "Market Study Details | VTKS INVEST",
-    description:
-      "Explore a documented VTKS educational market study with historical chart observations, reference prices and market structure analysis.",
-    indexable: true,
-  };
-}
+  if (cleanPath.startsWith("/etf/")) {
+    return {
+      title: "ETF Analysis | VTKS INVEST",
+      description:
+        "Explore published VTKS ETF accumulation history, average accumulation price, portfolio performance and structured ETF analysis.",
+      indexable: true,
+    };
+  }
 
-/* =====================================================
-   LEGACY PUBLIC TRADE DETAILS
-===================================================== */
+  /* =====================================================
+     PUBLIC MARKET STUDY DETAILS
+  ===================================================== */
 
-if (cleanPath.startsWith("/trade/")) {
-  return {
-    title: "Market Study Details | VTKS INVEST",
-    description:
-      "View detailed VTKS educational market study information.",
-    indexable: true,
-  };
-}
+  if (cleanPath.startsWith("/market-study/")) {
+    return {
+      title:
+        "Market Study Details | VTKS INVEST",
+      description:
+        "Explore a documented VTKS educational market study with historical chart observations, reference prices and market structure analysis.",
+      indexable: true,
+    };
+  }
 
-/* Subscriber trade details */
+  /* =====================================================
+     LEGACY PUBLIC TRADE DETAILS
+  ===================================================== */
+
+  if (cleanPath.startsWith("/trade/")) {
+    return {
+      title:
+        "Market Study Details | VTKS INVEST",
+      description:
+        "View detailed VTKS educational market study information.",
+      indexable: true,
+    };
+  }
+
   /* Subscriber trade details */
+
   if (
     cleanPath.startsWith(
       "/dashboard/trade/"
@@ -257,9 +285,11 @@ if (cleanPath.startsWith("/trade/")) {
   }
 
   /* Admin */
+
   if (cleanPath.startsWith("/admin")) {
     return {
-      title: "Admin Panel | VTKS INVEST",
+      title:
+        "Admin Panel | VTKS INVEST",
       description:
         "VTKS INVEST administration panel.",
       indexable: false,
@@ -267,8 +297,11 @@ if (cleanPath.startsWith("/trade/")) {
   }
 
   /* Any other subscriber route */
+
   if (
-    cleanPath.startsWith("/subscriber")
+    cleanPath.startsWith(
+      "/subscriber"
+    )
   ) {
     return {
       title:
@@ -280,8 +313,11 @@ if (cleanPath.startsWith("/trade/")) {
   }
 
   /* Any unmatched dashboard route */
+
   if (
-    cleanPath.startsWith("/dashboard")
+    cleanPath.startsWith(
+      "/dashboard"
+    )
   ) {
     return {
       title:

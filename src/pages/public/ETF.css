@@ -1,0 +1,388 @@
+/* =========================================================
+   VTKS PUBLIC ETF PORTFOLIO — LIGHT THEME
+========================================================= */
+
+.public-etf-page {
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 34px 28px 42px;
+  box-sizing: border-box;
+  color: #172033;
+}
+
+.public-etf-hero {
+  margin-bottom: 24px;
+}
+
+.public-etf-eyebrow {
+  margin: 0 0 7px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+.public-etf-hero h1 {
+  margin: 0;
+  color: #111827;
+  font-size: clamp(30px, 4vw, 44px);
+  line-height: 1.1;
+}
+
+.public-etf-intro {
+  max-width: 760px;
+  margin: 10px 0 0;
+  color: #64748b;
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+/* SUMMARY */
+
+.public-etf-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.public-etf-summary-card {
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 15px;
+  background: #ffffff;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+}
+
+.public-etf-summary-card span {
+  display: block;
+  margin-bottom: 9px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.public-etf-summary-card strong {
+  display: block;
+  color: #111827;
+  font-size: 25px;
+  line-height: 1.15;
+}
+
+.public-etf-summary-card small {
+  display: block;
+  margin-top: 7px;
+  color: #94a3b8;
+  font-size: 11px;
+}
+
+.public-etf-positive {
+  color: #059669 !important;
+}
+
+.public-etf-negative {
+  color: #dc2626 !important;
+}
+
+/* TOOLBAR */
+
+.public-etf-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+  padding: 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 13px;
+  background: #ffffff;
+  box-shadow: 0 3px 12px rgba(15, 23, 42, 0.03);
+}
+
+.public-etf-toolbar input,
+.public-etf-toolbar select {
+  height: 42px;
+  border: 1px solid #d5dce7;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #1f2937;
+  padding: 0 12px;
+  outline: none;
+  font-family: inherit;
+}
+
+.public-etf-toolbar input {
+  min-width: 300px;
+  flex: 1 1 360px;
+}
+
+.public-etf-toolbar select {
+  min-width: 190px;
+}
+
+.public-etf-toolbar input:focus,
+.public-etf-toolbar select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.08);
+}
+
+.public-etf-clear {
+  height: 42px;
+  padding: 0 15px;
+  border: 1px solid #d6dce6;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.public-etf-clear:hover {
+  background: #f8fafc;
+  color: #111827;
+}
+
+/* TABLE */
+
+.public-etf-table-card {
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 15px;
+  background: #ffffff;
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04);
+}
+
+.public-etf-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.public-etf-table {
+  width: 100%;
+  min-width: 1180px;
+  border-collapse: collapse;
+}
+
+.public-etf-table th {
+  padding: 14px 15px;
+  text-align: left;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.45px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.public-etf-table td {
+  padding: 16px 15px;
+  border-bottom: 1px solid #edf2f7;
+  color: #334155;
+  font-size: 13px;
+  vertical-align: middle;
+}
+
+.public-etf-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.public-etf-table tbody tr:hover {
+  background: #fbfdff;
+}
+
+.public-etf-name-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 170px;
+}
+
+.public-etf-name-cell strong {
+  color: #111827;
+  font-size: 14px;
+}
+
+.public-etf-name-cell span {
+  color: #2563eb;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.public-etf-name-cell small {
+  max-width: 220px;
+  color: #94a3b8;
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.public-etf-type {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 9px;
+  border: 1px solid #bfdbfe;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.public-etf-table td > div > small {
+  display: block;
+  margin-top: 3px;
+  font-size: 10px;
+}
+
+.public-etf-view-button {
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  padding: 8px 11px;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.public-etf-view-button:hover {
+  background: #dbeafe;
+  border-color: #93c5fd;
+}
+
+/* STATES */
+
+.public-etf-state {
+  padding: 70px 24px;
+  text-align: center;
+  color: #64748b;
+}
+
+.public-etf-state h2 {
+  margin: 0 0 8px;
+  color: #111827;
+}
+
+.public-etf-state p {
+  margin: 0;
+}
+
+/* PAGINATION */
+
+.public-etf-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 15px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.public-etf-pagination > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.public-etf-pagination button {
+  min-width: 88px;
+  height: 39px;
+  border: 1px solid #d6dce6;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.public-etf-pagination button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.public-etf-pagination strong {
+  color: #111827;
+  font-size: 12px;
+}
+
+.public-etf-disclaimer {
+  max-width: 1400px;
+  margin: 28px auto 8px;
+  padding: 18px 22px;
+  box-sizing: border-box;
+  background: #f8fafc;
+  border: 1px solid #d9e1ec;
+  border-left: 4px solid #2563eb;
+  border-radius: 11px;
+  color: #111827;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.75;
+  text-align: left;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.045);
+}
+
+.public-etf-disclaimer strong {
+  color: #0f172a;
+  font-weight: 900;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 980px) {
+  .public-etf-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .public-etf-page {
+    padding: 24px 14px 34px;
+  }
+
+  .public-etf-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .public-etf-toolbar {
+    align-items: stretch;
+  }
+
+  .public-etf-toolbar input,
+  .public-etf-toolbar select,
+  .public-etf-clear {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .public-etf-pagination {
+    align-items: stretch;
+  }
+
+  .public-etf-pagination > div {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .public-etf-pagination button {
+    flex: 1;
+  }
+
+  .public-etf-disclaimer {
+    margin-top: 20px;
+    padding: 15px 16px;
+    border-left-width: 3px;
+    border-radius: 9px;
+    font-size: 10px;
+    line-height: 1.65;
+  }
+}

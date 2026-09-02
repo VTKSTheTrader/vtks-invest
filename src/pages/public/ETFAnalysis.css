@@ -1,0 +1,718 @@
+.etfa-page {
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 32px 28px 45px;
+  box-sizing: border-box;
+  color: #172033;
+}
+
+.etfa-back {
+  margin-bottom: 18px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.etfa-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 25px;
+  align-items: center;
+  padding: 25px 27px;
+  border: 1px solid #e2e8f0;
+  border-radius: 17px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+  box-shadow: 0 5px 20px rgba(15, 23, 42, 0.05);
+}
+
+.etfa-header-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.etfa-header-tags span {
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #2563eb;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.etfa-header h1 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 34px;
+  line-height: 1.15;
+  word-break: break-word;
+}
+
+.etfa-header h2 {
+  margin: 4px 0 0;
+  color: #2563eb;
+  font-size: 14px;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.etfa-header p {
+  margin: 8px 0 0;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.etfa-return-box {
+  min-width: 210px;
+  padding: 17px 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 13px;
+  background: #fff;
+  flex-shrink: 0;
+}
+
+.etfa-return-box span,
+.etfa-return-box small {
+  display: block;
+  color: #64748b;
+  font-size: 11px;
+}
+
+.etfa-return-box strong {
+  display: block;
+  margin: 5px 0;
+  font-size: 27px;
+}
+
+.gain {
+  color: #059669 !important;
+}
+
+.loss {
+  color: #dc2626 !important;
+}
+
+.etfa-kpis {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 13px;
+  margin: 17px 0;
+}
+
+.etfa-kpis article,
+.etfa-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 15px;
+  background: #fff;
+  box-shadow: 0 4px 17px rgba(15, 23, 42, 0.04);
+  min-width: 0;
+}
+
+.etfa-kpis article {
+  padding: 18px;
+}
+
+.etfa-kpis span {
+  display: block;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.etfa-kpis strong {
+  display: block;
+  margin-top: 7px;
+  color: #0f172a;
+  font-size: 21px;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.etfa-kpis small {
+  display: block;
+  margin-top: 6px;
+  color: #94a3b8;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.etfa-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(300px, 0.8fr);
+  gap: 17px;
+  margin-bottom: 17px;
+}
+
+.etfa-card {
+  padding: 21px;
+  margin-bottom: 17px;
+}
+
+.etfa-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 15px;
+  margin-bottom: 18px;
+}
+
+.etfa-section-head span {
+  color: #2563eb;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 1.1px;
+}
+
+.etfa-section-head h3 {
+  margin: 4px 0 0;
+  color: #0f172a;
+  font-size: 19px;
+  line-height: 1.3;
+}
+
+.etfa-section-head p {
+  max-width: 390px;
+  margin: 0;
+  color: #94a3b8;
+  font-size: 11px;
+  line-height: 1.5;
+  text-align: right;
+}
+
+.etfa-chart {
+  width: 100%;
+  height: 365px;
+  min-width: 0;
+}
+
+.etfa-growth-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  margin-bottom: 16px;
+}
+
+.etfa-growth-row div {
+  padding: 13px;
+  border-radius: 10px;
+  background: #f8fafc;
+  min-width: 0;
+}
+
+.etfa-growth-row span,
+.etfa-growth-result span {
+  display: block;
+  color: #64748b;
+  font-size: 10px;
+}
+
+.etfa-growth-row strong {
+  display: block;
+  margin-top: 5px;
+  color: #0f172a;
+  font-size: 16px;
+  word-break: break-word;
+}
+
+.etfa-growth-track {
+  height: 10px;
+  margin: 12px 0 21px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: #edf2f7;
+}
+
+.etfa-growth-track div {
+  height: 100%;
+  border-radius: inherit;
+}
+
+.etfa-growth-track .positive {
+  background: #10b981;
+}
+
+.etfa-growth-track .negative {
+  background: #ef4444;
+}
+
+.etfa-growth-result {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 13px 0;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.etfa-growth-result strong {
+  color: #0f172a;
+  font-size: 13px;
+  text-align: right;
+  word-break: break-word;
+}
+
+.etfa-study p {
+  color: #475569;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.etfa-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.etfa-table {
+  width: 100%;
+  min-width: 850px;
+  border-collapse: collapse;
+}
+
+.etfa-table th {
+  padding: 12px 13px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  color: #64748b;
+  font-size: 10px;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.etfa-table td {
+  padding: 14px 13px;
+  border-bottom: 1px solid #edf2f7;
+  color: #334155;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.etfa-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.etfa-calculator {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+}
+
+.etfa-mode-tabs {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 4px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  background: #f1f5f9;
+}
+
+.etfa-mode-tabs button {
+  padding: 9px 15px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.etfa-mode-tabs button.active {
+  background: #fff;
+  color: #2563eb;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+}
+
+.etfa-calc-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+  gap: 20px;
+}
+
+.etfa-calc-form {
+  display: grid;
+  gap: 13px;
+  min-width: 0;
+}
+
+.etfa-calc-form label {
+  color: #475569;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.etfa-calc-form label small {
+  color: #94a3b8;
+}
+
+.etfa-calc-form input {
+  width: 100%;
+  height: 43px;
+  box-sizing: border-box;
+  margin-top: 6px;
+  padding: 0 12px;
+  border: 1px solid #d7dee9;
+  border-radius: 9px;
+  outline: none;
+  font-family: inherit;
+  font-size: 16px;
+}
+
+.etfa-calc-form input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.08);
+}
+
+.etfa-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.etfa-presets button {
+  padding: 7px 11px;
+  border: 1px solid #dbe4ef;
+  border-radius: 7px;
+  background: #fff;
+  color: #475569;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.etfa-price-field {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px;
+  border-radius: 9px;
+  background: #f8fafc;
+}
+
+.etfa-price-field span {
+  color: #64748b;
+  font-size: 11px;
+}
+
+.etfa-price-field strong {
+  color: #0f172a;
+  font-size: 13px;
+  text-align: right;
+  word-break: break-word;
+}
+
+.etfa-calc-result {
+  padding: 20px;
+  border-radius: 13px;
+  background: #0f172a;
+  color: #fff;
+  min-width: 0;
+}
+
+.etfa-calc-result > span {
+  display: block;
+  margin-bottom: 13px;
+  color: #93c5fd;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.etfa-calc-result > div {
+  padding: 13px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.etfa-calc-result > div:last-child {
+  border-bottom: 0;
+}
+
+.etfa-calc-result small {
+  display: block;
+  color: #94a3b8;
+  font-size: 10px;
+}
+
+.etfa-calc-result strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 20px;
+  word-break: break-word;
+}
+
+.etfa-empty,
+.etfa-state {
+  padding: 60px 20px;
+  text-align: center;
+  color: #64748b;
+}
+
+.etfa-state button {
+  margin-top: 12px;
+  padding: 9px 13px;
+  border: 0;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+  cursor: pointer;
+}
+
+.etfa-disclaimer {
+  max-width: 1400px;
+  margin: 28px auto 8px;
+  padding: 18px 22px;
+  box-sizing: border-box;
+
+  background: #f8fafc;
+  border: 1px solid #d9e1ec;
+  border-left: 4px solid #2563eb;
+  border-radius: 11px;
+
+  color: #111827 !important;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.75;
+  text-align: left;
+
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.045);
+}
+
+.etfa-disclaimer strong {
+  color: #0f172a !important;
+  font-weight: 900;
+}
+
+@media (max-width: 700px) {
+  .etfa-disclaimer {
+    margin-top: 20px;
+    padding: 15px 16px;
+    border-left-width: 3px;
+    border-radius: 9px;
+    font-size: 10px;
+    line-height: 1.65;
+  }
+}
+
+/* =========================================================
+   TABLET / SMALL LAPTOP
+========================================================= */
+
+@media (max-width: 1050px) {
+  .etfa-page {
+    padding: 28px 20px 40px;
+  }
+
+  .etfa-kpis {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .etfa-grid,
+  .etfa-calc-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .etfa-chart {
+    height: 340px;
+  }
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 700px) {
+  .etfa-page {
+    padding: 20px 12px 32px;
+  }
+
+  .etfa-back {
+    margin-bottom: 14px;
+    font-size: 12px;
+  }
+
+  .etfa-header {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 16px;
+    padding: 18px 16px;
+    border-radius: 13px;
+  }
+
+  .etfa-header h1 {
+    font-size: 27px;
+  }
+
+  .etfa-header h2 {
+    font-size: 13px;
+  }
+
+  .etfa-header p {
+    font-size: 12px;
+  }
+
+  .etfa-return-box {
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 14px 16px;
+  }
+
+  .etfa-return-box strong {
+    font-size: 23px;
+  }
+
+  .etfa-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin: 14px 0;
+  }
+
+  .etfa-kpis article {
+    padding: 14px;
+  }
+
+  .etfa-kpis strong {
+    font-size: 18px;
+  }
+
+  .etfa-card {
+    padding: 16px;
+    margin-bottom: 14px;
+    border-radius: 13px;
+  }
+
+  .etfa-grid {
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  .etfa-section-head {
+    flex-direction: column;
+    gap: 7px;
+    margin-bottom: 14px;
+  }
+
+  .etfa-section-head h3 {
+    font-size: 17px;
+  }
+
+  .etfa-section-head p {
+    max-width: none;
+    font-size: 10px;
+    text-align: left;
+  }
+
+  .etfa-chart {
+    height: 285px;
+  }
+
+  .etfa-growth-row {
+    grid-template-columns: 1fr;
+  }
+
+  .etfa-growth-result {
+    align-items: flex-start;
+  }
+
+  .etfa-table {
+    min-width: 760px;
+  }
+
+  .etfa-mode-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .etfa-mode-tabs button {
+    width: 100%;
+  }
+
+  .etfa-calc-grid {
+    gap: 15px;
+  }
+
+  .etfa-calc-result {
+    padding: 16px;
+  }
+
+  .etfa-price-field {
+    align-items: flex-start;
+  }
+
+  .etfa-disclaimer {
+    margin-top: 20px;
+    padding: 0 5px;
+  }
+}
+
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
+@media (max-width: 470px) {
+  .etfa-page {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .etfa-header {
+    padding: 16px 14px;
+  }
+
+  .etfa-header h1 {
+    font-size: 24px;
+  }
+
+  .etfa-kpis {
+    grid-template-columns: 1fr;
+  }
+
+  .etfa-kpis article {
+    padding: 13px 14px;
+  }
+
+  .etfa-card {
+    padding: 14px;
+  }
+
+  .etfa-chart {
+    height: 260px;
+  }
+
+  .etfa-growth-result {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .etfa-growth-result strong {
+    text-align: left;
+  }
+
+  .etfa-price-field {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .etfa-price-field strong {
+    text-align: left;
+  }
+
+  .etfa-calc-result strong {
+    font-size: 18px;
+  }
+
+  .etfa-presets button {
+    flex: 1 1 calc(50% - 7px);
+  }
+}

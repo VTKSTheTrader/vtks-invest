@@ -321,6 +321,18 @@ export default function Navbar({
             </NavLink>
           )}
 
+          {/* ETF PORTFOLIO */}
+
+          {website.showETF && (
+            <NavLink
+              to="/etf"
+              className={getNavClass}
+              onClick={closeMenu}
+            >
+              ETF Portfolio
+            </NavLink>
+          )}
+
           {/* =================================================
               EXPLORE DROPDOWN
           ================================================= */}

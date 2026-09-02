@@ -56,6 +56,7 @@ export const defaultSettings = {
     showFunds: true,
     showAccuracy: true,
     showScanner: true,
+    showETF: true,
     showMonthlyLevels: true,
     showTestimonial: true,
 
@@ -319,6 +320,10 @@ const mapFromDatabase = (row) => {
         row.show_scanner,
         defaultSettings.website.showScanner
       ),
+      showETF: toBoolean(
+  row.show_etf,
+  defaultSettings.website.showETF
+),
 
       showTestimonial: toBoolean(
         row.show_testimonial,
@@ -534,6 +539,10 @@ const mapToDatabase = (settings) => {
       mergedSettings.website.showScanner,
       true
     ),
+    show_etf: toBoolean(
+  mergedSettings.website.showETF,
+  true
+),
 
     show_testimonial: toBoolean(
       mergedSettings.website.showTestimonial,

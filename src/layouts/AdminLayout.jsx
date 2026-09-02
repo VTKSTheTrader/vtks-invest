@@ -44,6 +44,16 @@ export default function AdminLayout() {
       to: "/admin/holdings",
       label: "📈 Holdings",
     },
+
+    // =====================================================
+    // ETF PORTFOLIO
+    // =====================================================
+
+    {
+      to: "/admin/etf",
+      label: "📊 ETF Portfolio",
+    },
+
     {
       to: "/admin/monthly-levels",
       label: "📅 Monthly Levels",

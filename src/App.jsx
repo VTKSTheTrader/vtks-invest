@@ -37,13 +37,15 @@ import PublicTestimonials from "./pages/public/Testimonials";
 import AskVTKS from "./pages/public/AskVTKS";
 import AnsweredQueries from "./pages/public/AnsweredQueries";
 import PublicMonthlyLevels from "./pages/public/MonthlyLevels";
-
+import PublicETF from "./pages/public/ETF";
+import ETFAnalysis from "./pages/public/ETFAnalysis";
 /* =====================================================
    ADMIN PAGES
 ===================================================== */
 
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminHoldings from "./pages/admin/Holdings";
+import AdminETF from "./pages/admin/ETF";
 import MembersV2Test from "./pages/admin/MembersV2Test";
 import AdminScanner from "./pages/admin/Scanner";
 import AdminLibrary from "./pages/admin/Library";
@@ -101,7 +103,15 @@ function App() {
               />
             }
           />
+<Route
+  path="/etf"
+  element={<PublicETF />}
+/>
 
+<Route
+  path="/etf/:id"
+  element={<ETFAnalysis />}
+/>
           <Route
             path="/indicators"
             element={<Indicators />}
@@ -232,6 +242,15 @@ function App() {
           <Route
             path="holdings"
             element={<AdminHoldings />}
+          />
+
+          {/* =================================================
+              ETF PORTFOLIO
+          ================================================== */}
+
+          <Route
+            path="etf"
+            element={<AdminETF />}
           />
 
           {/* =================================================
