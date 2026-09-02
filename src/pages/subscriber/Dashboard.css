@@ -1157,3 +1157,20 @@ transform:translateY(-2px);
     max-width: 220px;
   }
 }
+/* =====================================================
+   HERO ACTIONS - NOTIFICATION + LOGOUT
+===================================================== */
+
+.subscriber-hero-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+@media (max-width: 600px) {
+  .subscriber-hero-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}

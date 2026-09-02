@@ -7,6 +7,7 @@ import {
 import { Link } from "react-router-dom";
 
 import ChangePassword from "../../components/auth/ChangePassword";
+import NotificationBell from "../../components/subscriber/NotificationBell";
 import Pagination from "../../components/common/Pagination";
 
 import { logoutUser } from "../../services/authService";
@@ -1243,15 +1244,17 @@ export default function Dashboard() {
 
         </div>
 
-        <button
-          type="button"
-          onClick={
-            handleLogout
-          }
-          className="subscriber-logout-button"
-        >
-          Logout
-        </button>
+        <div className="subscriber-hero-actions">
+  <NotificationBell />
+
+  <button
+    type="button"
+    onClick={handleLogout}
+    className="subscriber-logout-button"
+  >
+    Logout
+  </button>
+</div>
 
       </section>
 

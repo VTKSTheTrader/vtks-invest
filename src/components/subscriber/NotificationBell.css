@@ -1,0 +1,677 @@
+/* =====================================================
+   VTKS SUBSCRIBER NOTIFICATION BELL
+===================================================== */
+
+.subscriber-notification-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* =====================================================
+   BELL BUTTON
+===================================================== */
+
+.subscriber-notification-bell {
+  position: relative;
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border: 1px solid #dbe4f0;
+  border-radius: 12px;
+
+  background: #ffffff;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.subscriber-notification-bell:hover {
+  border-color: #2563eb;
+  box-shadow:
+    0 6px 18px
+    rgba(15, 23, 42, 0.08);
+  transform: translateY(-1px);
+}
+
+.subscriber-notification-bell:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.18);
+  outline-offset: 2px;
+}
+
+.subscriber-notification-bell-icon {
+  display: block;
+  font-size: 20px;
+  line-height: 1;
+}
+
+/* =====================================================
+   UNREAD BADGE
+===================================================== */
+
+.subscriber-notification-count {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+
+  min-width: 20px;
+  height: 20px;
+
+  padding: 0 5px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 2px solid #ffffff;
+  border-radius: 999px;
+
+  background: #dc2626;
+  color: #ffffff;
+
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+
+  box-sizing: border-box;
+}
+
+/* =====================================================
+   NOTIFICATION PANEL
+===================================================== */
+
+.subscriber-notification-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+
+  width: 390px;
+  max-width: calc(100vw - 28px);
+  max-height: 500px;
+
+  overflow: hidden;
+
+  border: 1px solid #dbe4f0;
+  border-radius: 16px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 18px 45px
+    rgba(15, 23, 42, 0.16);
+
+  z-index: 1000;
+}
+
+/* =====================================================
+   NOTIFICATION HEADER
+===================================================== */
+
+.subscriber-notification-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  padding: 15px 16px;
+
+  border-bottom: 1px solid #e2e8f0;
+
+  background: #ffffff;
+}
+
+.subscriber-notification-header-copy {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.subscriber-notification-header h3 {
+  margin: 0;
+
+  color: #0f172a;
+
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.subscriber-notification-header p {
+  margin: 4px 0 0;
+
+  color: #64748b !important;
+
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+/* =====================================================
+   HEADER ACTIONS
+===================================================== */
+
+.subscriber-notification-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+
+  flex-shrink: 0;
+}
+
+.subscriber-notification-header-actions button {
+  min-height: 30px;
+
+  padding: 6px 9px;
+
+  border-radius: 8px;
+
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+
+  white-space: nowrap;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.subscriber-notification-mark-read-button {
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.subscriber-notification-mark-read-button:hover {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+}
+
+.subscriber-notification-clear-button {
+  border: 1px solid #fecaca;
+  background: #fff1f2;
+  color: #dc2626;
+}
+
+.subscriber-notification-clear-button:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: #ffffff;
+}
+
+.subscriber-notification-header-actions button:active {
+  transform: translateY(1px);
+}
+
+.subscriber-notification-header-actions button:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.16);
+  outline-offset: 2px;
+}
+
+.subscriber-notification-header-actions button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* =====================================================
+   NOTIFICATION LIST
+===================================================== */
+
+.subscriber-notification-list {
+  max-height: 400px;
+
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  background: #ffffff;
+}
+
+.subscriber-notification-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.subscriber-notification-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.subscriber-notification-list::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+
+/* =====================================================
+   NOTIFICATION ITEM WRAPPER
+===================================================== */
+
+.subscriber-notification-item {
+  position: relative;
+
+  width: 100%;
+
+  display: flex;
+  align-items: stretch;
+
+  border-bottom: 1px solid #edf2f7;
+
+  background: #ffffff;
+
+  transition:
+    background-color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.subscriber-notification-item:last-child {
+  border-bottom: 0;
+}
+
+.subscriber-notification-item.unread {
+  background: #f7fbff;
+  opacity: 1;
+}
+
+.subscriber-notification-item.read {
+  background: #ffffff;
+  opacity: 0.78;
+}
+
+.subscriber-notification-item:hover {
+  background: #f1f6ff;
+  opacity: 1;
+}
+
+/* =====================================================
+   MAIN CLICKABLE AREA
+===================================================== */
+
+.subscriber-notification-main {
+  width: 100%;
+  min-width: 0;
+
+  display: grid;
+  grid-template-columns:
+    42px
+    minmax(0, 1fr);
+
+  gap: 12px;
+  align-items: flex-start;
+
+  padding: 15px 52px 15px 16px;
+
+  border: 0;
+
+  background: transparent;
+
+  font-family: inherit;
+  text-align: left;
+
+  cursor: pointer;
+}
+
+.subscriber-notification-main:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: -2px;
+}
+
+/* =====================================================
+   NOTIFICATION ICON
+===================================================== */
+
+.subscriber-notification-item-icon {
+  width: 40px;
+  height: 40px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border-radius: 12px;
+
+  background: #eff6ff;
+
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* =====================================================
+   NOTIFICATION CONTENT
+===================================================== */
+
+.subscriber-notification-item-content {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 4px;
+}
+
+.subscriber-notification-item-content strong {
+  display: block;
+
+  margin: 0;
+
+  color: #0f172a;
+
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.35;
+
+  overflow-wrap: anywhere;
+}
+
+.subscriber-notification-item.read
+  .subscriber-notification-item-content
+  strong {
+  color: #334155;
+}
+
+.subscriber-notification-item-content > span {
+  display: block;
+
+  color: #475569;
+
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+
+  overflow-wrap: anywhere;
+}
+
+.subscriber-notification-item-content small {
+  display: block;
+
+  margin-top: 2px;
+
+  color: #94a3b8;
+
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+/* =====================================================
+   RIGHT SIDE ACTIONS
+===================================================== */
+
+.subscriber-notification-item-actions {
+  position: absolute;
+
+  top: 15px;
+  right: 12px;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  z-index: 2;
+}
+
+/* =====================================================
+   UNREAD DOT
+===================================================== */
+
+.subscriber-notification-unread-dot {
+  width: 8px;
+  height: 8px;
+
+  display: block;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+
+  background: #2563eb;
+
+  box-shadow:
+    0 0 0 3px
+    rgba(37, 99, 235, 0.08);
+}
+
+/* =====================================================
+   DISMISS BUTTON
+===================================================== */
+
+.subscriber-notification-dismiss-button {
+  width: 24px;
+  height: 24px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border: 0;
+  border-radius: 6px;
+
+  background: transparent;
+
+  color: #94a3b8;
+
+  font-family: inherit;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.subscriber-notification-dismiss-button:hover {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.subscriber-notification-dismiss-button:active {
+  transform: scale(0.92);
+}
+
+.subscriber-notification-dismiss-button:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 1px;
+}
+
+.subscriber-notification-dismiss-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* =====================================================
+   LOADING / ERROR STATES
+===================================================== */
+
+.subscriber-notification-state,
+.subscriber-notification-empty {
+  padding: 34px 20px;
+
+  text-align: center;
+
+  color: #64748b;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.subscriber-notification-state.error {
+  color: #b91c1c;
+}
+
+.subscriber-notification-state button {
+  display: block;
+
+  margin: 12px auto 0;
+
+  padding: 7px 12px;
+
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+
+  background: #eff6ff;
+
+  color: #2563eb;
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 800;
+
+  cursor: pointer;
+}
+
+.subscriber-notification-state button:hover {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+}
+
+/* =====================================================
+   EMPTY STATE
+===================================================== */
+
+.subscriber-notification-empty span {
+  display: block;
+
+  margin-bottom: 10px;
+
+  font-size: 30px;
+}
+
+.subscriber-notification-empty h4 {
+  margin: 0;
+
+  color: #0f172a;
+
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.subscriber-notification-empty p {
+  margin: 6px 0 0;
+
+  color: #64748b;
+
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 600px) {
+  .subscriber-notification-panel {
+    position: fixed;
+
+    top: 70px;
+    left: 14px;
+    right: 14px;
+
+    width: auto;
+    max-width: none;
+
+    max-height:
+      calc(100vh - 90px);
+
+    border-radius: 14px;
+  }
+
+  .subscriber-notification-header {
+    align-items: flex-start;
+    padding: 13px 14px;
+    gap: 8px;
+  }
+
+  .subscriber-notification-header h3 {
+    font-size: 16px;
+  }
+
+  .subscriber-notification-header p {
+    font-size: 11px;
+  }
+
+  .subscriber-notification-header-actions {
+    gap: 5px;
+  }
+
+  .subscriber-notification-header-actions button {
+    min-height: 28px;
+    padding: 5px 7px;
+    font-size: 9px;
+  }
+
+  .subscriber-notification-list {
+    max-height:
+      calc(100vh - 180px);
+  }
+
+  .subscriber-notification-main {
+    grid-template-columns:
+      38px
+      minmax(0, 1fr);
+
+    gap: 10px;
+
+    padding:
+      14px
+      48px
+      14px
+      14px;
+  }
+
+  .subscriber-notification-item-icon {
+    width: 36px;
+    height: 36px;
+
+    border-radius: 10px;
+
+    font-size: 16px;
+  }
+
+  .subscriber-notification-item-content strong {
+    font-size: 12px;
+  }
+
+  .subscriber-notification-item-content > span {
+    font-size: 11px;
+  }
+
+  .subscriber-notification-item-actions {
+    top: 14px;
+    right: 10px;
+
+    gap: 6px;
+  }
+
+  .subscriber-notification-dismiss-button {
+    width: 22px;
+    height: 22px;
+
+    font-size: 18px;
+  }
+}
