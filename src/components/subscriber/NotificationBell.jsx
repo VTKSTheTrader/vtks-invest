@@ -6,6 +6,7 @@ import {
 } from "react";
 
 import { useNavigate } from "react-router-dom";
+import { supabase } from "../../lib/supabase";
 
 import {
   dismissAllNotifications,
@@ -72,45 +73,9 @@ const formatTimeAgo = (dateValue) => {
 };
 
 const getNotificationIcon = (type) => {
-  const normalized = String(type || "")
-    .trim()
-    .toLowerCase();
-
-  // =========================
-  // MARKET STUDY OUTCOMES
-  // =========================
-
-  if (normalized === "target_1_hit") {
-    return "🎯";
-  }
-
-  if (normalized === "target_2_hit") {
-    return "🚀";
-  }
-
-  if (normalized === "target_3_hit") {
-    return "🏆";
-  }
-
-  if (normalized === "sl_hit") {
-    return "🛑";
-  }
-
-  if (normalized === "booked_profit") {
-    return "💰";
-  }
-
-  if (normalized === "booked_loss") {
-    return "📉";
-  }
-
-  if (normalized === "breakeven") {
-    return "⚖️";
-  }
-
-  // =========================
-  // EXISTING NOTIFICATIONS
-  // =========================
+  const normalized = String(
+    type || ""
+  ).toLowerCase();
 
   if (
     normalized.includes("study") ||
@@ -138,7 +103,9 @@ const getNotificationIcon = (type) => {
     return "🎬";
   }
 
-  if (normalized.includes("community")) {
+  if (
+    normalized.includes("community")
+  ) {
     return "📢";
   }
 
@@ -149,9 +116,85 @@ const getNotificationIcon = (type) => {
   return "🔔";
 };
 
+
+const canUseBrowserNotifications = () =>
+  typeof window !== "undefined" &&
+  "Notification" in window;
+
+const requestBrowserNotificationPermission = async () => {
+  if (!canUseBrowserNotifications()) {
+    return "unsupported";
+  }
+
+  if (Notification.permission === "granted") {
+    return "granted";
+  }
+
+  if (Notification.permission === "denied") {
+    return "denied";
+  }
+
+  try {
+    return await Notification.requestPermission();
+  } catch (error) {
+    console.error(
+      "Browser notification permission error:",
+      error
+    );
+
+    return "default";
+  }
+};
+
+const showBrowserNotification = (notification) => {
+  if (
+    !canUseBrowserNotifications() ||
+    Notification.permission !== "granted" ||
+    !notification
+  ) {
+    return;
+  }
+
+  const title =
+    notification.title || "VTKS INVEST";
+
+  const body =
+    notification.message ||
+    "A new VTKS update is available.";
+
+  try {
+    const browserNotification =
+      new Notification(title, {
+        body,
+        icon: "/favicon.png",
+        badge: "/favicon.png",
+        tag: `vtks-${notification.id || Date.now()}`,
+      });
+
+    browserNotification.onclick = () => {
+      window.focus();
+
+      if (notification.link) {
+        window.location.assign(notification.link);
+      }
+
+      browserNotification.close();
+    };
+  } catch (error) {
+    console.error(
+      "Browser notification display error:",
+      error
+    );
+  }
+};
+
 export default function NotificationBell() {
   const navigate = useNavigate();
   const wrapperRef = useRef(null);
+  const knownNotificationIdsRef =
+    useRef(new Set());
+  const hasLoadedInitialNotificationsRef =
+    useRef(false);
 
   const [
     notifications,
@@ -201,9 +244,35 @@ export default function NotificationBell() {
         const rows =
           await getSubscriberNotifications();
 
-        setNotifications(
-          rows || []
-        );
+        const safeRows = rows || [];
+
+        if (
+          hasLoadedInitialNotificationsRef.current
+        ) {
+          const newlyArrived = safeRows.filter(
+            (item) =>
+              !knownNotificationIdsRef.current.has(
+                item.id
+              )
+          );
+
+          newlyArrived
+            .slice()
+            .reverse()
+            .forEach((item) => {
+              showBrowserNotification(item);
+            });
+        }
+
+        knownNotificationIdsRef.current =
+          new Set(
+            safeRows.map((item) => item.id)
+          );
+
+        hasLoadedInitialNotificationsRef.current =
+          true;
+
+        setNotifications(safeRows);
       } catch (error) {
         console.error(
           "Notification load error:",
@@ -221,6 +290,91 @@ export default function NotificationBell() {
 
   useEffect(() => {
     loadNotifications();
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const channel = supabase
+      .channel(
+        `vtks-browser-notifications-${Date.now()}`
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "notifications",
+        },
+        async (payload) => {
+          const item = payload?.new;
+
+          if (
+            !isMounted ||
+            !item ||
+            item.is_active === false ||
+            !["subscriber", "public"].includes(
+              item.audience
+            )
+          ) {
+            return;
+          }
+
+          if (
+            knownNotificationIdsRef.current.has(
+              item.id
+            )
+          ) {
+            return;
+          }
+
+          knownNotificationIdsRef.current.add(
+            item.id
+          );
+
+          showBrowserNotification(item);
+
+          try {
+            const rows =
+              await getSubscriberNotifications();
+
+            if (!isMounted) {
+              return;
+            }
+
+            const safeRows = rows || [];
+
+            knownNotificationIdsRef.current =
+              new Set(
+                safeRows.map(
+                  (notification) =>
+                    notification.id
+                )
+              );
+
+            setNotifications(safeRows);
+          } catch (error) {
+            console.error(
+              "Realtime notification refresh error:",
+              error
+            );
+          }
+        }
+      )
+      .subscribe();
+
+    const pollingTimer = window.setInterval(
+      () => {
+        loadNotifications();
+      },
+      60000
+    );
+
+    return () => {
+      isMounted = false;
+      window.clearInterval(pollingTimer);
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   useEffect(() => {
@@ -380,11 +534,13 @@ export default function NotificationBell() {
       <button
         type="button"
         className="subscriber-notification-bell"
-        onClick={() =>
+        onClick={async () => {
+          await requestBrowserNotificationPermission();
+
           setIsOpen(
             (previous) => !previous
-          )
-        }
+          );
+        }}
         aria-label="Notifications"
       >
         <span
