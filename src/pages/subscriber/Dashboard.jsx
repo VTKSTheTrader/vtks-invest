@@ -1245,7 +1245,7 @@ export default function Dashboard() {
         </div>
 
         <div className="subscriber-hero-actions">
-  <NotificationBell />
+  {!isExpired && <NotificationBell />}
 
   <button
     type="button"

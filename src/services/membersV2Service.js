@@ -1638,3 +1638,42 @@ export const updateSubscriptionV2 = async ({
 
   return data;
 };
+/* =========================================================
+   UPDATE DASHBOARD ACCESS
+========================================================= */
+
+export const updateDashboardAccessV2 = async (
+  memberId,
+  enabled
+) => {
+  if (!memberId) {
+    throw new Error(
+      "Member ID is required."
+    );
+  }
+
+  const { data, error } =
+    await supabase
+      .from("members_v2")
+      .update({
+        dashboard_access:
+          Boolean(enabled),
+
+        updated_at:
+          new Date().toISOString(),
+      })
+      .eq("id", memberId)
+      .select("*")
+      .single();
+
+  if (error) {
+    console.error(
+      "updateDashboardAccessV2 error:",
+      error
+    );
+
+    throw error;
+  }
+
+  return data;
+};

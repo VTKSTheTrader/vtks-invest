@@ -47,6 +47,7 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import AdminHoldings from "./pages/admin/Holdings";
 import AdminETF from "./pages/admin/ETF";
 import MembersV2Test from "./pages/admin/MembersV2Test";
+import RegisteredUsers from "./pages/admin/RegisteredUsers";
 import AdminScanner from "./pages/admin/Scanner";
 import AdminLibrary from "./pages/admin/Library";
 import AdminSettings from "./pages/admin/Settings";
@@ -261,7 +262,10 @@ function App() {
             path="members"
             element={<MembersV2Test />}
           />
-
+<Route
+  path="registered-users"
+  element={<RegisteredUsers />}
+/>
           <Route
             path="expenses"
             element={<AdminExpenses />}

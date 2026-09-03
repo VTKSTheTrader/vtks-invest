@@ -14,6 +14,7 @@ import {
   deleteMemberV2,
   updateSettlementStatusV2,
   updateSubscriptionV2,
+  updateDashboardAccessV2,
 } from "../../services/membersV2Service";
 
 import {
@@ -1436,6 +1437,64 @@ export default function MembersV2Test() {
     };
 
   /* =====================================================
+     DASHBOARD ACCESS
+  ===================================================== */
+
+  const handleDashboardAccess =
+    async (member) => {
+      if (!member?.id) {
+        return;
+      }
+
+      const nextValue =
+        !Boolean(
+          member.dashboard_access
+        );
+
+      const confirmed =
+        window.confirm(
+          nextValue
+            ? `Enable dashboard access for ${member.name}?`
+            : `Disable dashboard access for ${member.name}?`
+        );
+
+      if (!confirmed) {
+        return;
+      }
+
+      try {
+        setSaving(true);
+        setError("");
+        setMessage("");
+
+        await updateDashboardAccessV2(
+          member.id,
+          nextValue
+        );
+
+        await loadMembers();
+
+        setMessage(
+          nextValue
+            ? `${member.name} dashboard access enabled.`
+            : `${member.name} dashboard access disabled.`
+        );
+      } catch (err) {
+        console.error(
+          "Dashboard access update error:",
+          err
+        );
+
+        setError(
+          err?.message ||
+            "Unable to update dashboard access."
+        );
+      } finally {
+        setSaving(false);
+      }
+    };
+
+  /* =====================================================
      FILTER MEMBERS
   ===================================================== */
 
@@ -1963,6 +2022,7 @@ export default function MembersV2Test() {
                 <th>Start</th>
                 <th>Expiry</th>
                 <th>Status</th>
+                <th>Access</th>
                 <th>
                   Current Amount
                 </th>
@@ -2057,6 +2117,52 @@ export default function MembersV2Test() {
                             status
                           }
                         />
+                      </td>
+
+                      <td>
+                        <button
+                          type="button"
+                          disabled={
+                            saving
+                          }
+                          onClick={() =>
+                            handleDashboardAccess(
+                              member
+                            )
+                          }
+                          style={{
+                            border:
+                              "none",
+                            borderRadius:
+                              "18px",
+                            padding:
+                              "7px 12px",
+                            cursor:
+                              saving
+                                ? "not-allowed"
+                                : "pointer",
+                            fontWeight:
+                              700,
+                            background:
+                              member.dashboard_access
+                                ? "#dcfce7"
+                                : "#fee2e2",
+                            color:
+                              member.dashboard_access
+                                ? "#166534"
+                                : "#991b1b",
+                            whiteSpace:
+                              "nowrap",
+                            opacity:
+                              saving
+                                ? 0.65
+                                : 1,
+                          }}
+                        >
+                          {member.dashboard_access
+                            ? "ON"
+                            : "OFF"}
+                        </button>
                       </td>
 
                       <td>
@@ -2155,7 +2261,7 @@ export default function MembersV2Test() {
                 0 && (
                 <tr>
                   <td
-                    colSpan="11"
+                    colSpan="12"
                     className="members-v2-empty"
                   >
                     No members match the selected filters.

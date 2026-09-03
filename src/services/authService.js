@@ -10,7 +10,9 @@ export async function registerUser({
   mobile,
   password,
 }) {
-  const normalizedEmail = String(email || "")
+  const normalizedEmail = String(
+    email || ""
+  )
     .trim()
     .toLowerCase();
 
@@ -29,11 +31,14 @@ export async function registerUser({
 
       options: {
         data: {
-          full_name: normalizedFullName,
-          mobile: normalizedMobile,
+          full_name:
+            normalizedFullName,
+          mobile:
+            normalizedMobile,
         },
 
-        emailRedirectTo: `${window.location.origin}/login`,
+        emailRedirectTo:
+          `${window.location.origin}/login`,
       },
     });
 
@@ -47,7 +52,8 @@ export async function registerUser({
     ).toLowerCase();
 
     if (
-      errorCode === "user_already_exists" ||
+      errorCode ===
+        "user_already_exists" ||
       errorMessage.includes(
         "already registered"
       ) ||
@@ -67,14 +73,12 @@ export async function registerUser({
   }
 
   /*
-    When email confirmation is enabled, Supabase may return
-    an obfuscated user object for an email that already exists.
-
-    A newly created email/password account normally contains
-    an email identity. The obfuscated duplicate response can
-    contain an empty identities array.
-  */
-  const identities = data?.user?.identities;
+   * When email confirmation is enabled,
+   * Supabase may return an obfuscated user
+   * object for an email that already exists.
+   */
+  const identities =
+    data?.user?.identities;
 
   if (
     Array.isArray(identities) &&
@@ -97,18 +101,23 @@ export async function registerUser({
 /* =========================================================
    LOGIN
 ========================================================= */
-/* ---------------- LOGIN ---------------- */
 
-export async function loginUser(email, password) {
-  const normalizedEmail = String(email || "")
+export async function loginUser(
+  email,
+  password
+) {
+  const normalizedEmail = String(
+    email || ""
+  )
     .trim()
     .toLowerCase();
 
   const { data, error } =
-    await supabase.auth.signInWithPassword({
-      email: normalizedEmail,
-      password,
-    });
+    await supabase.auth
+      .signInWithPassword({
+        email: normalizedEmail,
+        password,
+      });
 
   if (error) {
     throw error;
@@ -120,15 +129,28 @@ export async function loginUser(email, password) {
     );
   }
 
+  /* =====================================================
+     LOAD PROFILE
+
+     profiles.role remains the authority for ADMIN.
+
+     Public/registered users do NOT automatically become
+     subscribers.
+  ===================================================== */
+
   const {
     data: profile,
     error: profileError,
-  } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", data.user.id)
-    .limit(1)
-    .maybeSingle();
+  } =
+    await supabase
+      .from("profiles")
+      .select("*")
+      .eq(
+        "id",
+        data.user.id
+      )
+      .limit(1)
+      .maybeSingle();
 
   if (profileError) {
     console.error(
@@ -141,31 +163,74 @@ export async function loginUser(email, password) {
     );
   }
 
-  /*
-    Preserve the database profile whenever it exists.
-    This keeps the admin role and existing subscriber
-    permissions unchanged.
+  /* =====================================================
+     RESOLVE ACCOUNT ROLE
 
-    If an Auth user has no profile row, use safe Auth
-    metadata so login does not crash.
-  */
-  const resolvedProfile =
-    profile || {
-      id: data.user.id,
-      email: data.user.email || normalizedEmail,
-      full_name:
-        data.user.user_metadata?.full_name || "",
-      mobile:
-        data.user.user_metadata?.mobile || "",
-      role:
-        data.user.user_metadata?.role ||
-        "subscriber",
-      status: "active",
-    };
+     IMPORTANT:
+
+     OLD:
+       missing profile => subscriber
+
+     NEW:
+       missing profile => user
+
+     Subscriber dashboard permission is now controlled by
+     members_v2.dashboard_access.
+  ===================================================== */
+
+  const resolvedRole = String(
+    profile?.role ||
+      data.user.user_metadata?.role ||
+      "user"
+  )
+    .trim()
+    .toLowerCase();
+
+  const resolvedProfile = {
+    ...(profile || {}),
+
+    id:
+      profile?.id ||
+      data.user.id,
+
+    email:
+      profile?.email ||
+      data.user.email ||
+      normalizedEmail,
+
+    full_name:
+      profile?.full_name ||
+      data.user.user_metadata
+        ?.full_name ||
+      "",
+
+    mobile:
+      profile?.mobile ||
+      data.user.user_metadata
+        ?.mobile ||
+      "",
+
+    role:
+      resolvedRole,
+
+    status:
+      profile?.status ||
+      "active",
+  };
 
   return {
-    user: data.user,
-    profile: resolvedProfile,
+    user:
+      data.user,
+
+    session:
+      data.session ||
+      null,
+
+    profile:
+      resolvedProfile,
+
+    isAdmin:
+      resolvedRole === "admin",
   };
 }
 
@@ -180,6 +245,22 @@ export async function logoutUser() {
   if (error) {
     throw error;
   }
+
+  /*
+   * Clear old VTKS browser state.
+   * Supabase session itself is handled by signOut().
+   */
+  localStorage.removeItem(
+    "vtks_user_role"
+  );
+
+  localStorage.removeItem(
+    "vtks_user_email"
+  );
+
+  localStorage.removeItem(
+    "vtks_user_name"
+  );
 }
 
 /* =========================================================
@@ -189,17 +270,27 @@ export async function logoutUser() {
 export async function sendResetEmail(
   email
 ) {
-  const normalizedEmail = String(email || "")
+  const normalizedEmail = String(
+    email || ""
+  )
     .trim()
     .toLowerCase();
 
-  const { error } =
-    await supabase.auth.resetPasswordForEmail(
-      normalizedEmail,
-      {
-        redirectTo: `${window.location.origin}/reset-password`,
-      }
+  if (!normalizedEmail) {
+    throw new Error(
+      "Email address is required."
     );
+  }
+
+  const { error } =
+    await supabase.auth
+      .resetPasswordForEmail(
+        normalizedEmail,
+        {
+          redirectTo:
+            `${window.location.origin}/reset-password`,
+        }
+      );
 
   if (error) {
     throw error;
@@ -213,6 +304,15 @@ export async function sendResetEmail(
 export async function updatePassword(
   password
 ) {
+  if (
+    !password ||
+    String(password).length < 6
+  ) {
+    throw new Error(
+      "Password must be at least 6 characters."
+    );
+  }
+
   const { error } =
     await supabase.auth.updateUser({
       password,
@@ -236,4 +336,19 @@ export async function getCurrentUser() {
   }
 
   return data?.user || null;
+}
+
+/* =========================================================
+   CURRENT SESSION
+========================================================= */
+
+export async function getCurrentSession() {
+  const { data, error } =
+    await supabase.auth.getSession();
+
+  if (error) {
+    throw error;
+  }
+
+  return data?.session || null;
 }

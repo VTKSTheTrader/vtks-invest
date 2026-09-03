@@ -66,9 +66,6 @@ const calculateSubscriptionStatus = (
 
   /*
    * Subscription starts in future.
-   *
-   * Dashboard.jsx treats "inactive"
-   * as restricted access.
    */
   if (startDate > today) {
     return "inactive";
@@ -332,98 +329,195 @@ export const getSubscriberProfile =
 /* =========================================================
    SUBSCRIBER MEMBERSHIP
 
-   IMPORTANT:
+   NEW ACCESS ENGINE:
 
-   OLD SYSTEM:
-   public.members
-
-   NEW V2 SYSTEM:
-   public.members_v2
-   public.member_subscriptions_v2
+   1. Get logged-in Supabase Auth user.
+   2. Find members_v2 using auth_user_id.
+   3. Email fallback for existing accounts not linked yet.
+   4. dashboard_access must be TRUE.
+   5. Existing subscription engine remains intact.
 ========================================================= */
 
 export const getSubscriberMembership =
   async (email) => {
-    let membershipEmail =
-      normalize(email);
+    const {
+      data: { user },
+      error: userError,
+    } =
+      await supabase.auth.getUser();
 
-    /* =====================================================
-       GET EMAIL FROM AUTH IF REQUIRED
-    ===================================================== */
-
-    if (!membershipEmail) {
-      const {
-        data: { user },
-        error: userError,
-      } =
-        await supabase.auth.getUser();
-
-      if (userError) {
-        throw userError;
-      }
-
-      membershipEmail =
-        normalize(
-          user?.email
-        );
+    if (userError) {
+      throw userError;
     }
 
-    if (!membershipEmail) {
-      console.warn(
-        "Subscriber membership lookup skipped: no email available."
-      );
-
+    if (!user) {
       return null;
     }
 
-    console.log(
-      "Looking up V2 member:",
-      membershipEmail
-    );
+    const membershipEmail =
+      normalize(
+        email || user.email
+      );
 
     /* =====================================================
        STEP 1
-       FIND MEMBER IN members_v2
+       FIND MEMBER BY AUTH UUID FIRST
     ===================================================== */
 
+    let member = null;
+
     const {
-      data: member,
-      error: memberError,
+      data: memberByAuth,
+      error: authMemberError,
     } =
       await supabase
         .from("members_v2")
         .select("*")
         .eq(
-          "email",
-          membershipEmail
+          "auth_user_id",
+          user.id
         )
         .maybeSingle();
 
-    if (memberError) {
+    if (authMemberError) {
       console.error(
-        "members_v2 lookup error:",
-        memberError
+        "members_v2 auth lookup error:",
+        authMemberError
       );
 
-      throw memberError;
+      throw authMemberError;
+    }
+
+    member =
+      memberByAuth || null;
+
+    /* =====================================================
+       TEMPORARY EMAIL FALLBACK
+
+       This protects existing subscribers whose old
+       members_v2 records do not yet have auth_user_id.
+    ===================================================== */
+
+    if (
+      !member &&
+      membershipEmail
+    ) {
+      const {
+        data: memberByEmail,
+        error: emailMemberError,
+      } =
+        await supabase
+          .from("members_v2")
+          .select("*")
+          .eq(
+            "email",
+            membershipEmail
+          )
+          .maybeSingle();
+
+      if (emailMemberError) {
+        console.error(
+          "members_v2 email fallback error:",
+          emailMemberError
+        );
+
+        throw emailMemberError;
+      }
+
+      member =
+        memberByEmail || null;
     }
 
     if (!member) {
       console.warn(
-        `No members_v2 record found for ${membershipEmail}`
+        "No members_v2 record found for logged-in user."
       );
 
       return null;
     }
 
-    console.log(
-      "V2 member found:",
-      member
-    );
-
     /* =====================================================
        STEP 2
-       GET MEMBER SUBSCRIPTION HISTORY
+       ADMIN-CONTROLLED DASHBOARD ACCESS
+
+       Registration alone DOES NOT grant dashboard access.
+    ===================================================== */
+
+    if (
+      member.dashboard_access !==
+      true
+    ) {
+      console.warn(
+        `Dashboard access is disabled for member ${member.id}`
+      );
+
+      return {
+        id: null,
+
+        member_id:
+          member.id,
+
+        name:
+          member.name || "",
+
+        email:
+          member.email ||
+          membershipEmail ||
+          user.email ||
+          "",
+
+        mobile:
+          member.mobile || "",
+
+        tv_id:
+          member.tv_id || "",
+
+        plan:
+          "Registered User",
+
+        start_date:
+          null,
+
+        expiry_date:
+          null,
+
+        amount:
+          0,
+
+        status:
+          "inactive",
+
+        subscription_status:
+          "inactive",
+
+        settlement_status:
+          null,
+
+        payment_date:
+          null,
+
+        is_renewal:
+          false,
+
+        dashboard_access:
+          false,
+
+        access_denied:
+          true,
+
+        member,
+
+        subscription:
+          null,
+
+        subscriptions:
+          [],
+      };
+    }
+
+    /* =====================================================
+       STEP 3
+       GET SUBSCRIPTION HISTORY
     ===================================================== */
 
     const {
@@ -464,24 +558,83 @@ export const getSubscriberMembership =
       throw subscriptionError;
     }
 
+    /* =====================================================
+       MANUAL DASHBOARD ACCESS
+
+       Admin can enable a registered account even when
+       there is no subscription record.
+    ===================================================== */
+
     if (
       !subscriptions ||
       subscriptions.length === 0
     ) {
-      console.warn(
-        `No subscription history found for member ${member.id}`
-      );
+      return {
+        id: null,
 
-      return null;
+        member_id:
+          member.id,
+
+        name:
+          member.name || "",
+
+        email:
+          member.email ||
+          membershipEmail ||
+          user.email ||
+          "",
+
+        mobile:
+          member.mobile || "",
+
+        tv_id:
+          member.tv_id || "",
+
+        plan:
+          "Manual Access",
+
+        start_date:
+          null,
+
+        expiry_date:
+          null,
+
+        amount:
+          0,
+
+        status:
+          "active",
+
+        subscription_status:
+          "active",
+
+        settlement_status:
+          null,
+
+        payment_date:
+          null,
+
+        is_renewal:
+          false,
+
+        dashboard_access:
+          true,
+
+        access_denied:
+          false,
+
+        member,
+
+        subscription:
+          null,
+
+        subscriptions:
+          [],
+      };
     }
 
-    console.log(
-      "V2 subscription history:",
-      subscriptions
-    );
-
     /* =====================================================
-       STEP 3
+       STEP 4
        SELECT CURRENT/EFFECTIVE SUBSCRIPTION
     ===================================================== */
 
@@ -493,16 +646,12 @@ export const getSubscriberMembership =
     if (
       !selectedSubscription
     ) {
-      console.warn(
-        `No effective subscription found for ${membershipEmail}`
-      );
-
       return null;
     }
 
     /* =====================================================
-       STEP 4
-       CALCULATE STATUS
+       STEP 5
+       CALCULATE SUBSCRIPTION STATUS
     ===================================================== */
 
     const calculatedStatus =
@@ -510,19 +659,9 @@ export const getSubscriberMembership =
         selectedSubscription
       );
 
-    console.log(
-      "Selected subscriber membership:",
-      {
-        member,
-        subscription:
-          selectedSubscription,
-        calculatedStatus,
-      }
-    );
-
     /* =====================================================
-       STEP 5
-       RETURN FORMAT EXPECTED BY Dashboard.jsx
+       STEP 6
+       RETURN FORMAT EXPECTED BY EXISTING DASHBOARD
     ===================================================== */
 
     return {
@@ -541,7 +680,9 @@ export const getSubscriberMembership =
 
       email:
         member.email ||
-        membershipEmail,
+        membershipEmail ||
+        user.email ||
+        "",
 
       mobile:
         member.mobile ||
@@ -570,10 +711,12 @@ export const getSubscriberMembership =
         Number(
           selectedSubscription
             .amount ||
-            0
+          0
         ),
 
-      /* Dashboard uses this status */
+      /*
+       * Existing Dashboard.jsx uses this status.
+       */
       status:
         calculatedStatus,
 
@@ -596,7 +739,16 @@ export const getSubscriberMembership =
             .is_renewal
         ),
 
-      /* Complete source records if needed later */
+      /*
+       * New dashboard permission fields.
+       */
+      dashboard_access:
+        true,
+
+      access_denied:
+        false,
+
+      /* Complete source records */
       member,
 
       subscription:

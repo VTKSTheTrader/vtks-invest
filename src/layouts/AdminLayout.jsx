@@ -58,34 +58,51 @@ export default function AdminLayout() {
       to: "/admin/monthly-levels",
       label: "📅 Monthly Levels",
     },
+
+    // =====================================================
+    // MEMBERS
+    // =====================================================
+
     {
       to: "/admin/members",
       label: "👥 Members",
     },
+
+    {
+      to: "/admin/registered-users",
+      label: "🧑‍💻 Registered Users",
+    },
+
     {
       to: "/admin/expenses",
       label: "💰 Expenses",
     },
+
     {
       to: "/admin/stock-queries",
       label: "💬 Stock Queries",
     },
+
     {
       to: "/admin/scanner",
       label: "📡 Scanner",
     },
+
     {
       to: "/admin/library",
       label: "📚 Library",
     },
+
     {
       to: "/admin/community-links",
       label: "📢 Community Links",
     },
+
     {
       to: "/admin/testimonials",
       label: "⭐ Feedback",
     },
+
     {
       to: "/admin/settings",
       label: "⚙️ Settings",
@@ -95,7 +112,9 @@ export default function AdminLayout() {
   return (
     <div className="admin-layout">
 
-      {/* MOBILE HEADER */}
+      {/* =================================================
+          MOBILE HEADER
+      ================================================= */}
 
       <header className="admin-mobile-header">
 
@@ -116,7 +135,9 @@ export default function AdminLayout() {
 
       </header>
 
-      {/* BACKDROP */}
+      {/* =================================================
+          BACKDROP
+      ================================================= */}
 
       {sidebarOpen && (
         <button
@@ -129,7 +150,9 @@ export default function AdminLayout() {
         />
       )}
 
-      {/* SIDEBAR */}
+      {/* =================================================
+          SIDEBAR
+      ================================================= */}
 
       <aside
         className={`admin-sidebar ${
@@ -185,7 +208,9 @@ export default function AdminLayout() {
 
       </aside>
 
-      {/* MAIN CONTENT */}
+      {/* =================================================
+          MAIN CONTENT
+      ================================================= */}
 
       <main className="admin-main">
         <Outlet />
