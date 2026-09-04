@@ -5,8 +5,13 @@ import {
   useState,
 } from "react";
 
-import { useNavigate } from "react-router-dom";
-import { supabase } from "../../lib/supabase";
+import {
+  useNavigate,
+} from "react-router-dom";
+
+import {
+  supabase,
+} from "../../lib/supabase";
 
 import {
   dismissAllNotifications,
@@ -18,47 +23,78 @@ import {
 
 import "./NotificationBell.css";
 
-const formatTimeAgo = (dateValue) => {
-  if (!dateValue) return "";
+/* =========================================================
+   FORMAT TIME AGO
+========================================================= */
 
-  const date = new Date(dateValue);
-  const now = new Date();
-
-  const diffMs = now - date;
-
-  if (!Number.isFinite(diffMs)) {
+const formatTimeAgo = (
+  dateValue
+) => {
+  if (!dateValue) {
     return "";
   }
 
-  const diffMinutes = Math.floor(
-    diffMs / 60000
-  );
+  const date =
+    new Date(dateValue);
 
-  if (diffMinutes < 1) {
+  const now =
+    new Date();
+
+  const diffMs =
+    now - date;
+
+  if (
+    !Number.isFinite(
+      diffMs
+    )
+  ) {
+    return "";
+  }
+
+  const diffMinutes =
+    Math.floor(
+      diffMs / 60000
+    );
+
+  if (
+    diffMinutes < 1
+  ) {
     return "Just now";
   }
 
-  if (diffMinutes < 60) {
+  if (
+    diffMinutes < 60
+  ) {
     return `${diffMinutes} min ago`;
   }
 
-  const diffHours = Math.floor(
-    diffMinutes / 60
-  );
+  const diffHours =
+    Math.floor(
+      diffMinutes / 60
+    );
 
-  if (diffHours < 24) {
+  if (
+    diffHours < 24
+  ) {
     return `${diffHours} hr${
-      diffHours === 1 ? "" : "s"
+      diffHours === 1
+        ? ""
+        : "s"
     } ago`;
   }
 
-  const diffDays = Math.floor(
-    diffHours / 24
-  );
+  const diffDays =
+    Math.floor(
+      diffHours / 24
+    );
 
-  if (diffDays < 7) {
+  if (
+    diffDays < 7
+  ) {
     return `${diffDays} day${
-      diffDays === 1 ? "" : "s"
+      diffDays === 1
+        ? ""
+        : "s"
     } ago`;
   }
 
@@ -72,129 +108,237 @@ const formatTimeAgo = (dateValue) => {
   );
 };
 
-const getNotificationIcon = (type) => {
-  const normalized = String(
-    type || ""
-  ).toLowerCase();
+/* =========================================================
+   NOTIFICATION ICON
+========================================================= */
+
+const getNotificationIcon = (
+  type
+) => {
+  const normalized =
+    String(
+      type || ""
+    ).toLowerCase();
 
   if (
-    normalized.includes("study") ||
-    normalized.includes("stock")
+    normalized.includes(
+      "study"
+    ) ||
+    normalized.includes(
+      "stock"
+    )
   ) {
     return "📈";
   }
 
-  if (normalized.includes("scanner")) {
+  if (
+    normalized.includes(
+      "scanner"
+    )
+  ) {
     return "🎯";
   }
 
   if (
-    normalized.includes("level") ||
-    normalized.includes("outlook")
+    normalized.includes(
+      "level"
+    ) ||
+    normalized.includes(
+      "outlook"
+    )
   ) {
     return "📊";
   }
 
   if (
-    normalized.includes("video") ||
-    normalized.includes("resource") ||
-    normalized.includes("library")
+    normalized.includes(
+      "video"
+    ) ||
+    normalized.includes(
+      "resource"
+    ) ||
+    normalized.includes(
+      "library"
+    )
   ) {
     return "🎬";
   }
 
   if (
-    normalized.includes("community")
+    normalized.includes(
+      "community"
+    )
   ) {
     return "📢";
   }
 
-  if (normalized.includes("etf")) {
+  if (
+    normalized.includes(
+      "etf"
+    )
+  ) {
     return "💼";
   }
 
   return "🔔";
 };
 
+/* =========================================================
+   BROWSER NOTIFICATION SUPPORT
+========================================================= */
 
-const canUseBrowserNotifications = () =>
-  typeof window !== "undefined" &&
-  "Notification" in window;
+const canUseBrowserNotifications =
+  () =>
+    typeof window !==
+      "undefined" &&
+    "Notification" in
+      window;
 
-const requestBrowserNotificationPermission = async () => {
-  if (!canUseBrowserNotifications()) {
-    return "unsupported";
-  }
+/* =========================================================
+   REQUEST BROWSER PERMISSION
+========================================================= */
 
-  if (Notification.permission === "granted") {
-    return "granted";
-  }
+const requestBrowserNotificationPermission =
+  async () => {
+    if (
+      !canUseBrowserNotifications()
+    ) {
+      return "unsupported";
+    }
 
-  if (Notification.permission === "denied") {
-    return "denied";
-  }
+    if (
+      Notification.permission ===
+      "granted"
+    ) {
+      return "granted";
+    }
 
-  try {
-    return await Notification.requestPermission();
-  } catch (error) {
-    console.error(
-      "Browser notification permission error:",
-      error
-    );
+    if (
+      Notification.permission ===
+      "denied"
+    ) {
+      return "denied";
+    }
 
-    return "default";
-  }
-};
+    try {
+      return await Notification.requestPermission();
+    } catch (error) {
+      console.error(
+        "Browser notification permission error:",
+        error
+      );
 
-const showBrowserNotification = (notification) => {
-  if (
-    !canUseBrowserNotifications() ||
-    Notification.permission !== "granted" ||
-    !notification
-  ) {
-    return;
-  }
+      return "default";
+    }
+  };
 
-  const title =
-    notification.title || "VTKS INVEST";
+/* =========================================================
+   SHOW WINDOWS / BROWSER POPUP
+========================================================= */
 
-  const body =
-    notification.message ||
-    "A new VTKS update is available.";
+const showBrowserNotification =
+  (notification) => {
+    if (
+      !canUseBrowserNotifications() ||
+      Notification.permission !==
+        "granted" ||
+      !notification
+    ) {
+      return;
+    }
 
-  try {
-    const browserNotification =
-      new Notification(title, {
-        body,
-        icon: "/favicon.png",
-        badge: "/favicon.png",
-        tag: `vtks-${notification.id || Date.now()}`,
-      });
+    const title =
+      notification.title ||
+      "VTKS INVEST";
 
-    browserNotification.onclick = () => {
-      window.focus();
+    const body =
+      notification.message ||
+      "A new VTKS update is available.";
 
-      if (notification.link) {
-        window.location.assign(notification.link);
-      }
+    try {
+      const browserNotification =
+        new Notification(
+          title,
+          {
+            body,
 
-      browserNotification.close();
-    };
-  } catch (error) {
-    console.error(
-      "Browser notification display error:",
-      error
-    );
-  }
-};
+            icon:
+              "/favicon.png",
+
+            badge:
+              "/favicon.png",
+
+            tag: `vtks-${
+              notification.id ||
+              Date.now()
+            }`,
+          }
+        );
+
+      browserNotification.onclick =
+        () => {
+          window.focus();
+
+          if (
+            notification.link
+          ) {
+            window.location.assign(
+              notification.link
+            );
+          }
+
+          browserNotification.close();
+        };
+    } catch (error) {
+      console.error(
+        "Browser notification display error:",
+        error
+      );
+    }
+  };
+
+/* =========================================================
+   COMPONENT
+========================================================= */
 
 export default function NotificationBell() {
-  const navigate = useNavigate();
-  const wrapperRef = useRef(null);
+  const navigate =
+    useNavigate();
+
+  const wrapperRef =
+    useRef(null);
+
+  /*
+    Keeps track of notifications
+    already known by this browser.
+
+    Used ONLY to prevent duplicate
+    popup notifications.
+  */
+
   const knownNotificationIdsRef =
-    useRef(new Set());
+    useRef(
+      new Set()
+    );
+
+  /*
+    Prevent browser popups when
+    page first loads existing
+    notifications.
+  */
+
   const hasLoadedInitialNotificationsRef =
     useRef(false);
+
+  /*
+    Current Supabase Auth UUID.
+
+    Individual notifications are
+    matched against this UUID.
+  */
+
+  const currentUserIdRef =
+    useRef(null);
 
   const [
     notifications,
@@ -226,53 +370,96 @@ export default function NotificationBell() {
     setClearingAll,
   ] = useState(false);
 
-  const unreadCount = useMemo(
-    () =>
-      notifications.filter(
-        (notification) =>
-          !notification.isRead
-      ).length,
-    [notifications]
-  );
+  /* =====================================================
+     UNREAD COUNT
+  ===================================================== */
+
+  const unreadCount =
+    useMemo(
+      () =>
+        notifications.filter(
+          (
+            notification
+          ) =>
+            !notification.isRead
+        ).length,
+      [
+        notifications,
+      ]
+    );
+
+  /* =====================================================
+     LOAD NOTIFICATIONS
+  ===================================================== */
 
   const loadNotifications =
     async () => {
       try {
         setLoading(true);
-        setErrorMessage("");
+
+        setErrorMessage(
+          ""
+        );
 
         const rows =
           await getSubscriberNotifications();
 
-        const safeRows = rows || [];
+        const safeRows =
+          Array.isArray(
+            rows
+          )
+            ? rows
+            : [];
+
+        /*
+          Only show popup for newly
+          discovered notifications
+          AFTER initial page load.
+
+          This is mainly our polling
+          fallback.
+
+          Realtime INSERT normally
+          handles the popup instantly.
+        */
 
         if (
           hasLoadedInitialNotificationsRef.current
         ) {
-          const newlyArrived = safeRows.filter(
-            (item) =>
-              !knownNotificationIdsRef.current.has(
-                item.id
-              )
-          );
+          const newlyArrived =
+            safeRows.filter(
+              (item) =>
+                !knownNotificationIdsRef.current.has(
+                  item.id
+                )
+            );
 
           newlyArrived
             .slice()
             .reverse()
-            .forEach((item) => {
-              showBrowserNotification(item);
-            });
+            .forEach(
+              (item) => {
+                showBrowserNotification(
+                  item
+                );
+              }
+            );
         }
 
         knownNotificationIdsRef.current =
           new Set(
-            safeRows.map((item) => item.id)
+            safeRows.map(
+              (item) =>
+                item.id
+            )
           );
 
         hasLoadedInitialNotificationsRef.current =
           true;
 
-        setNotifications(safeRows);
+        setNotifications(
+          safeRows
+        );
       } catch (error) {
         console.error(
           "Notification load error:",
@@ -284,112 +471,470 @@ export default function NotificationBell() {
             "Unable to load notifications."
         );
       } finally {
-        setLoading(false);
+        setLoading(
+          false
+        );
       }
     };
+
+  /* =====================================================
+     INITIAL LOAD
+  ===================================================== */
 
   useEffect(() => {
     loadNotifications();
   }, []);
 
+  /* =====================================================
+     REALTIME
+
+     INSERT
+       -> new notification
+       -> popup + bell refresh
+
+     UPDATE ACTIVE
+       -> Admin edited notification
+       -> bell refresh only
+       -> NO second popup
+
+     UPDATE INACTIVE
+       -> Admin deleted/removed
+       -> immediately remove
+
+     DELETE
+       -> physical database deletion
+       -> immediately remove
+  ===================================================== */
+
   useEffect(() => {
-    let isMounted = true;
+    let isMounted =
+      true;
 
-    const channel = supabase
-      .channel(
-        `vtks-browser-notifications-${Date.now()}`
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "notifications",
-        },
-        async (payload) => {
-          const item = payload?.new;
+    let channel =
+      null;
+
+    /* =================================================
+       REFRESH BELL WITHOUT POPUP
+    ================================================= */
+
+    const refreshBellData =
+      async () => {
+        try {
+          const rows =
+            await getSubscriberNotifications();
 
           if (
-            !isMounted ||
-            !item ||
-            item.is_active === false ||
-            !["subscriber", "public"].includes(
-              item.audience
-            )
+            !isMounted
           ) {
             return;
           }
 
-          if (
-            knownNotificationIdsRef.current.has(
-              item.id
+          const safeRows =
+            Array.isArray(
+              rows
             )
-          ) {
-            return;
-          }
+              ? rows
+              : [];
 
-          knownNotificationIdsRef.current.add(
-            item.id
+          knownNotificationIdsRef.current =
+            new Set(
+              safeRows.map(
+                (
+                  notification
+                ) =>
+                  notification.id
+              )
+            );
+
+          setNotifications(
+            safeRows
           );
+        } catch (error) {
+          console.error(
+            "Realtime notification refresh error:",
+            error
+          );
+        }
+      };
 
-          showBrowserNotification(item);
+    /* =================================================
+       SETUP REALTIME
+    ================================================= */
 
-          try {
-            const rows =
-              await getSubscriberNotifications();
+    const setupRealtime =
+      async () => {
+        try {
+          /* =========================================
+             CURRENT LOGGED-IN USER
+          ========================================= */
 
-            if (!isMounted) {
-              return;
-            }
+          const {
+            data: {
+              user,
+            },
+            error:
+              userError,
+          } =
+            await supabase.auth.getUser();
 
-            const safeRows = rows || [];
-
-            knownNotificationIdsRef.current =
-              new Set(
-                safeRows.map(
-                  (notification) =>
-                    notification.id
-                )
-              );
-
-            setNotifications(safeRows);
-          } catch (error) {
+          if (
+            userError
+          ) {
             console.error(
-              "Realtime notification refresh error:",
-              error
+              "Notification auth user error:",
+              userError
             );
           }
-        }
-      )
-      .subscribe();
 
-    const pollingTimer = window.setInterval(
-      () => {
-        loadNotifications();
-      },
-      60000
-    );
+          if (
+            !isMounted
+          ) {
+            return;
+          }
+
+          currentUserIdRef.current =
+            user?.id ||
+            null;
+
+          /* =========================================
+             REALTIME CHANNEL
+          ========================================= */
+
+          channel =
+            supabase
+              .channel(
+                `vtks-browser-notifications-${Date.now()}`
+              )
+              .on(
+                "postgres_changes",
+                {
+                  event:
+                    "*",
+
+                  schema:
+                    "public",
+
+                  table:
+                    "notifications",
+                },
+                async (
+                  payload
+                ) => {
+                  if (
+                    !isMounted
+                  ) {
+                    return;
+                  }
+
+                  const eventType =
+                    payload
+                      ?.eventType;
+
+                  const item =
+                    payload
+                      ?.new;
+
+                  const oldItem =
+                    payload
+                      ?.old;
+
+                  /* =================================
+                     PHYSICAL DELETE
+                  ================================= */
+
+                  if (
+                    eventType ===
+                    "DELETE"
+                  ) {
+                    const deletedId =
+                      oldItem
+                        ?.id;
+
+                    if (
+                      deletedId
+                    ) {
+                      setNotifications(
+                        (
+                          previous
+                        ) =>
+                          previous.filter(
+                            (
+                              notification
+                            ) =>
+                              notification.id !==
+                              deletedId
+                          )
+                      );
+
+                      knownNotificationIdsRef.current.delete(
+                        deletedId
+                      );
+                    }
+
+                    /*
+                      Database refresh provides
+                      final authoritative state.
+                    */
+
+                    await refreshBellData();
+
+                    return;
+                  }
+
+                  if (
+                    !item
+                  ) {
+                    return;
+                  }
+
+                  /* =================================
+                     UPDATE EVENT
+                  ================================= */
+
+                  if (
+                    eventType ===
+                    "UPDATE"
+                  ) {
+                    /*
+                      Admin Delete / Remove.
+
+                      is_active false means this
+                      notification must disappear.
+                    */
+
+                    if (
+                      item.is_active ===
+                      false
+                    ) {
+                      setNotifications(
+                        (
+                          previous
+                        ) =>
+                          previous.filter(
+                            (
+                              notification
+                            ) =>
+                              notification.id !==
+                              item.id
+                          )
+                      );
+
+                      knownNotificationIdsRef.current.delete(
+                        item.id
+                      );
+
+                      await refreshBellData();
+
+                      return;
+                    }
+
+                    /*
+                      If audience was changed away
+                      from subscriber/public,
+                      refresh to remove stale row.
+                    */
+
+                    if (
+                      ![
+                        "subscriber",
+                        "public",
+                      ].includes(
+                        item.audience
+                      )
+                    ) {
+                      await refreshBellData();
+
+                      return;
+                    }
+
+                    /*
+                      Individual notification
+                      belonging to someone else.
+
+                      Refresh in case this row was
+                      previously visible here.
+                    */
+
+                    if (
+                      item.target_user_id &&
+                      item.target_user_id !==
+                        currentUserIdRef.current
+                    ) {
+                      await refreshBellData();
+
+                      return;
+                    }
+
+                    /*
+                      Admin edited:
+                      - title
+                      - message
+                      - link
+
+                      Refresh bell silently.
+
+                      IMPORTANT:
+                      No Windows popup for edits.
+                    */
+
+                    await refreshBellData();
+
+                    return;
+                  }
+
+                  /* =================================
+                     ONLY INSERT CONTINUES BELOW
+                  ================================= */
+
+                  if (
+                    eventType !==
+                    "INSERT"
+                  ) {
+                    return;
+                  }
+
+                  /* =================================
+                     VALID ACTIVE NOTIFICATION
+                  ================================= */
+
+                  if (
+                    item.is_active ===
+                      false ||
+                    ![
+                      "subscriber",
+                      "public",
+                    ].includes(
+                      item.audience
+                    )
+                  ) {
+                    return;
+                  }
+
+                  /* =================================
+                     INDIVIDUAL TARGET CHECK
+                  ================================= */
+
+                  if (
+                    item.target_user_id &&
+                    item.target_user_id !==
+                      currentUserIdRef.current
+                  ) {
+                    return;
+                  }
+
+                  /* =================================
+                     DUPLICATE PROTECTION
+
+                     IMPORTANT:
+                     Applied ONLY to INSERT.
+                  ================================= */
+
+                  if (
+                    knownNotificationIdsRef.current.has(
+                      item.id
+                    )
+                  ) {
+                    return;
+                  }
+
+                  knownNotificationIdsRef.current.add(
+                    item.id
+                  );
+
+                  /* =================================
+                     WINDOWS POPUP
+
+                     ONLY NEW INSERT
+                  ================================= */
+
+                  showBrowserNotification(
+                    item
+                  );
+
+                  /* =================================
+                     REFRESH BELL
+                  ================================= */
+
+                  await refreshBellData();
+                }
+              )
+              .subscribe(
+                (
+                  status
+                ) => {
+                  console.log(
+                    "VTKS notification realtime:",
+                    status
+                  );
+                }
+              );
+        } catch (error) {
+          console.error(
+            "Notification realtime setup error:",
+            error
+          );
+        }
+      };
+
+    setupRealtime();
+
+    /* =================================================
+       POLLING FALLBACK
+
+       If Realtime ever misses something,
+       bell syncs within 60 seconds.
+    ================================================= */
+
+    const pollingTimer =
+      window.setInterval(
+        () => {
+          loadNotifications();
+        },
+        60000
+      );
+
+    /* =================================================
+       CLEANUP
+    ================================================= */
 
     return () => {
-      isMounted = false;
-      window.clearInterval(pollingTimer);
-      supabase.removeChannel(channel);
+      isMounted =
+        false;
+
+      window.clearInterval(
+        pollingTimer
+      );
+
+      if (
+        channel
+      ) {
+        supabase.removeChannel(
+          channel
+        );
+      }
     };
   }, []);
 
+  /* =====================================================
+     CLOSE PANEL ON OUTSIDE CLICK
+  ===================================================== */
+
   useEffect(() => {
-    const handleOutsideClick = (
-      event
-    ) => {
-      if (
-        wrapperRef.current &&
-        !wrapperRef.current.contains(
-          event.target
-        )
-      ) {
-        setIsOpen(false);
-      }
-    };
+    const handleOutsideClick =
+      (
+        event
+      ) => {
+        if (
+          wrapperRef.current &&
+          !wrapperRef.current.contains(
+            event.target
+          )
+        ) {
+          setIsOpen(
+            false
+          );
+        }
+      };
 
     document.addEventListener(
       "mousedown",
@@ -404,40 +949,89 @@ export default function NotificationBell() {
     };
   }, []);
 
-  const handleNotificationClick =
-    async (notification) => {
-      try {
-        if (!notification.isRead) {
-          await markNotificationAsRead(
-            notification.id
-          );
+  /* =====================================================
+     CLICK NOTIFICATION
+  ===================================================== */
 
-          setNotifications(
-            (previous) =>
-              previous.map((item) =>
-                item.id ===
-                notification.id
-                  ? {
-                      ...item,
-                      isRead: true,
-                    }
-                  : item
-              )
-          );
-        }
-      } catch (error) {
-        console.error(
-          "Mark notification read error:",
-          error
+  const handleNotificationClick =
+  async (notification) => {
+    try {
+      if (!notification.isRead) {
+        await markNotificationAsRead(
+          notification.id
+        );
+
+        setNotifications(
+          (previous) =>
+            previous.map((item) =>
+              item.id === notification.id
+                ? {
+                    ...item,
+                    isRead: true,
+                  }
+                : item
+            )
         );
       }
+    } catch (error) {
+      console.error(
+        "Mark notification read error:",
+        error
+      );
+    }
 
-      setIsOpen(false);
+    setIsOpen(false);
 
-      if (notification.link) {
-        navigate(notification.link);
-      }
-    };
+    const link =
+      String(
+        notification.link || ""
+      ).trim();
+
+    if (!link) {
+      return;
+    }
+
+    /* =========================================
+       EXTERNAL URL
+       Example:
+       https://www.vtksinvest.com/
+    ========================================= */
+
+    if (
+      link.startsWith("http://") ||
+      link.startsWith("https://")
+    ) {
+      window.location.assign(link);
+      return;
+    }
+
+    /* =========================================
+       WWW URL WITHOUT PROTOCOL
+    ========================================= */
+
+    if (link.startsWith("www.")) {
+      window.location.assign(
+        `https://${link}`
+      );
+      return;
+    }
+
+    /* =========================================
+       INTERNAL WEBSITE ROUTE
+       Example:
+       /dashboard/trade/47
+    ========================================= */
+
+    navigate(
+      link.startsWith("/")
+        ? link
+        : `/${link}`
+    );
+  };
+
+  /* =====================================================
+     MARK ALL READ
+  ===================================================== */
 
   const handleMarkAllRead =
     async () => {
@@ -447,11 +1041,18 @@ export default function NotificationBell() {
         );
 
         setNotifications(
-          (previous) =>
-            previous.map((item) => ({
-              ...item,
-              isRead: true,
-            }))
+          (
+            previous
+          ) =>
+            previous.map(
+              (
+                item
+              ) => ({
+                ...item,
+                isRead:
+                  true,
+              })
+            )
         );
       } catch (error) {
         console.error(
@@ -461,88 +1062,143 @@ export default function NotificationBell() {
       }
     };
 
-  const handleDismiss = async (
-    event,
-    notificationId
-  ) => {
-    event.preventDefault();
-    event.stopPropagation();
+  /* =====================================================
+     DISMISS ONE
+  ===================================================== */
 
-    if (!notificationId) {
-      return;
-    }
+  const handleDismiss =
+    async (
+      event,
+      notificationId
+    ) => {
+      event.preventDefault();
+      event.stopPropagation();
 
-    try {
-      setDismissingId(
-        notificationId
-      );
+      if (
+        !notificationId
+      ) {
+        return;
+      }
 
-      await dismissNotification(
-        notificationId
-      );
+      try {
+        setDismissingId(
+          notificationId
+        );
 
-      setNotifications(
-        (previous) =>
-          previous.filter(
-            (item) =>
-              item.id !==
-              notificationId
-          )
-      );
-    } catch (error) {
-      console.error(
-        "Dismiss notification error:",
-        error
-      );
-    } finally {
-      setDismissingId(null);
-    }
-  };
+        await dismissNotification(
+          notificationId
+        );
+
+        setNotifications(
+          (
+            previous
+          ) =>
+            previous.filter(
+              (
+                item
+              ) =>
+                item.id !==
+                notificationId
+            )
+        );
+
+        knownNotificationIdsRef.current.delete(
+          notificationId
+        );
+      } catch (error) {
+        console.error(
+          "Dismiss notification error:",
+          error
+        );
+      } finally {
+        setDismissingId(
+          null
+        );
+      }
+    };
+
+  /* =====================================================
+     CLEAR ALL
+  ===================================================== */
 
   const handleClearAll =
     async () => {
       if (
-        notifications.length === 0 ||
+        notifications.length ===
+          0 ||
         clearingAll
       ) {
         return;
       }
 
       try {
-        setClearingAll(true);
+        setClearingAll(
+          true
+        );
 
         await dismissAllNotifications(
           notifications
         );
 
-        setNotifications([]);
+        setNotifications(
+          []
+        );
+
+        /*
+          Keep known IDs.
+
+          Clear All is subscriber-specific
+          dismissal, not a new notification.
+          We do not want polling to create
+          desktop popups for old dismissed
+          notifications.
+        */
       } catch (error) {
         console.error(
           "Clear all notifications error:",
           error
         );
       } finally {
-        setClearingAll(false);
+        setClearingAll(
+          false
+        );
       }
     };
+
+  /* =====================================================
+     UI
+  ===================================================== */
 
   return (
     <div
       className="subscriber-notification-wrapper"
-      ref={wrapperRef}
+      ref={
+        wrapperRef
+      }
     >
+
+      {/* =================================================
+          BELL BUTTON
+      ================================================= */}
+
       <button
         type="button"
         className="subscriber-notification-bell"
-        onClick={async () => {
-          await requestBrowserNotificationPermission();
+        onClick={
+          async () => {
+            await requestBrowserNotificationPermission();
 
-          setIsOpen(
-            (previous) => !previous
-          );
-        }}
+            setIsOpen(
+              (
+                previous
+              ) =>
+                !previous
+            );
+          }
+        }
         aria-label="Notifications"
       >
+
         <span
           className="subscriber-notification-bell-icon"
           aria-hidden="true"
@@ -550,35 +1206,57 @@ export default function NotificationBell() {
           🔔
         </span>
 
-        {unreadCount > 0 && (
+        {unreadCount >
+          0 && (
           <span className="subscriber-notification-count">
-            {unreadCount > 99
+            {unreadCount >
+            99
               ? "99+"
               : unreadCount}
           </span>
         )}
+
       </button>
+
+      {/* =================================================
+          PANEL
+      ================================================= */}
 
       {isOpen && (
         <div className="subscriber-notification-panel">
+
+          {/* =============================================
+              HEADER
+          ============================================= */}
+
           <div className="subscriber-notification-header">
+
             <div className="subscriber-notification-header-copy">
-              <h3>Notifications</h3>
+
+              <h3>
+                Notifications
+              </h3>
 
               <p>
-                {unreadCount > 0
+                {unreadCount >
+                0
                   ? `${unreadCount} unread update${
-                      unreadCount === 1
+                      unreadCount ===
+                      1
                         ? ""
                         : "s"
                     }`
                   : "You're all caught up"}
               </p>
+
             </div>
 
-            {notifications.length > 0 && (
+            {notifications.length >
+              0 && (
               <div className="subscriber-notification-header-actions">
-                {unreadCount > 0 && (
+
+                {unreadCount >
+                  0 && (
                   <button
                     type="button"
                     className="subscriber-notification-mark-read-button"
@@ -604,18 +1282,28 @@ export default function NotificationBell() {
                     ? "Clearing..."
                     : "Clear All"}
                 </button>
+
               </div>
             )}
+
           </div>
 
+          {/* =============================================
+              LIST
+          ============================================= */}
+
           <div className="subscriber-notification-list">
+
             {loading ? (
               <div className="subscriber-notification-state">
                 Loading notifications...
               </div>
             ) : errorMessage ? (
               <div className="subscriber-notification-state error">
-                {errorMessage}
+
+                {
+                  errorMessage
+                }
 
                 <button
                   type="button"
@@ -625,11 +1313,15 @@ export default function NotificationBell() {
                 >
                   Try Again
                 </button>
+
               </div>
             ) : notifications.length ===
               0 ? (
               <div className="subscriber-notification-empty">
-                <span>🔔</span>
+
+                <span>
+                  🔔
+                </span>
 
                 <h4>
                   No notifications
@@ -639,12 +1331,18 @@ export default function NotificationBell() {
                   New subscriber updates
                   will appear here.
                 </p>
+
               </div>
             ) : (
               notifications
-                .slice(0, 20)
+                .slice(
+                  0,
+                  20
+                )
                 .map(
-                  (notification) => (
+                  (
+                    notification
+                  ) => (
                     <div
                       key={
                         notification.id
@@ -655,6 +1353,11 @@ export default function NotificationBell() {
                           : "unread"
                       }`}
                     >
+
+                      {/* =================================
+                          MAIN CONTENT
+                      ================================= */}
+
                       <button
                         type="button"
                         className="subscriber-notification-main"
@@ -664,6 +1367,7 @@ export default function NotificationBell() {
                           )
                         }
                       >
+
                         <span className="subscriber-notification-item-icon">
                           {getNotificationIcon(
                             notification.notification_type
@@ -671,6 +1375,7 @@ export default function NotificationBell() {
                         </span>
 
                         <span className="subscriber-notification-item-content">
+
                           <strong>
                             {
                               notification.title
@@ -690,10 +1395,17 @@ export default function NotificationBell() {
                               notification.created_at
                             )}
                           </small>
+
                         </span>
+
                       </button>
 
+                      {/* =================================
+                          ACTIONS
+                      ================================= */}
+
                       <div className="subscriber-notification-item-actions">
+
                         {!notification.isRead && (
                           <span
                             className="subscriber-notification-unread-dot"
@@ -721,14 +1433,19 @@ export default function NotificationBell() {
                         >
                           ×
                         </button>
+
                       </div>
+
                     </div>
                   )
                 )
             )}
+
           </div>
+
         </div>
       )}
+
     </div>
   );
 }

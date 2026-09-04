@@ -56,6 +56,7 @@ import AdminTestimonials from "./pages/admin/Testimonials";
 import MonthlyLevels from "./pages/admin/MonthlyLevels";
 import AdminStockQueries from "./pages/admin/StockQueries";
 import AdminExpenses from "./pages/admin/Expenses";
+import AdminNotifications from "./pages/admin/Notifications";
 
 /* =====================================================
    SUBSCRIBER PAGES
@@ -265,6 +266,10 @@ function App() {
 <Route
   path="registered-users"
   element={<RegisteredUsers />}
+/>
+<Route
+  path="notifications"
+  element={<AdminNotifications />}
 />
           <Route
             path="expenses"

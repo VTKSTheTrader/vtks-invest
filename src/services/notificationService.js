@@ -31,11 +31,19 @@ export const getSubscriberNotifications = async () => {
       link,
       reference_id,
       audience,
+      target_user_id,
       is_active,
-      created_at
+      created_at,
+      updated_at
     `)
     .eq("is_active", true)
-    .in("audience", ["subscriber", "public"])
+    .in("audience", [
+      "subscriber",
+      "public",
+    ])
+    .or(
+      `target_user_id.is.null,target_user_id.eq.${user.id}`
+    )
     .order("created_at", {
       ascending: false,
     });
@@ -65,7 +73,9 @@ export const getSubscriberNotifications = async () => {
       row.notification_id,
       {
         isRead: Boolean(row.read_at),
-        isDismissed: Boolean(row.dismissed_at),
+        isDismissed: Boolean(
+          row.dismissed_at
+        ),
       },
     ])
   );
@@ -73,11 +83,15 @@ export const getSubscriberNotifications = async () => {
   return (notifications || [])
     .map((notification) => {
       const status =
-        statusMap.get(notification.id) || {};
+        statusMap.get(
+          notification.id
+        ) || {};
 
       return {
         ...notification,
-        isRead: Boolean(status.isRead),
+        isRead: Boolean(
+          status.isRead
+        ),
         isDismissed: Boolean(
           status.isDismissed
         ),
@@ -110,7 +124,9 @@ export const getUnreadNotificationCount =
 
 export const markNotificationAsRead =
   async (notificationId) => {
-    if (!notificationId) return;
+    if (!notificationId) {
+      return;
+    }
 
     const {
       data: { user },
@@ -125,21 +141,26 @@ export const markNotificationAsRead =
       return;
     }
 
-    const { error } = await supabase
-      .from("notification_reads")
-      .upsert(
-        {
-          notification_id:
-            notificationId,
-          user_id: user.id,
-          read_at:
-            new Date().toISOString(),
-        },
-        {
-          onConflict:
-            "notification_id,user_id",
-        }
-      );
+    const { error } =
+      await supabase
+        .from("notification_reads")
+        .upsert(
+          {
+            notification_id:
+              notificationId,
+
+            user_id:
+              user.id,
+
+            read_at:
+              new Date()
+                .toISOString(),
+          },
+          {
+            onConflict:
+              "notification_id,user_id",
+          }
+        );
 
     if (error) {
       throw error;
@@ -185,17 +206,22 @@ export const markAllNotificationsAsRead =
         (notification) => ({
           notification_id:
             notification.id,
-          user_id: user.id,
-          read_at: now,
+
+          user_id:
+            user.id,
+
+          read_at:
+            now,
         })
       );
 
-    const { error } = await supabase
-      .from("notification_reads")
-      .upsert(rows, {
-        onConflict:
-          "notification_id,user_id",
-      });
+    const { error } =
+      await supabase
+        .from("notification_reads")
+        .upsert(rows, {
+          onConflict:
+            "notification_id,user_id",
+        });
 
     if (error) {
       throw error;
@@ -208,7 +234,9 @@ export const markAllNotificationsAsRead =
 
 export const dismissNotification =
   async (notificationId) => {
-    if (!notificationId) return;
+    if (!notificationId) {
+      return;
+    }
 
     const {
       data: { user },
@@ -236,7 +264,10 @@ export const dismissNotification =
         "notification_id",
         notificationId
       )
-      .eq("user_id", user.id)
+      .eq(
+        "user_id",
+        user.id
+      )
       .maybeSingle();
 
     if (checkError) {
@@ -249,13 +280,17 @@ export const dismissNotification =
       } = await supabase
         .from("notification_reads")
         .update({
-          dismissed_at: now,
+          dismissed_at:
+            now,
         })
         .eq(
           "notification_id",
           notificationId
         )
-        .eq("user_id", user.id);
+        .eq(
+          "user_id",
+          user.id
+        );
 
       if (updateError) {
         throw updateError;
@@ -268,9 +303,15 @@ export const dismissNotification =
         .insert({
           notification_id:
             notificationId,
-          user_id: user.id,
-          read_at: now,
-          dismissed_at: now,
+
+          user_id:
+            user.id,
+
+          read_at:
+            now,
+
+          dismissed_at:
+            now,
         });
 
       if (insertError) {
@@ -286,10 +327,15 @@ export const dismissNotification =
 ========================================================= */
 
 export const dismissAllNotifications =
-  async (notifications = []) => {
+  async (
+    notifications = []
+  ) => {
     if (
-      !Array.isArray(notifications) ||
-      notifications.length === 0
+      !Array.isArray(
+        notifications
+      ) ||
+      notifications.length ===
+        0
     ) {
       return;
     }
@@ -310,25 +356,33 @@ export const dismissAllNotifications =
     const now =
       new Date().toISOString();
 
-    const rows = notifications.map(
-      (notification) => ({
-        notification_id:
-          notification.id,
-        user_id: user.id,
-        read_at:
-          notification.isRead
-            ? notification.read_at || now
-            : now,
-        dismissed_at: now,
-      })
-    );
+    const rows =
+      notifications.map(
+        (notification) => ({
+          notification_id:
+            notification.id,
 
-    const { error } = await supabase
-      .from("notification_reads")
-      .upsert(rows, {
-        onConflict:
-          "notification_id,user_id",
-      });
+          user_id:
+            user.id,
+
+          read_at:
+            notification.isRead
+              ? notification.read_at ||
+                now
+              : now,
+
+          dismissed_at:
+            now,
+        })
+      );
+
+    const { error } =
+      await supabase
+        .from("notification_reads")
+        .upsert(rows, {
+          onConflict:
+            "notification_id,user_id",
+        });
 
     if (error) {
       throw error;
@@ -351,8 +405,24 @@ export const createNotification =
     link = "",
     referenceId = null,
     audience = "subscriber",
+    targetUserId = null,
   }) => {
-    if (!title) {
+    const cleanTitle =
+      String(
+        title || ""
+      ).trim();
+
+    const cleanMessage =
+      String(
+        message || ""
+      ).trim();
+
+    const cleanLink =
+      String(
+        link || ""
+      ).trim();
+
+    if (!cleanTitle) {
       throw new Error(
         "Notification title is required."
       );
@@ -364,17 +434,33 @@ export const createNotification =
     } = await supabase
       .from("notifications")
       .insert({
-        title,
-        message,
+        title:
+          cleanTitle,
+
+        message:
+          cleanMessage,
+
         notification_type:
           notificationType,
-        link,
+
+        link:
+          cleanLink,
+
         reference_id:
           referenceId
-            ? String(referenceId)
+            ? String(
+                referenceId
+              )
             : null,
+
         audience,
-        is_active: true,
+
+        target_user_id:
+          targetUserId ||
+          null,
+
+        is_active:
+          true,
       })
       .select()
       .single();
@@ -387,23 +473,240 @@ export const createNotification =
   };
 
 /* =========================================================
-   DELETE / DISABLE NOTIFICATION
+   UPDATE NOTIFICATION
+   ADMIN USE
+
+   Updates existing notification only.
+   Recipient is intentionally NOT changed.
 ========================================================= */
 
-export const disableNotification =
-  async (notificationId) => {
-    if (!notificationId) return;
+export const updateNotification =
+  async ({
+    notificationId,
+    title,
+    message = "",
+    link = "",
+  }) => {
+    if (!notificationId) {
+      throw new Error(
+        "Notification ID is required."
+      );
+    }
 
-    const { error } = await supabase
+    const cleanTitle =
+      String(
+        title || ""
+      ).trim();
+
+    const cleanMessage =
+      String(
+        message || ""
+      ).trim();
+
+    const cleanLink =
+      String(
+        link || ""
+      ).trim();
+
+    if (!cleanTitle) {
+      throw new Error(
+        "Notification title is required."
+      );
+    }
+
+    if (!cleanMessage) {
+      throw new Error(
+        "Notification message is required."
+      );
+    }
+
+    const {
+      error,
+    } = await supabase
       .from("notifications")
       .update({
-        is_active: false,
+        title:
+          cleanTitle,
+
+        message:
+          cleanMessage,
+
+        link:
+          cleanLink,
+
         updated_at:
-          new Date().toISOString(),
+          new Date()
+            .toISOString(),
       })
-      .eq("id", notificationId);
+      .eq(
+        "id",
+        notificationId
+      );
 
     if (error) {
       throw error;
     }
+
+    return true;
+  };
+
+/* =========================================================
+   REMOVE NOTIFICATION
+   ADMIN USE
+
+   Soft delete:
+   is_active = false
+
+   Subscriber query automatically stops showing it.
+========================================================= */
+
+export const removeNotification =
+  async (notificationId) => {
+    if (!notificationId) {
+      throw new Error(
+        "Notification ID is required."
+      );
+    }
+
+    const {
+      data,
+      error,
+    } = await supabase.rpc(
+      "admin_remove_notification",
+      {
+        p_notification_id:
+          notificationId,
+      }
+    );
+
+    if (error) {
+      throw error;
+    }
+
+    return data;
+  };
+/* =========================================================
+   RESTORE NOTIFICATION
+   ADMIN USE
+========================================================= */
+
+export const restoreNotification =
+  async (notificationId) => {
+    if (!notificationId) {
+      throw new Error(
+        "Notification ID is required."
+      );
+    }
+
+    const {
+      data,
+      error,
+    } = await supabase
+      .from("notifications")
+      .update({
+        is_active:
+          true,
+
+        updated_at:
+          new Date()
+            .toISOString(),
+      })
+      .eq(
+        "id",
+        notificationId
+      )
+      .select()
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    return data;
+  };
+
+/* =========================================================
+   DELETE NOTIFICATION PERMANENTLY
+   ADMIN USE
+
+   Kept for compatibility.
+========================================================= */
+
+export const deleteNotification =
+  async (notificationId) => {
+    if (!notificationId) {
+      return;
+    }
+
+    /* Delete read/dismiss records first */
+
+    const {
+      error:
+        readsDeleteError,
+    } = await supabase
+      .from("notification_reads")
+      .delete()
+      .eq(
+        "notification_id",
+        notificationId
+      );
+
+    if (readsDeleteError) {
+      throw readsDeleteError;
+    }
+
+    /* Permanently delete notification */
+
+    const {
+      error:
+        notificationDeleteError,
+    } = await supabase
+      .from("notifications")
+      .delete()
+      .eq(
+        "id",
+        notificationId
+      );
+
+    if (
+      notificationDeleteError
+    ) {
+      throw notificationDeleteError;
+    }
+
+    return true;
+  };
+
+/* =========================================================
+   LEGACY DISABLE FUNCTION
+   KEPT FOR EXISTING WEBSITE COMPATIBILITY
+========================================================= */
+
+export const disableNotification =
+  async (notificationId) => {
+    if (!notificationId) {
+      return;
+    }
+
+    const { error } =
+      await supabase
+        .from("notifications")
+        .update({
+          is_active:
+            false,
+
+          updated_at:
+            new Date()
+              .toISOString(),
+        })
+        .eq(
+          "id",
+          notificationId
+        );
+
+    if (error) {
+      throw error;
+    }
+
+    return true;
   };

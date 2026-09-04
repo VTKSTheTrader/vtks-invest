@@ -35,80 +35,88 @@ export default function AdminLayout() {
   };
 
   const menuItems = [
-    {
-      to: "/admin",
-      label: "📊 Dashboard",
-      end: true,
-    },
-    {
-      to: "/admin/holdings",
-      label: "📈 Holdings",
-    },
+  {
+    to: "/admin",
+    label: "📊 Dashboard",
+    end: true,
+  },
+  {
+    to: "/admin/holdings",
+    label: "📈 Holdings",
+  },
 
-    // =====================================================
-    // ETF PORTFOLIO
-    // =====================================================
+  // =====================================================
+  // ETF / SIP PORTFOLIO
+  // =====================================================
 
-    {
-      to: "/admin/etf",
-      label: "📊 ETF Portfolio",
-    },
+  {
+    to: "/admin/etf",
+    label: "📊 ETF Portfolio",
+  },
 
-    {
-      to: "/admin/monthly-levels",
-      label: "📅 Monthly Levels",
-    },
+  {
+    to: "/admin/monthly-levels",
+    label: "📅 Monthly Levels",
+  },
 
-    // =====================================================
-    // MEMBERS
-    // =====================================================
+  // =====================================================
+  // MEMBERS
+  // =====================================================
 
-    {
-      to: "/admin/members",
-      label: "👥 Members",
-    },
+  {
+    to: "/admin/members",
+    label: "👥 Members",
+  },
 
-    {
-      to: "/admin/registered-users",
-      label: "🧑‍💻 Registered Users",
-    },
+  {
+    to: "/admin/registered-users",
+    label: "🧑‍💻 Registered Users",
+  },
 
-    {
-      to: "/admin/expenses",
-      label: "💰 Expenses",
-    },
+  // =====================================================
+  // NOTIFICATIONS
+  // =====================================================
 
-    {
-      to: "/admin/stock-queries",
-      label: "💬 Stock Queries",
-    },
+  {
+    to: "/admin/notifications",
+    label: "🔔 Notifications",
+  },
 
-    {
-      to: "/admin/scanner",
-      label: "📡 Scanner",
-    },
+  {
+    to: "/admin/expenses",
+    label: "💰 Expenses",
+  },
 
-    {
-      to: "/admin/library",
-      label: "📚 Library",
-    },
+  {
+    to: "/admin/stock-queries",
+    label: "💬 Stock Queries",
+  },
 
-    {
-      to: "/admin/community-links",
-      label: "📢 Community Links",
-    },
+  {
+    to: "/admin/scanner",
+    label: "📡 Scanner",
+  },
 
-    {
-      to: "/admin/testimonials",
-      label: "⭐ Feedback",
-    },
+  {
+    to: "/admin/library",
+    label: "📚 Library",
+  },
 
-    {
-      to: "/admin/settings",
-      label: "⚙️ Settings",
-    },
-  ];
+  {
+    to: "/admin/community-links",
+    label: "📢 Community Links",
+  },
 
+  {
+    to: "/admin/testimonials",
+    label: "⭐ Feedback",
+  },
+
+  {
+    to: "/admin/settings",
+    label: "⚙️ Settings",
+  },
+];
   return (
     <div className="admin-layout">
 
