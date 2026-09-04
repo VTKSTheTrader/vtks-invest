@@ -52,6 +52,25 @@ export default function Home() {
     setTestimonialsLoading,
   ] = useState(false);
 
+  const [
+    expandedTestimonials,
+    setExpandedTestimonials,
+  ] = useState(() => new Set());
+
+  const toggleTestimonial = (testimonialId) => {
+    setExpandedTestimonials((previous) => {
+      const next = new Set(previous);
+
+      if (next.has(testimonialId)) {
+        next.delete(testimonialId);
+      } else {
+        next.add(testimonialId);
+      }
+
+      return next;
+    });
+  };
+
   useEffect(() => {
     loadHoldings();
   }, []);
@@ -790,28 +809,56 @@ export default function Home() {
             </p>
           ) : testimonials.length > 0 ? (
             <div className="home-testimonials-grid">
-              {testimonials.map(
-                (testimonial) => (
+              {testimonials.map((testimonial) => {
+                const isExpanded =
+                  expandedTestimonials.has(
+                    testimonial.id
+                  );
+
+                const testimonialMessage =
+                  String(
+                    testimonial.message || ""
+                  );
+
+                const showReadMore =
+                  testimonialMessage.length > 260;
+
+                return (
                   <article
                     key={testimonial.id}
-                    className="home-testimonial-card"
+                    className={`home-testimonial-card ${
+                      isExpanded ? "expanded" : ""
+                    }`}
                   >
                     <div className="home-testimonial-rating">
                       {"★".repeat(
                         Number(
-                          testimonial.rating ||
-                            0
+                          testimonial.rating || 0
                         )
                       )}
                     </div>
 
-                    <p>
-                      “
-                      {
-                        testimonial.message
-                      }
-                      ”
-                    </p>
+                    <div className="home-testimonial-content">
+                      <p className="home-testimonial-text">
+                        “{testimonialMessage}”
+                      </p>
+                    </div>
+
+                    {showReadMore && (
+                      <button
+                        type="button"
+                        className="home-testimonial-read-more"
+                        onClick={() =>
+                          toggleTestimonial(
+                            testimonial.id
+                          )
+                        }
+                      >
+                        {isExpanded
+                          ? "Show Less ↑"
+                          : "Read Full Experience ↓"}
+                      </button>
+                    )}
 
                     <div className="home-testimonial-footer">
                       <strong>
@@ -829,8 +876,8 @@ export default function Home() {
                       )}
                     </div>
                   </article>
-                )
-              )}
+                );
+              })}
             </div>
           ) : (
             <p className="home-testimonial-message">
