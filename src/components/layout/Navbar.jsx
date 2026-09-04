@@ -329,7 +329,7 @@ export default function Navbar({
               className={getNavClass}
               onClick={closeMenu}
             >
-              ETF Portfolio
+              SIP Tracker
             </NavLink>
           )}
 
