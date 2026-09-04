@@ -78,10 +78,25 @@ export default function ETFAnalysis() {
   const [calculatorMode, setCalculatorMode] =
     useState("amount");
   const [investmentAmount, setInvestmentAmount] =
-    useState(10000);
+    useState(5000);
   const [portfolioAmount, setPortfolioAmount] =
     useState(100000);
   const [percentage, setPercentage] = useState(10);
+  /* =====================================================
+   BROWSER TAB TITLE
+===================================================== */
+
+useEffect(() => {
+  if (etf?.name) {
+    document.title = `${etf.name} SIP Analysis | VTKS INVEST`;
+  } else {
+    document.title = "SIP Analysis | VTKS INVEST";
+  }
+
+  return () => {
+    document.title = "VTKS INVEST";
+  };
+}, [etf]);
 
   useEffect(() => {
     const loadPage = async () => {
@@ -169,7 +184,7 @@ export default function ETFAnalysis() {
     return (
       <div className="etfa-page">
         <div className="etfa-state">
-          <h2>ETF Portfolio is currently unavailable.</h2>
+          <h2>SIP Portfolio is currently unavailable.</h2>
           <button onClick={() => navigate("/")}>Go Home</button>
         </div>
       </div>
@@ -180,10 +195,10 @@ export default function ETFAnalysis() {
     return (
       <div className="etfa-page">
         <div className="etfa-state">
-          <h2>ETF analysis not found.</h2>
-          <p>This ETF may not be published.</p>
+          <h2>SIP analysis not found.</h2>
+          <p>This SIP may not be published.</p>
           <button onClick={() => navigate("/etf")}>
-            Back to ETF Portfolio
+            Back to SIP Portfolio
           </button>
         </div>
       </div>
@@ -199,7 +214,7 @@ export default function ETFAnalysis() {
         type="button"
         onClick={() => navigate("/etf")}
       >
-        ← Back to ETF Portfolio
+        ← Back to SIP Tracker
       </button>
 
       <section className="etfa-header">
@@ -466,7 +481,7 @@ export default function ETFAnalysis() {
         <div className="etfa-section-head">
           <div>
             <span>PUBLIC TOOL</span>
-            <h3>ETF Accumulation Calculator</h3>
+            <h3>SIP Accumulation Calculator</h3>
           </div>
           <p>
             Simulation only. Calculator entries are not saved to the
@@ -506,7 +521,7 @@ export default function ETFAnalysis() {
                 </label>
 
                 <div className="etfa-presets">
-                  {[5000, 10000, 25000, 50000].map((value) => (
+                  {[2500, 5000, 10000, 20000, 50000].map((value) => (
                     <button
                       type="button"
                       key={value}
@@ -615,13 +630,13 @@ export default function ETFAnalysis() {
 
       <p className="etfa-disclaimer">
         <strong>Disclosure:</strong> This analysis forms part of the VTKS
-        Long-Term ETF Portfolio and is presented solely for educational
+        Long-Term SIP Portfolio and is presented solely for educational
         and informational purposes. The portfolio follows a structured
         accumulation approach with an intended long-term investment
-        horizon of approximately 5–10 years. It is not an investment
+        horizon of approximately 10–20 years. It is not an investment
         advisory service, portfolio management service, mutual fund, or
         a recommendation or solicitation to buy or sell any security.
-        ETF prices and returns are market-linked and may fluctuate, and
+        INSTRUMENT prices and returns are market-linked and may fluctuate, and
         past performance does not guarantee future results. Investors
         should conduct their own research, assess suitability and risk
         tolerance, and where appropriate consult a SEBI-registered
