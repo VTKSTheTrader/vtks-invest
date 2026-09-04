@@ -15,11 +15,11 @@ import { supabase } from "../../lib/supabase";
 import "./ETF.css";
 
 const ETF_TYPES = [
+  "Commodity",
+  "BEES",
   "Index ETF",
-  "Sectoral / Thematic ETF",
-  "Commodity ETF",
-  "International ETF",
-  "Diversified ETF",
+  "Sector ETF",
+  "Stock SIP",
 ];
 
 const ETF_STATUSES = [
@@ -48,7 +48,7 @@ const emptyETF = {
   name: "",
   symbol: "",
   fullName: "",
-  etfType: "Index ETF",
+  etfType: "Commodity",
   description: "",
   dhanSecurityId: "",
   exchangeSegment: "NSE_EQ",
@@ -369,7 +369,7 @@ const ETF = () => {
         name: fullETF.name || "",
         symbol: fullETF.symbol || "",
         fullName: fullETF.fullName || "",
-        etfType: fullETF.etfType || "Index ETF",
+        etfType: fullETF.etfType || "Commodity",
         description: fullETF.description || "",
         dhanSecurityId: fullETF.dhanSecurityId ?? "",
         exchangeSegment: fullETF.exchangeSegment || "NSE_EQ",

@@ -20,25 +20,20 @@ import {
 import "./ETF.css";
 
 /* =====================================================
-   UNDERLYING ASSET CATEGORIES
-   Keep ETF terminology here because the actual
-   underlying instruments are ETFs.
+   SIP CATEGORIES
 ===================================================== */
 
 const ETF_TYPES = [
+  "Commodity",
+  "BEES",
   "Index ETF",
-  "Sectoral / Thematic ETF",
-  "Commodity ETF",
-  "International ETF",
-  "Other ETF",
+  "Sector ETF",
+  "Stock SIP",
 ];
 
 const getETFTypeLabel = (
   type
-) =>
-  type === "Other ETF"
-    ? "Diversified ETF"
-    : type;
+) => type;
 
 /* =====================================================
    SORT OPTIONS
@@ -765,7 +760,7 @@ export default function ETF() {
                   </th>
 
                   <th>
-                    Type
+                    Category
                   </th>
 
                   <th>
@@ -818,9 +813,7 @@ export default function ETF() {
                         }
                       >
 
-                        {/* =============================
-                            SIP / UNDERLYING INSTRUMENT
-                        ============================= */}
+                        {/* SIP / UNDERLYING INSTRUMENT */}
 
                         <td>
 
@@ -852,10 +845,7 @@ export default function ETF() {
 
                         </td>
 
-                        {/* =============================
-                            ACTUAL ETF TYPE
-                            KEEP TECHNICALLY CORRECT
-                        ============================= */}
+                        {/* SIP CATEGORY */}
 
                         <td>
 
