@@ -293,11 +293,11 @@ export default function ETF() {
         </p>
 
         <h1>
-          Building Wealth Through ETFs
+          Building Wealth Through SIP
         </h1>
 
         <p className="public-etf-intro">
-          A disciplined, transparent approach to long-term ETF accumulation, designed around a 5–10 year investment horizon with published accumulation records and market-linked portfolio tracking.
+          A disciplined and transparent SIP accumulation framework with a 3-year minimum commitment, built for long-term wealth creation across 10, 15, and 20-year horizons, with documented accumulation records and market-linked portfolio tracking.
         </p>
       </section>
 
