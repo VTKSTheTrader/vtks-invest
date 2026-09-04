@@ -20,14 +20,14 @@ const ALPHABETS =
   );
 
 /* =====================================================
-   DATE
+   DATE / TIME
 ===================================================== */
 
 const formatDateTime = (
   value
 ) => {
   if (!value) {
-    return "-";
+    return "Never";
   }
 
   try {
@@ -48,7 +48,7 @@ const formatDateTime = (
       }
     );
   } catch {
-    return "-";
+    return "Never";
   }
 };
 
@@ -208,7 +208,7 @@ export default function RegisteredUsers() {
     };
 
   /* =====================================================
-     DELETE REGISTRATION
+     DELETE
   ===================================================== */
 
   const handleDelete =
@@ -328,7 +328,7 @@ export default function RegisteredUsers() {
     }, [users]);
 
   /* =====================================================
-     FILTER + ALPHABETICAL SORT
+     FILTER + NAME SORT
   ===================================================== */
 
   const filteredUsers =
@@ -524,7 +524,7 @@ export default function RegisteredUsers() {
   ]);
 
   /* =====================================================
-     CLEAR FILTERS
+     CLEAR
   ===================================================== */
 
   const clearFilters =
@@ -553,10 +553,6 @@ export default function RegisteredUsers() {
     );
   }
 
-  /* =====================================================
-     PAGE
-  ===================================================== */
-
   return (
     <section className="registered-users-page">
 
@@ -572,8 +568,8 @@ export default function RegisteredUsers() {
 
           <p>
             Manage VTKS registrations,
-            contact information and
-            dashboard access.
+            contact information, login
+            activity and dashboard access.
           </p>
 
         </div>
@@ -660,15 +656,16 @@ export default function RegisteredUsers() {
             </h2>
 
             <p>
-              Dashboard access remains
-              under manual Admin control.
+              Last Login shows the latest
+              successful Supabase account
+              sign-in.
             </p>
 
           </div>
 
         </div>
 
-        {/* ALPHABET FILTER */}
+        {/* ALPHABET */}
 
         <div className="registered-users-alphabet-filter">
 
@@ -808,19 +805,6 @@ export default function RegisteredUsers() {
 
           {" users"}
 
-          {alphabetFilter !==
-            "All" && (
-            <>
-              {" • "}
-              Names starting with{" "}
-              <strong>
-                {
-                  alphabetFilter
-                }
-              </strong>
-            </>
-          )}
-
         </div>
 
         {/* TABLE */}
@@ -845,7 +829,7 @@ export default function RegisteredUsers() {
                 </th>
 
                 <th>
-                  Registered
+                  Last Login
                 </th>
 
                 <th>
@@ -899,9 +883,11 @@ export default function RegisteredUsers() {
                           "-"}
                       </td>
 
+                      {/* LAST LOGIN */}
+
                       <td>
                         {formatDateTime(
-                          user.registered_at
+                          user.last_sign_in_at
                         )}
                       </td>
 
