@@ -147,6 +147,25 @@ export default function ETF() {
   const navigate =
     useNavigate();
 
+    useEffect(() => {
+  if (
+    typeof window !== "undefined" &&
+    typeof window.gtag === "function"
+  ) {
+    window.gtag(
+      "event",
+      "sip_tracker_view",
+      {
+        page_title:
+          "VTKS SIP Tracker",
+        page_path:
+          "/etf",
+        page_location:
+          window.location.href,
+      }
+    );
+  }
+}, []);
   /* =====================================================
      BROWSER TAB TITLE
   ===================================================== */
