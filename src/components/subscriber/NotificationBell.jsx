@@ -237,7 +237,7 @@ const requestBrowserNotificationPermission =
 ========================================================= */
 
 const showBrowserNotification =
-  (notification) => {
+  (notification, onInternalNavigate) => {
     if (
       !canUseBrowserNotifications() ||
       Notification.permission !==
@@ -279,12 +279,33 @@ const showBrowserNotification =
         () => {
           window.focus();
 
-          if (
-            notification.link
-          ) {
-            window.location.assign(
-              notification.link
-            );
+          const link =
+            String(
+              notification.link || ""
+            ).trim();
+
+          if (link) {
+            if (
+              link.startsWith("http://") ||
+              link.startsWith("https://")
+            ) {
+              window.location.assign(link);
+            } else if (
+              link.startsWith("www.")
+            ) {
+              window.location.assign(
+                `https://${link}`
+              );
+            } else if (
+              typeof onInternalNavigate ===
+              "function"
+            ) {
+              onInternalNavigate(
+                link.startsWith("/")
+                  ? link
+                  : `/${link}`
+              );
+            }
           }
 
           browserNotification.close();
@@ -440,7 +461,8 @@ export default function NotificationBell() {
             .forEach(
               (item) => {
                 showBrowserNotification(
-                  item
+                  item,
+                  navigate
                 );
               }
             );
@@ -483,7 +505,7 @@ export default function NotificationBell() {
 
   useEffect(() => {
     loadNotifications();
-  }, []);
+  }, [navigate]);
 
   /* =====================================================
      REALTIME
@@ -833,7 +855,8 @@ export default function NotificationBell() {
                   );
 
                   showBrowserNotification(
-                    item
+                    item,
+                    navigate
                   );
 
                   /* =================================
@@ -906,7 +929,7 @@ export default function NotificationBell() {
         );
       }
     };
-  }, []);
+  }, [navigate]);
 
   /* =====================================================
      CLOSE PANEL ON OUTSIDE CLICK

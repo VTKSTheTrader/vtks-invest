@@ -11,6 +11,7 @@ import {
   updateETFAccumulation,
 } from "../../services/etfService";
 import { fetchLiveCMP } from "../../services/marketService";
+import { createNotification } from "../../services/notificationService";
 import { supabase } from "../../lib/supabase";
 import "./ETF.css";
 
@@ -108,6 +109,9 @@ const ETF = () => {
   const [selectedETF, setSelectedETF] = useState(null);
   const [accumulations, setAccumulations] = useState([]);
   const [loadingAccumulations, setLoadingAccumulations] =
+    useState(false);
+
+  const [fetchingAccumulationCMP, setFetchingAccumulationCMP] =
     useState(false);
 
   const [editingAccumulation, setEditingAccumulation] =
@@ -603,6 +607,71 @@ const ETF = () => {
     setShowAccumulationModal(true);
 
     await loadAccumulations(etf.id);
+
+    try {
+      setFetchingAccumulationCMP(true);
+
+      const fullETF =
+        (await getETFById(etf.id)) || etf;
+
+      const securityId = Number(
+        fullETF.dhanSecurityId || 0
+      );
+
+      const exchangeSegment =
+        fullETF.exchangeSegment || "NSE_EQ";
+
+      let latestCMP = Number(
+        fullETF.cmp || etf.cmp || 0
+      );
+
+      if (
+        Number.isFinite(securityId) &&
+        securityId > 0
+      ) {
+        const liveCMP = await fetchLiveCMP(
+          securityId,
+          exchangeSegment
+        );
+
+        if (
+          liveCMP &&
+          Number(liveCMP) > 0
+        ) {
+          latestCMP = Number(liveCMP);
+        }
+      }
+
+      setSelectedETF({
+        ...etf,
+        ...fullETF,
+        cmp: latestCMP,
+      });
+
+      if (latestCMP > 0) {
+        setAccumulationForm((prev) => ({
+          ...prev,
+          price: latestCMP,
+        }));
+      }
+    } catch (error) {
+      console.error(
+        "Accumulation CMP fetch error:",
+        error
+      );
+
+      const fallbackCMP =
+        Number(etf?.cmp || 0);
+
+      if (fallbackCMP > 0) {
+        setAccumulationForm((prev) => ({
+          ...prev,
+          price: fallbackCMP,
+        }));
+      }
+    } finally {
+      setFetchingAccumulationCMP(false);
+    }
   };
 
   const closeAccumulationModal = () => {
@@ -676,6 +745,44 @@ const ETF = () => {
           ...accumulationForm,
           etfId: selectedETF.id,
         });
+
+        /*
+          Automatically inform all subscribers
+          only when a NEW SIP accumulation is added.
+
+          Editing an existing accumulation does not
+          generate another notification.
+        */
+        try {
+          await createNotification({
+            title: `SIP Accumulation Updated: ${
+              selectedETF.name ||
+              selectedETF.symbol ||
+              "VTKS SIP"
+            }`,
+            message:
+              "A new accumulation record has been added to the VTKS SIP Tracker. Tap to view the updated details.",
+            notificationType:
+              "sip_accumulation",
+            link: `/etf/${selectedETF.id}`,
+            referenceId:
+              selectedETF.id,
+            audience:
+              "subscriber",
+            targetUserId:
+              null,
+          });
+        } catch (notificationError) {
+          /*
+            The SIP accumulation is already saved at this point.
+            A notification failure must not undo or block the
+            accumulation workflow.
+          */
+          console.error(
+            "SIP accumulation notification error:",
+            notificationError
+          );
+        }
       }
 
       resetAccumulationForm();
@@ -1547,9 +1654,28 @@ const ETF = () => {
                     }
                     min="0.0001"
                     step="0.0001"
-                    placeholder="265"
+                    placeholder={
+                      fetchingAccumulationCMP
+                        ? "Fetching latest CMP..."
+                        : "Latest CMP"
+                    }
+                    disabled={
+                      fetchingAccumulationCMP
+                    }
                     required
                   />
+
+                  <small
+                    style={{
+                      display: "block",
+                      marginTop: "6px",
+                      color: "#64748b",
+                    }}
+                  >
+                    {fetchingAccumulationCMP
+                      ? "Fetching latest CMP from Dhan..."
+                      : "Latest CMP is filled automatically. You can edit it before saving if required."}
+                  </small>
                 </label>
 
                 <label>

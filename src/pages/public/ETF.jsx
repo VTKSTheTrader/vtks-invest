@@ -10,6 +10,7 @@ import {
 
 import {
   calculateETFPortfolioTotals,
+  getRecentPublicETFAccumulations,
   getPublicETFs,
 } from "../../services/etfService";
 
@@ -112,6 +113,31 @@ const formatNumber = (
     }
   );
 
+const formatUpdateDate = (value) => {
+  if (!value) return "";
+
+  const date = new Date(
+    `${value}T00:00:00`
+  );
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+    return value;
+  }
+
+  return date.toLocaleDateString(
+    "en-IN",
+    {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }
+  );
+};
+
 /* =====================================================
    MAIN PAGE
 ===================================================== */
@@ -143,6 +169,37 @@ export default function ETF() {
     loading,
     setLoading,
   ] = useState(true);
+
+  const [
+    recentAccumulations,
+    setRecentAccumulations,
+  ] = useState([]);
+
+  const [
+    dismissedAccumulationIds,
+    setDismissedAccumulationIds,
+  ] = useState(() => {
+    try {
+      const saved = localStorage.getItem(
+        "vtks-public-sip-dismissed"
+      );
+
+      const parsed = saved
+        ? JSON.parse(saved)
+        : [];
+
+      return Array.isArray(parsed)
+        ? parsed.map(String)
+        : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [
+    showSipUpdates,
+    setShowSipUpdates,
+  ] = useState(false);
 
   const [
     pageEnabled,
@@ -182,10 +239,12 @@ export default function ETF() {
           const [
             settings,
             data,
+            sipUpdates,
           ] =
             await Promise.all([
               loadSettings(),
               getPublicETFs(),
+              getRecentPublicETFAccumulations(20),
             ]);
 
           const enabled =
@@ -200,8 +259,13 @@ export default function ETF() {
             setETFs(
               data || []
             );
+
+            setRecentAccumulations(
+              sipUpdates || []
+            );
           } else {
             setETFs([]);
+            setRecentAccumulations([]);
           }
         } catch (error) {
           console.error(
@@ -210,6 +274,7 @@ export default function ETF() {
           );
 
           setETFs([]);
+          setRecentAccumulations([]);
         } finally {
           setLoading(false);
         }
@@ -217,6 +282,77 @@ export default function ETF() {
 
     loadPage();
   }, []);
+
+  /* =====================================================
+     PUBLIC SIP UPDATE NOTIFICATIONS
+  ===================================================== */
+
+  const visibleSipUpdates =
+    useMemo(() => {
+      const dismissed =
+        new Set(
+          dismissedAccumulationIds.map(
+            String
+          )
+        );
+
+      return recentAccumulations.filter(
+        (item) =>
+          !dismissed.has(
+            String(item.id)
+          )
+      );
+    }, [
+      recentAccumulations,
+      dismissedAccumulationIds,
+    ]);
+
+  const saveDismissedSipUpdates =
+    (ids) => {
+      const uniqueIds = [
+        ...new Set(
+          ids.map(String)
+        ),
+      ];
+
+      setDismissedAccumulationIds(
+        uniqueIds
+      );
+
+      try {
+        localStorage.setItem(
+          "vtks-public-sip-dismissed",
+          JSON.stringify(uniqueIds)
+        );
+      } catch (error) {
+        console.error(
+          "Unable to save dismissed SIP updates:",
+          error
+        );
+      }
+    };
+
+  const dismissSipUpdate =
+    (id) => {
+      saveDismissedSipUpdates([
+        ...dismissedAccumulationIds,
+        String(id),
+      ]);
+    };
+
+  const clearAllSipUpdates =
+    () => {
+      const allVisibleIds =
+        visibleSipUpdates.map(
+          (item) =>
+            String(item.id)
+        );
+
+      saveDismissedSipUpdates([
+        ...dismissedAccumulationIds,
+        ...allVisibleIds,
+      ]);
+    };
 
   /* =====================================================
      FILTER + SORT
@@ -482,7 +618,7 @@ export default function ETF() {
           HERO
       ================================================= */}
 
-      <section className="public-etf-hero">
+      <section className="public-etf-hero" style={{ position: "relative" }}>
 
         <p className="public-etf-eyebrow">
           VTKS LONG-TERM SIP
@@ -507,6 +643,426 @@ export default function ETF() {
           records and market-linked
           portfolio tracking.
         </p>
+
+
+        {visibleSipUpdates.length > 0 && (
+          <div
+            style={{
+              position: "absolute",
+              top: "0",
+              right: "0",
+              zIndex: 30,
+            }}
+          >
+            <button
+              type="button"
+              aria-label="Open SIP updates"
+              title="SIP Updates"
+              onClick={() =>
+                setShowSipUpdates(
+                  (open) => !open
+                )
+              }
+              style={{
+                position: "relative",
+                width: "46px",
+                height: "46px",
+                border: "1px solid #bfdbfe",
+                borderRadius: "50%",
+                background: "#eff6ff",
+                color: "#1d4ed8",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                boxShadow:
+                  "0 8px 20px rgba(37, 99, 235, 0.14)",
+                fontSize: "20px",
+              }}
+            >
+              🔔
+
+              <span
+                style={{
+                  position: "absolute",
+                  top: "-4px",
+                  right: "-4px",
+                  minWidth: "20px",
+                  height: "20px",
+                  padding: "0 5px",
+                  borderRadius: "999px",
+                  background: "#2563eb",
+                  color: "#ffffff",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "10px",
+                  fontWeight: 700,
+                  lineHeight: 1,
+                  border: "2px solid #ffffff",
+                }}
+              >
+                {visibleSipUpdates.length}
+              </span>
+            </button>
+
+            {showSipUpdates && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: "56px",
+                  right: "0",
+                  width:
+                    "min(420px, calc(100vw - 40px))",
+                  border: "1px solid #dbeafe",
+                  borderRadius: "14px",
+                  background: "#ffffff",
+                  boxShadow:
+                    "0 18px 45px rgba(15, 23, 42, 0.18)",
+                  overflow: "hidden",
+                  zIndex: 40,
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent:
+                      "space-between",
+                    gap: "10px",
+                    padding: "11px 12px",
+                    background: "#eff6ff",
+                    borderBottom:
+                      "1px solid #dbeafe",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                    }}
+                  >
+                    <span
+                      aria-hidden="true"
+                      style={{
+                        fontSize: "15px",
+                      }}
+                    >
+                      🔔
+                    </span>
+
+                    <strong
+                      style={{
+                        color: "#1d4ed8",
+                        fontSize: "13px",
+                        letterSpacing: ".03em",
+                      }}
+                    >
+                      SIP UPDATES
+                    </strong>
+
+                    <span
+                      style={{
+                        minWidth: "20px",
+                        height: "20px",
+                        padding: "0 6px",
+                        borderRadius: "999px",
+                        background: "#2563eb",
+                        color: "#ffffff",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent:
+                          "center",
+                        fontSize: "10px",
+                        fontWeight: 700,
+                      }}
+                    >
+                      {visibleSipUpdates.length}
+                    </span>
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}
+                  >
+                    <button
+                      type="button"
+                      onClick={
+                        clearAllSipUpdates
+                      }
+                      style={{
+                        border: "none",
+                        background:
+                          "transparent",
+                        color: "#64748b",
+                        fontSize: "11px",
+                        fontWeight: 600,
+                        cursor: "pointer",
+                        padding: "4px 5px",
+                      }}
+                    >
+                      Clear All
+                    </button>
+
+                    <button
+                      type="button"
+                      aria-label="Close SIP updates"
+                      title="Close"
+                      onClick={() =>
+                        setShowSipUpdates(
+                          false
+                        )
+                      }
+                      style={{
+                        width: "26px",
+                        height: "26px",
+                        border:
+                          "1px solid #e2e8f0",
+                        borderRadius: "7px",
+                        background: "#ffffff",
+                        color: "#64748b",
+                        display:
+                          "inline-flex",
+                        alignItems:
+                          "center",
+                        justifyContent:
+                          "center",
+                        cursor: "pointer",
+                        fontSize: "15px",
+                        lineHeight: 1,
+                      }}
+                    >
+                      ×
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    height: "138px",
+                    overflowY: "auto",
+                    overflowX: "hidden",
+                  }}
+                >
+                  {visibleSipUpdates.map(
+                    (update, index) => (
+                      <div
+                        key={update.id}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent:
+                            "space-between",
+                          gap: "10px",
+                          height: "69px",
+                          minHeight: "69px",
+                          boxSizing:
+                            "border-box",
+                          padding: "9px 10px",
+                          borderBottom:
+                            index ===
+                            visibleSipUpdates.length -
+                              1
+                              ? "none"
+                              : "1px solid #eef2f7",
+                          background:
+                            index === 0
+                              ? "#f8fbff"
+                              : "#ffffff",
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems:
+                              "flex-start",
+                            gap: "8px",
+                            minWidth: 0,
+                            flex: 1,
+                          }}
+                        >
+                          <span
+                            aria-hidden="true"
+                            style={{
+                              fontSize: "14px",
+                              lineHeight: 1.4,
+                              flexShrink: 0,
+                            }}
+                          >
+                            🔔
+                          </span>
+
+                          <div
+                            style={{
+                              minWidth: 0,
+                              flex: 1,
+                            }}
+                          >
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems:
+                                  "center",
+                                gap: "6px",
+                                minWidth: 0,
+                              }}
+                            >
+                              <strong
+                                style={{
+                                  color:
+                                    "#0f172a",
+                                  fontSize:
+                                    "13px",
+                                  overflow:
+                                    "hidden",
+                                  textOverflow:
+                                    "ellipsis",
+                                  whiteSpace:
+                                    "nowrap",
+                                }}
+                              >
+                                {update.etfName}
+                              </strong>
+
+                              {index ===
+                                0 && (
+                                <span
+                                  style={{
+                                    background:
+                                      "#dbeafe",
+                                    color:
+                                      "#1d4ed8",
+                                    borderRadius:
+                                      "999px",
+                                    padding:
+                                      "1px 5px",
+                                    fontSize:
+                                      "8px",
+                                    fontWeight:
+                                      700,
+                                    flexShrink:
+                                      0,
+                                  }}
+                                >
+                                  NEW
+                                </span>
+                              )}
+                            </div>
+
+                            <span
+                              style={{
+                                display:
+                                  "block",
+                                marginTop:
+                                  "3px",
+                                color:
+                                  "#64748b",
+                                fontSize:
+                                  "11px",
+                                lineHeight:
+                                  1.3,
+                              }}
+                            >
+                              Added on{" "}
+                              {formatUpdateDate(
+                                update.accumulationDate
+                              )}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems:
+                              "center",
+                            gap: "5px",
+                            flexShrink: 0,
+                          }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowSipUpdates(
+                                false
+                              );
+                              navigate(
+                                `/etf/${update.etfId}`
+                              );
+                            }}
+                            style={{
+                              border:
+                                "1px solid #bfdbfe",
+                              background:
+                                "#eff6ff",
+                              color:
+                                "#1d4ed8",
+                              borderRadius:
+                                "8px",
+                              padding:
+                                "6px 8px",
+                              fontSize:
+                                "10px",
+                              fontWeight:
+                                700,
+                              cursor:
+                                "pointer",
+                              whiteSpace:
+                                "nowrap",
+                            }}
+                          >
+                            View
+                          </button>
+
+                          <button
+                            type="button"
+                            aria-label="Dismiss SIP update"
+                            title="Dismiss"
+                            onClick={() =>
+                              dismissSipUpdate(
+                                update.id
+                              )
+                            }
+                            style={{
+                              width: "26px",
+                              height:
+                                "26px",
+                              display:
+                                "inline-flex",
+                              alignItems:
+                                "center",
+                              justifyContent:
+                                "center",
+                              border:
+                                "1px solid #e2e8f0",
+                              borderRadius:
+                                "7px",
+                              background:
+                                "#ffffff",
+                              color:
+                                "#64748b",
+                              cursor:
+                                "pointer",
+                              fontSize:
+                                "15px",
+                              lineHeight: 1,
+                            }}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      </div>
+                    )
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
       </section>
 
