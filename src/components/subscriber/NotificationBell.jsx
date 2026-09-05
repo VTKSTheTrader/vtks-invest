@@ -823,32 +823,25 @@ export default function NotificationBell() {
                   }
 
                   /* =================================
-                     DUPLICATE PROTECTION
-
-                     IMPORTANT:
-                     Applied ONLY to INSERT.
-                  ================================= */
-
-                  if (
-                    knownNotificationIdsRef.current.has(
-                      item.id
-                    )
-                  ) {
-                    return;
-                  }
-
-                  knownNotificationIdsRef.current.add(
-                    item.id
-                  );
-
-                  /* =================================
                      WINDOWS POPUP
-
-                     ONLY NEW INSERT
+                     REALTIME INSERT
                   ================================= */
+
+                  console.log(
+                    "VTKS new notification received:",
+                    item
+                  );
 
                   showBrowserNotification(
                     item
+                  );
+
+                  /* =================================
+                     MARK AS KNOWN
+                  ================================= */
+
+                  knownNotificationIdsRef.current.add(
+                    item.id
                   );
 
                   /* =================================
