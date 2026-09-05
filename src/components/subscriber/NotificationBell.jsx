@@ -240,76 +240,84 @@ const showBrowserNotification =
   (notification, onInternalNavigate) => {
     if (
       !canUseBrowserNotifications() ||
-      Notification.permission !==
-        "granted" ||
+      Notification.permission !== "granted" ||
       !notification
     ) {
       return;
     }
 
     const title =
-      notification.title ||
-      "VTKS INVEST";
-
+      notification.title || "VTKS INVEST";
     const body =
       notification.message ||
       "A new VTKS update is available.";
 
     try {
       const browserNotification =
-        new Notification(
-          title,
-          {
-            body,
+        new Notification(title, {
+          body,
+          icon: "/favicon.png",
+          badge: "/favicon.png",
+          tag: `vtks-${notification.id || Date.now()}`,
+        });
 
-            icon:
-              "/favicon.png",
+      browserNotification.onclick = () => {
+        window.focus();
 
-            badge:
-              "/favicon.png",
+        const link =
+          String(notification.link || "").trim();
 
-            tag: `vtks-${
-              notification.id ||
-              Date.now()
-            }`,
-          }
-        );
+        const notificationType =
+          String(
+            notification.notification_type ||
+              notification.notificationType ||
+              ""
+          ).toLowerCase();
 
-      browserNotification.onclick =
-        () => {
-          window.focus();
+        const isSipAccumulation =
+          notificationType === "sip_accumulation";
 
-          const link =
-            String(
-              notification.link || ""
-            ).trim();
-
-          if (link) {
-            if (
+        if (link) {
+          if (isSipAccumulation) {
+            const targetUrl =
               link.startsWith("http://") ||
               link.startsWith("https://")
-            ) {
-              window.location.assign(link);
-            } else if (
-              link.startsWith("www.")
-            ) {
-              window.location.assign(
-                `https://${link}`
-              );
-            } else if (
-              typeof onInternalNavigate ===
-              "function"
-            ) {
-              onInternalNavigate(
-                link.startsWith("/")
-                  ? link
-                  : `/${link}`
-              );
-            }
-          }
+                ? link
+                : link.startsWith("www.")
+                ? `https://${link}`
+                : `${window.location.origin}${
+                    link.startsWith("/")
+                      ? link
+                      : `/${link}`
+                  }`;
 
-          browserNotification.close();
-        };
+            window.open(
+              targetUrl,
+              "_blank",
+              "noopener,noreferrer"
+            );
+          } else if (
+            link.startsWith("http://") ||
+            link.startsWith("https://")
+          ) {
+            window.location.assign(link);
+          } else if (link.startsWith("www.")) {
+            window.location.assign(
+              `https://${link}`
+            );
+          } else if (
+            typeof onInternalNavigate === "function"
+          ) {
+            onInternalNavigate(
+              link.startsWith("/")
+                ? link
+                : `/${link}`
+            );
+          }
+        }
+
+        browserNotification.close();
+      };
     } catch (error) {
       console.error(
         "Browser notification display error:",
@@ -970,80 +978,90 @@ export default function NotificationBell() {
   ===================================================== */
 
   const handleNotificationClick =
-  async (notification) => {
-    try {
-      if (!notification.isRead) {
-        await markNotificationAsRead(
-          notification.id
-        );
+    async (notification) => {
+      try {
+        if (!notification.isRead) {
+          await markNotificationAsRead(
+            notification.id
+          );
 
-        setNotifications(
-          (previous) =>
-            previous.map((item) =>
-              item.id === notification.id
-                ? {
-                    ...item,
-                    isRead: true,
-                  }
-                : item
-            )
+          setNotifications(
+            (previous) =>
+              previous.map((item) =>
+                item.id === notification.id
+                  ? { ...item, isRead: true }
+                  : item
+              )
+          );
+        }
+      } catch (error) {
+        console.error(
+          "Mark notification read error:",
+          error
         );
       }
-    } catch (error) {
-      console.error(
-        "Mark notification read error:",
-        error
+
+      setIsOpen(false);
+
+      const link =
+        String(notification.link || "").trim();
+
+      if (!link) {
+        return;
+      }
+
+      const notificationType =
+        String(
+          notification.notification_type ||
+            notification.notificationType ||
+            ""
+        ).toLowerCase();
+
+      const isSipAccumulation =
+        notificationType === "sip_accumulation";
+
+      if (isSipAccumulation) {
+        const targetUrl =
+          link.startsWith("http://") ||
+          link.startsWith("https://")
+            ? link
+            : link.startsWith("www.")
+            ? `https://${link}`
+            : `${window.location.origin}${
+                link.startsWith("/")
+                  ? link
+                  : `/${link}`
+              }`;
+
+        window.open(
+          targetUrl,
+          "_blank",
+          "noopener,noreferrer"
+        );
+        return;
+      }
+
+      if (
+        link.startsWith("http://") ||
+        link.startsWith("https://")
+      ) {
+        window.location.assign(link);
+        return;
+      }
+
+      if (link.startsWith("www.")) {
+        window.location.assign(
+          `https://${link}`
+        );
+        return;
+      }
+
+      navigate(
+        link.startsWith("/")
+          ? link
+          : `/${link}`
       );
-    }
-
-    setIsOpen(false);
-
-    const link =
-      String(
-        notification.link || ""
-      ).trim();
-
-    if (!link) {
-      return;
-    }
-
-    /* =========================================
-       EXTERNAL URL
-       Example:
-       https://www.vtksinvest.com/
-    ========================================= */
-
-    if (
-      link.startsWith("http://") ||
-      link.startsWith("https://")
-    ) {
-      window.location.assign(link);
-      return;
-    }
-
-    /* =========================================
-       WWW URL WITHOUT PROTOCOL
-    ========================================= */
-
-    if (link.startsWith("www.")) {
-      window.location.assign(
-        `https://${link}`
-      );
-      return;
-    }
-
-    /* =========================================
-       INTERNAL WEBSITE ROUTE
-       Example:
-       /dashboard/trade/47
-    ========================================= */
-
-    navigate(
-      link.startsWith("/")
-        ? link
-        : `/${link}`
-    );
-  };
+    };
 
   /* =====================================================
      MARK ALL READ

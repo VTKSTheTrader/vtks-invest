@@ -10,6 +10,7 @@ import {
 
 import {
   calculateETFPortfolioTotals,
+  getPublicETFIdsByAccumulationDate,
   getRecentPublicETFAccumulations,
   getPublicETFs,
 } from "../../services/etfService";
@@ -76,7 +77,7 @@ const SORT_OPTIONS = [
   },
 ];
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 5;
 
 /* =====================================================
    FORMATTERS
@@ -222,6 +223,26 @@ export default function ETF() {
   ] = useState("newest");
 
   const [
+    accumulationFromDate,
+    setAccumulationFromDate,
+  ] = useState("");
+
+  const [
+    accumulationToDate,
+    setAccumulationToDate,
+  ] = useState("");
+
+  const [
+    accumulationDateETFIds,
+    setAccumulationDateETFIds,
+  ] = useState([]);
+
+  const [
+    accumulationDateLoading,
+    setAccumulationDateLoading,
+  ] = useState(false);
+
+  const [
     currentPage,
     setCurrentPage,
   ] = useState(1);
@@ -282,6 +303,64 @@ export default function ETF() {
 
     loadPage();
   }, []);
+
+  /* =====================================================
+     ACCUMULATION DATE FILTER
+  ===================================================== */
+
+  useEffect(() => {
+    let active = true;
+
+    const loadAccumulationDateFilter =
+      async () => {
+        if (
+          !accumulationFromDate &&
+          !accumulationToDate
+        ) {
+          setAccumulationDateETFIds([]);
+          setAccumulationDateLoading(false);
+          return;
+        }
+
+        try {
+          setAccumulationDateLoading(true);
+
+          const ids =
+            await getPublicETFIdsByAccumulationDate({
+              fromDate: accumulationFromDate,
+              toDate: accumulationToDate,
+            });
+
+          if (active) {
+            setAccumulationDateETFIds(
+              ids || []
+            );
+          }
+        } catch (error) {
+          console.error(
+            "Public SIP accumulation date filter error:",
+            error
+          );
+
+          if (active) {
+            setAccumulationDateETFIds([]);
+          }
+        } finally {
+          if (active) {
+            setAccumulationDateLoading(false);
+          }
+        }
+      };
+
+    loadAccumulationDateFilter();
+
+    return () => {
+      active = false;
+    };
+  }, [
+    accumulationFromDate,
+    accumulationToDate,
+  ]);
 
   /* =====================================================
      PUBLIC SIP UPDATE NOTIFICATIONS
@@ -392,9 +471,22 @@ export default function ETF() {
               etf.etfType ===
                 typeFilter;
 
+            const hasAccumulationDateFilter =
+              Boolean(
+                accumulationFromDate ||
+                  accumulationToDate
+              );
+
+            const matchesAccumulationDate =
+              !hasAccumulationDateFilter ||
+              accumulationDateETFIds.includes(
+                String(etf.id)
+              );
+
             return (
               matchesSearch &&
-              matchesType
+              matchesType &&
+              matchesAccumulationDate
             );
           }
         );
@@ -493,6 +585,9 @@ export default function ETF() {
       search,
       typeFilter,
       sortBy,
+      accumulationFromDate,
+      accumulationToDate,
+      accumulationDateETFIds,
     ]);
 
   /* =====================================================
@@ -505,6 +600,8 @@ export default function ETF() {
     search,
     typeFilter,
     sortBy,
+    accumulationFromDate,
+    accumulationToDate,
   ]);
 
   /* =====================================================
@@ -1192,6 +1289,93 @@ export default function ETF() {
           placeholder="Search SIP name or symbol..."
         />
 
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            minHeight: "48px",
+            padding: "0 12px",
+            border: "1px solid #dbe3ef",
+            borderRadius: "10px",
+            background: "#ffffff",
+            whiteSpace: "nowrap",
+          }}
+        >
+          <strong
+            style={{
+              fontSize: "12px",
+              color: "#64748b",
+            }}
+          >
+            Accumulated
+          </strong>
+
+          <input
+            type="date"
+            value={accumulationFromDate}
+            max={accumulationToDate || undefined}
+            onChange={(event) =>
+              setAccumulationFromDate(
+                event.target.value
+              )
+            }
+            aria-label="Accumulated from date"
+            style={{
+              width: "132px",
+              border: "none",
+              outline: "none",
+              background: "transparent",
+              padding: "0",
+              minHeight: "34px",
+              fontSize: "13px",
+              color: "#0f172a",
+            }}
+          />
+
+          <span
+            style={{
+              color: "#64748b",
+              fontSize: "12px",
+            }}
+          >
+            to
+          </span>
+
+          <input
+            type="date"
+            value={accumulationToDate}
+            min={accumulationFromDate || undefined}
+            onChange={(event) =>
+              setAccumulationToDate(
+                event.target.value
+              )
+            }
+            aria-label="Accumulated to date"
+            style={{
+              width: "132px",
+              border: "none",
+              outline: "none",
+              background: "transparent",
+              padding: "0",
+              minHeight: "34px",
+              fontSize: "13px",
+              color: "#0f172a",
+            }}
+          />
+
+          {accumulationDateLoading && (
+            <span
+              style={{
+                color: "#2563eb",
+                fontSize: "11px",
+              }}
+            >
+              ...
+            </span>
+          )}
+        </div>
+
         <select
           value={
             typeFilter
@@ -1262,7 +1446,9 @@ export default function ETF() {
           typeFilter !==
             "All" ||
           sortBy !==
-            "newest") && (
+            "newest" ||
+          accumulationFromDate ||
+          accumulationToDate) && (
 
           <button
             type="button"
@@ -1275,6 +1461,9 @@ export default function ETF() {
               setSortBy(
                 "newest"
               );
+              setAccumulationFromDate("");
+              setAccumulationToDate("");
+              setAccumulationDateETFIds([]);
               setCurrentPage(
                 1
               );

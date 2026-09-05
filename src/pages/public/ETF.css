@@ -386,3 +386,125 @@
     line-height: 1.65;
   }
 }
+/* =========================================================
+   PUBLIC SIP FILTER TOOLBAR
+========================================================= */
+
+.public-etf-toolbar {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  flex-wrap: nowrap !important;
+
+  width: 100%;
+  padding: 16px;
+
+  box-sizing: border-box;
+}
+
+/* SEARCH */
+
+.public-etf-toolbar > input[type="text"] {
+  flex: 1 1 320px;
+  min-width: 240px;
+  height: 52px;
+
+  box-sizing: border-box;
+}
+
+/* DATE RANGE BOX */
+
+.public-etf-toolbar > div {
+  flex: 1.35 1 480px;
+  min-width: 390px;
+  max-width: 560px;
+
+  height: 52px;
+  box-sizing: border-box;
+}
+
+/* CATEGORY + SORT */
+
+.public-etf-toolbar > select {
+  flex: 0 0 220px;
+  width: 220px;
+  min-width: 0;
+  height: 52px;
+
+  box-sizing: border-box;
+}
+
+/* CLEAR BUTTON */
+
+.public-etf-toolbar > .public-etf-clear {
+  flex: 0 0 auto;
+  height: 52px;
+  min-width: 76px;
+
+  white-space: nowrap;
+}
+
+/* DATE INPUTS INSIDE ACCUMULATED BOX */
+
+.public-etf-toolbar
+  > div
+  input[type="date"] {
+  width: 118px !important;
+  min-width: 110px !important;
+  flex: 1 1 118px;
+
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 1250px) {
+  .public-etf-toolbar {
+    flex-wrap: wrap !important;
+  }
+
+  .public-etf-toolbar > input[type="text"] {
+    flex: 1 1 45%;
+  }
+
+  .public-etf-toolbar > div {
+    flex: 1 1 50%;
+    max-width: none;
+  }
+
+  .public-etf-toolbar > select {
+    flex: 1 1 200px;
+    width: auto;
+  }
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 720px) {
+  .public-etf-toolbar {
+    display: flex !important;
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 10px !important;
+
+    padding: 12px;
+  }
+
+  .public-etf-toolbar > input[type="text"],
+  .public-etf-toolbar > div,
+  .public-etf-toolbar > select,
+  .public-etf-toolbar > .public-etf-clear {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    flex: none !important;
+  }
+
+  .public-etf-toolbar > div {
+    overflow-x: auto;
+  }
+}

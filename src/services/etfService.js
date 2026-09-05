@@ -34,21 +34,27 @@ const normalizeETFSummary = (row = {}) => ({
   accumulationCount: Number(
     row.accumulation_count || 0
   ),
+
   totalInvested: Number(
     row.total_invested || 0
   ),
+
   totalUnits: Number(
     row.total_units || 0
   ),
+
   averagePrice: Number(
     row.average_price || 0
   ),
+
   currentValue: Number(
     row.current_value || 0
   ),
+
   gainLoss: Number(
     row.gain_loss || 0
   ),
+
   returnPercentage: Number(
     row.return_percentage || 0
   ),
@@ -69,12 +75,18 @@ const normalizeAccumulation = (row = {}) => ({
 
 const buildETFPayload = (etf = {}) => ({
   name: etf.name?.trim(),
+
   symbol:
-    etf.symbol?.trim()?.toUpperCase(),
+    etf.symbol
+      ?.trim()
+      ?.toUpperCase(),
+
   full_name:
     etf.fullName?.trim() || null,
+
   etf_type:
     etf.etfType || "Index ETF",
+
   description:
     etf.description?.trim() || null,
 
@@ -88,10 +100,13 @@ const buildETFPayload = (etf = {}) => ({
     etf.exchangeSegment || "NSE_EQ",
 
   cmp: Number(etf.cmp || 0),
+
   status:
     etf.status || "Accumulating",
+
   publish_status:
     etf.publishStatus || "draft",
+
   notes:
     etf.notes?.trim() || null,
 });
@@ -118,8 +133,7 @@ const buildAccumulationPayload = (
   ),
 
   note:
-    accumulation.note?.trim() ||
-    null,
+    accumulation.note?.trim() || null,
 });
 
 // =========================================================
@@ -140,6 +154,7 @@ export const getETFs = async () => {
       "getETFs error:",
       error
     );
+
     throw error;
   }
 
@@ -148,136 +163,138 @@ export const getETFs = async () => {
   );
 };
 
-export const getETFById = async (
-  id
-) => {
-  if (!id) return null;
+export const getETFById =
+  async (id) => {
+    if (!id) return null;
 
-  const { data, error } =
-    await supabase
-      .from("etfs")
-      .select("*")
-      .eq("id", id)
-      .maybeSingle();
+    const { data, error } =
+      await supabase
+        .from("etfs")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
 
-  if (error) {
-    console.error(
-      "getETFById error:",
-      error
-    );
-    throw error;
-  }
+    if (error) {
+      console.error(
+        "getETFById error:",
+        error
+      );
 
-  return data
-    ? normalizeETF(data)
-    : null;
-};
+      throw error;
+    }
 
-export const addETF = async (
-  etf
-) => {
-  const payload =
-    buildETFPayload(etf);
+    return data
+      ? normalizeETF(data)
+      : null;
+  };
 
-  if (!payload.name) {
-    throw new Error(
-      "ETF name is required."
-    );
-  }
+export const addETF =
+  async (etf) => {
+    const payload =
+      buildETFPayload(etf);
 
-  if (!payload.symbol) {
-    throw new Error(
-      "ETF symbol is required."
-    );
-  }
+    if (!payload.name) {
+      throw new Error(
+        "ETF name is required."
+      );
+    }
 
-  const { data, error } =
-    await supabase
-      .from("etfs")
-      .insert([payload])
-      .select()
-      .single();
+    if (!payload.symbol) {
+      throw new Error(
+        "ETF symbol is required."
+      );
+    }
 
-  if (error) {
-    console.error(
-      "addETF error:",
-      error
-    );
-    throw error;
-  }
+    const { data, error } =
+      await supabase
+        .from("etfs")
+        .insert([payload])
+        .select()
+        .single();
 
-  return normalizeETF(data);
-};
+    if (error) {
+      console.error(
+        "addETF error:",
+        error
+      );
 
-export const updateETF = async (
-  id,
-  etf
-) => {
-  if (!id) {
-    throw new Error(
-      "ETF ID is required."
-    );
-  }
+      throw error;
+    }
 
-  const payload =
-    buildETFPayload(etf);
+    return normalizeETF(data);
+  };
 
-  if (!payload.name) {
-    throw new Error(
-      "ETF name is required."
-    );
-  }
+export const updateETF =
+  async (
+    id,
+    etf
+  ) => {
+    if (!id) {
+      throw new Error(
+        "ETF ID is required."
+      );
+    }
 
-  if (!payload.symbol) {
-    throw new Error(
-      "ETF symbol is required."
-    );
-  }
+    const payload =
+      buildETFPayload(etf);
 
-  const { data, error } =
-    await supabase
-      .from("etfs")
-      .update(payload)
-      .eq("id", id)
-      .select()
-      .single();
+    if (!payload.name) {
+      throw new Error(
+        "ETF name is required."
+      );
+    }
 
-  if (error) {
-    console.error(
-      "updateETF error:",
-      error
-    );
-    throw error;
-  }
+    if (!payload.symbol) {
+      throw new Error(
+        "ETF symbol is required."
+      );
+    }
 
-  return normalizeETF(data);
-};
+    const { data, error } =
+      await supabase
+        .from("etfs")
+        .update(payload)
+        .eq("id", id)
+        .select()
+        .single();
 
-export const deleteETF = async (
-  id
-) => {
-  if (!id) {
-    throw new Error(
-      "ETF ID is required."
-    );
-  }
+    if (error) {
+      console.error(
+        "updateETF error:",
+        error
+      );
 
-  const { error } =
-    await supabase
-      .from("etfs")
-      .delete()
-      .eq("id", id);
+      throw error;
+    }
 
-  if (error) {
-    console.error(
-      "deleteETF error:",
-      error
-    );
-    throw error;
-  }
+    return normalizeETF(data);
+  };
 
-  return true;
-};
+export const deleteETF =
+  async (id) => {
+    if (!id) {
+      throw new Error(
+        "ETF ID is required."
+      );
+    }
+
+    const { error } =
+      await supabase
+        .from("etfs")
+        .delete()
+        .eq("id", id);
+
+    if (error) {
+      console.error(
+        "deleteETF error:",
+        error
+      );
+
+      throw error;
+    }
+
+    return true;
+  };
 
 // =========================================================
 // ETF SUMMARY
@@ -300,6 +317,7 @@ export const getETFSummaries =
         "getETFSummaries error:",
         error
       );
+
       throw error;
     }
 
@@ -326,6 +344,7 @@ export const getETFSummaryById =
         "getETFSummaryById error:",
         error
       );
+
       throw error;
     }
 
@@ -359,6 +378,7 @@ export const getPublicETFs =
         "getPublicETFs error:",
         error
       );
+
       throw error;
     }
 
@@ -389,6 +409,7 @@ export const getPublicETFById =
         "getPublicETFById error:",
         error
       );
+
       throw error;
     }
 
@@ -398,25 +419,26 @@ export const getPublicETFById =
   };
 
 // =========================================================
-// LATEST PUBLIC SIP ACCUMULATION
-// Used by public SIP Tracker update strip
-// =========================================================
-
-// =========================================================
 // RECENT PUBLIC SIP ACCUMULATIONS
-// Used by public SIP Tracker notification panel
+// Used by public SIP notification bell
 // =========================================================
 
 export const getRecentPublicETFAccumulations =
   async (limit = 20) => {
-    const safeLimit = Math.min(
-      Math.max(Number(limit) || 20, 1),
-      50
-    );
+    const safeLimit =
+      Math.min(
+        Math.max(
+          Number(limit) || 20,
+          1
+        ),
+        50
+      );
 
     const { data, error } =
       await supabase
-        .from("etf_accumulations")
+        .from(
+          "etf_accumulations"
+        )
         .select(`
           id,
           etf_id,
@@ -441,20 +463,25 @@ export const getRecentPublicETFAccumulations =
         .order("created_at", {
           ascending: false,
         })
-        .limit(safeLimit);
+        .limit(
+          safeLimit
+        );
 
     if (error) {
       console.error(
         "getRecentPublicETFAccumulations error:",
         error
       );
+
       throw error;
     }
 
     return (data || []).map(
       (row) => {
         const parentETF =
-          Array.isArray(row.etfs)
+          Array.isArray(
+            row.etfs
+          )
             ? row.etfs[0]
             : row.etfs;
 
@@ -469,11 +496,108 @@ export const getRecentPublicETFAccumulations =
             "SIP",
 
           etfSymbol:
-            parentETF?.symbol ||
-            "",
+            parentETF?.symbol || "",
         };
       }
     );
+  };
+
+// =========================================================
+// PUBLIC SIP ACCUMULATION DATE INDEX
+// Used by public SIP date-range filter
+// =========================================================
+
+export const getPublicETFAccumulationDates =
+  async () => {
+    const { data, error } =
+      await supabase
+        .from(
+          "etf_accumulations"
+        )
+        .select(`
+          etf_id,
+          accumulation_date
+        `)
+        .order(
+          "accumulation_date",
+          {
+            ascending: false,
+          }
+        );
+
+    if (error) {
+      console.error(
+        "getPublicETFAccumulationDates error:",
+        error
+      );
+
+      throw error;
+    }
+
+    return (data || []).map(
+      (row) => ({
+        etfId:
+          String(
+            row.etf_id
+          ),
+
+        accumulationDate:
+          row.accumulation_date || "",
+      })
+    );
+  };
+  // =========================================================
+// PUBLIC SIP DATE RANGE FILTER
+// Compatibility function used by current public ETF.jsx
+// =========================================================
+
+export const getPublicETFIdsByAccumulationDate =
+  async ({
+    fromDate = "",
+    toDate = "",
+  } = {}) => {
+    const rows =
+      await getPublicETFAccumulationDates();
+
+    if (
+      !fromDate &&
+      !toDate
+    ) {
+      return [];
+    }
+
+    const matchingIds =
+      rows
+        .filter((item) => {
+          const date =
+            item.accumulationDate;
+
+          if (!date) {
+            return false;
+          }
+
+          const matchesFrom =
+            !fromDate ||
+            date >= fromDate;
+
+          const matchesTo =
+            !toDate ||
+            date <= toDate;
+
+          return (
+            matchesFrom &&
+            matchesTo
+          );
+        })
+        .map((item) =>
+          String(item.etfId)
+        );
+
+    return [
+      ...new Set(
+        matchingIds
+      ),
+    ];
   };
 // =========================================================
 // ACCUMULATION HISTORY
@@ -481,13 +605,20 @@ export const getRecentPublicETFAccumulations =
 
 export const getETFAccumulations =
   async (etfId) => {
-    if (!etfId) return [];
+    if (!etfId) {
+      return [];
+    }
 
     const { data, error } =
       await supabase
-        .from("etf_accumulations")
+        .from(
+          "etf_accumulations"
+        )
         .select("*")
-        .eq("etf_id", etfId)
+        .eq(
+          "etf_id",
+          etfId
+        )
         .order(
           "accumulation_date",
           {
@@ -503,6 +634,7 @@ export const getETFAccumulations =
         "getETFAccumulations error:",
         error
       );
+
       throw error;
     }
 
@@ -512,7 +644,9 @@ export const getETFAccumulations =
   };
 
 export const addETFAccumulation =
-  async (accumulation) => {
+  async (
+    accumulation
+  ) => {
     const payload =
       buildAccumulationPayload(
         accumulation
@@ -544,8 +678,12 @@ export const addETFAccumulation =
 
     const { data, error } =
       await supabase
-        .from("etf_accumulations")
-        .insert([payload])
+        .from(
+          "etf_accumulations"
+        )
+        .insert([
+          payload,
+        ])
         .select()
         .single();
 
@@ -554,6 +692,7 @@ export const addETFAccumulation =
         "addETFAccumulation error:",
         error
       );
+
       throw error;
     }
 
@@ -589,7 +728,8 @@ export const updateETFAccumulation =
       ),
 
       note:
-        accumulation.note?.trim() ||
+        accumulation.note
+          ?.trim() ||
         null,
     };
 
@@ -613,9 +753,16 @@ export const updateETFAccumulation =
 
     const { data, error } =
       await supabase
-        .from("etf_accumulations")
-        .update(payload)
-        .eq("id", id)
+        .from(
+          "etf_accumulations"
+        )
+        .update(
+          payload
+        )
+        .eq(
+          "id",
+          id
+        )
         .select()
         .single();
 
@@ -624,6 +771,7 @@ export const updateETFAccumulation =
         "updateETFAccumulation error:",
         error
       );
+
       throw error;
     }
 
@@ -642,15 +790,21 @@ export const deleteETFAccumulation =
 
     const { error } =
       await supabase
-        .from("etf_accumulations")
+        .from(
+          "etf_accumulations"
+        )
         .delete()
-        .eq("id", id);
+        .eq(
+          "id",
+          id
+        );
 
     if (error) {
       console.error(
         "deleteETFAccumulation error:",
         error
       );
+
       throw error;
     }
 
@@ -659,7 +813,6 @@ export const deleteETFAccumulation =
 
 // =========================================================
 // COMPLETE ETF DETAIL
-// Useful for View Analysis page
 // =========================================================
 
 export const getETFAnalysis =
@@ -674,10 +827,16 @@ export const getETFAnalysis =
     const [
       etf,
       accumulations,
-    ] = await Promise.all([
-      getPublicETFById(etfId),
-      getETFAccumulations(etfId),
-    ]);
+    ] =
+      await Promise.all([
+        getPublicETFById(
+          etfId
+        ),
+
+        getETFAccumulations(
+          etfId
+        ),
+      ]);
 
     return {
       etf,
@@ -687,48 +846,57 @@ export const getETFAnalysis =
 
 // =========================================================
 // PORTFOLIO TOTALS
-// Useful for public ETF dashboard summary cards
 // =========================================================
 
 export const calculateETFPortfolioTotals =
   (etfs = []) => {
-    const totals = etfs.reduce(
-      (acc, etf) => {
-        acc.totalInvested +=
-          Number(
-            etf.totalInvested || 0
-          );
+    const totals =
+      etfs.reduce(
+        (
+          acc,
+          etf
+        ) => {
+          acc.totalInvested +=
+            Number(
+              etf.totalInvested ||
+                0
+            );
 
-        acc.currentValue +=
-          Number(
-            etf.currentValue || 0
-          );
+          acc.currentValue +=
+            Number(
+              etf.currentValue ||
+                0
+            );
 
-        acc.totalUnits +=
-          Number(
-            etf.totalUnits || 0
-          );
+          acc.totalUnits +=
+            Number(
+              etf.totalUnits ||
+                0
+            );
 
-        acc.etfCount += 1;
+          acc.etfCount += 1;
 
-        return acc;
-      },
-      {
-        totalInvested: 0,
-        currentValue: 0,
-        totalUnits: 0,
-        etfCount: 0,
-      }
-    );
+          return acc;
+        },
+        {
+          totalInvested: 0,
+          currentValue: 0,
+          totalUnits: 0,
+          etfCount: 0,
+        }
+      );
 
     totals.gainLoss =
       totals.currentValue -
       totals.totalInvested;
 
     totals.returnPercentage =
-      totals.totalInvested > 0
-        ? (totals.gainLoss /
-            totals.totalInvested) *
+      totals.totalInvested >
+      0
+        ? (
+            totals.gainLoss /
+            totals.totalInvested
+          ) *
           100
         : 0;
 
@@ -737,8 +905,6 @@ export const calculateETFPortfolioTotals =
 
 // =========================================================
 // USER ACCUMULATION CALCULATOR
-// This does NOT save anything to Supabase.
-// Used only for public simulation.
 // =========================================================
 
 export const calculateAmountBasedAccumulation =
@@ -748,10 +914,14 @@ export const calculateAmountBasedAccumulation =
     portfolioAmount = 0,
   }) => {
     const safeAmount =
-      Number(amount || 0);
+      Number(
+        amount || 0
+      );
 
     const safePrice =
-      Number(price || 0);
+      Number(
+        price || 0
+      );
 
     const safePortfolioAmount =
       Number(
@@ -765,16 +935,24 @@ export const calculateAmountBasedAccumulation =
         : 0;
 
     const equivalentPercentage =
-      safePortfolioAmount > 0
-        ? (safeAmount /
-            safePortfolioAmount) *
+      safePortfolioAmount >
+      0
+        ? (
+            safeAmount /
+            safePortfolioAmount
+          ) *
           100
         : 0;
 
     return {
-      amount: safeAmount,
-      price: safePrice,
+      amount:
+        safeAmount,
+
+      price:
+        safePrice,
+
       units,
+
       equivalentPercentage,
     };
   };
@@ -791,31 +969,43 @@ export const calculatePercentageBasedAccumulation =
       );
 
     const safePercentage =
-      Number(percentage || 0);
+      Number(
+        percentage || 0
+      );
 
     const safePrice =
-      Number(price || 0);
+      Number(
+        price || 0
+      );
 
     const amount =
       safePortfolioAmount > 0 &&
       safePercentage > 0
-        ? (safePortfolioAmount *
-            safePercentage) /
+        ? (
+            safePortfolioAmount *
+            safePercentage
+          ) /
           100
         : 0;
 
     const units =
       safePrice > 0
-        ? amount / safePrice
+        ? amount /
+          safePrice
         : 0;
 
     return {
       portfolioAmount:
         safePortfolioAmount,
+
       percentage:
         safePercentage,
+
       amount,
-      price: safePrice,
+
+      price:
+        safePrice,
+
       units,
     };
   };
