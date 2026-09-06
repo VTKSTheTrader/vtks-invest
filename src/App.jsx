@@ -72,6 +72,7 @@ import AdminNotifications from "./pages/admin/Notifications";
 import SubscriberDashboard from "./pages/subscriber/Dashboard";
 import SubscriberLibrary from "./pages/subscriber/Library";
 import SubscriberScanner from "./pages/subscriber/Scanner";
+import ScannerViewer from "./pages/subscriber/ScannerViewer";
 import Feedback from "./pages/subscriber/Feedback";
 import SubscriberMonthlyLevels from "./pages/subscriber/MonthlyLevels";
 import SubscriberResourceViewer from "./pages/subscriber/ResourceViewer";
@@ -530,6 +531,16 @@ function App() {
             </SubscriberRoute>
           }
         />
+        <Route
+  path="/dashboard/scanner/view/:id"
+  element={
+    <SubscriberRoute>
+      <SubscriberFeatureRoute feature="scanner">
+        <ScannerViewer />
+      </SubscriberFeatureRoute>
+    </SubscriberRoute>
+  }
+/>
 
         {/* =================================================
             SUBSCRIBER TRADE DETAILS

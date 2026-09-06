@@ -13,6 +13,11 @@ import {
   getSubscriberMembership,
 } from "../../services/subscriberService";
 
+import {
+  loadSettings,
+  defaultSettings,
+} from "../../services/settingsService";
+
 /* =========================================================
    HELPERS
 ========================================================= */
@@ -134,62 +139,49 @@ const hasActiveSubscription = (
 };
 
 /* =========================================================
-   PLAN ACCESS
+   DYNAMIC PLAN / FEATURE ACCESS
 ========================================================= */
 
-/*
-   MONTHLY
-   -------
-   Allowed:
-   - Main Dashboard
-   - Market Studies
-   - Market Outlook / Monthly Levels
-   - Trade Details
-   - Feedback
+const getPlanKey = (plan) => {
+  const value = normalize(plan);
 
-   Restricted:
-   - Knowledge Library
-   - Scanner
-   - Community premium content
+  if (value.includes("annual")) return "annual";
+  if (value.includes("quarter")) return "quarterly";
+  if (value.includes("month")) return "monthly";
 
-   QUARTERLY / ANNUAL / MANUAL ACCESS
-   ----------------------------------
-   Full subscriber access.
-*/
-
-const hasFullPlanAccess = (
-  membership
-) => {
-  const plan = normalize(
-    membership?.plan
-  );
-
-  return [
-    "quarterly",
-    "annual",
-    "manual access",
-  ].includes(plan);
+  return "";
 };
 
-/* =========================================================
-   FULL-PLAN-ONLY ROUTES
-========================================================= */
-
-const isFullPlanOnlyRoute = (
-  pathname
-) => {
+const getFeatureForPath = (pathname) => {
   const path = normalize(pathname);
 
-  return (
+  if (
     path === "/dashboard/library" ||
-    path.startsWith(
-      "/dashboard/library/"
-    ) ||
+    path.startsWith("/dashboard/library/")
+  ) {
+    return "library";
+  }
+
+  if (
     path === "/dashboard/scanner" ||
-    path.startsWith(
-      "/dashboard/scanner/"
-    )
-  );
+    path.startsWith("/dashboard/scanner/")
+  ) {
+    return "scanner";
+  }
+
+  if (
+    path === "/dashboard/monthly-levels"
+  ) {
+    return "marketOutlook";
+  }
+
+  if (
+    path === "/subscriber/feedback"
+  ) {
+    return "feedback";
+  }
+
+  return "";
 };
 
 /* =========================================================
@@ -204,15 +196,9 @@ const isFullPlanOnlyRoute = (
       member so renewal/account information can be shown.
    5. Other subscriber routes require active subscription
       or Manual Access.
-   6. Monthly members may access:
-      - Market Studies
-      - Market Outlook / Monthly Levels
-      - Trade Details
-      - Feedback
-   7. Library and Scanner require:
-      - Quarterly
-      - Annual
-      - Manual Access
+   6. Feature access is read dynamically from
+      Admin → Subscriber Access → Supabase.
+   7. Manual Access receives full subscriber access.
    8. localStorage is NOT trusted for authorization.
 ========================================================= */
 
@@ -377,26 +363,66 @@ export default function SubscriberRoute({
         }
 
         /* ===============================================
-           PLAN-RESTRICTED ROUTES
+           DYNAMIC FEATURE ACCESS
 
-           Monthly cannot directly open Library/Scanner.
-
-           Quarterly / Annual / Manual Access can.
+           Admin → Subscriber Access controls access
+           for Monthly / Quarterly / Annual plans.
         =============================================== */
 
-        if (
-          isFullPlanOnlyRoute(
+        const feature =
+          getFeatureForPath(
             location.pathname
-          ) &&
-          !hasFullPlanAccess(
-            membership
-          )
-        ) {
-          setAccessState(
-            "plan_restricted"
           );
 
-          return;
+        if (feature) {
+          const planKey =
+            getPlanKey(
+              membership?.plan
+            );
+
+          /*
+            Manual Access continues to receive full access.
+          */
+          const isManualAccess =
+            normalize(
+              membership?.plan
+            ) === "manual access";
+
+          if (!isManualAccess) {
+            if (!planKey) {
+              setAccessState(
+                "plan_restricted"
+              );
+
+              return;
+            }
+
+            const settings =
+              await loadSettings();
+
+            const planAccess =
+              settings?.subscriberAccess?.[
+                planKey
+              ] ||
+              defaultSettings
+                .subscriberAccess?.[
+                  planKey
+                ] ||
+              {};
+
+            const allowed =
+              planAccess?.[
+                feature
+              ] === true;
+
+            if (!allowed) {
+              setAccessState(
+                "plan_restricted"
+              );
+
+              return;
+            }
+          }
         }
 
         /* ===============================================
@@ -530,10 +556,10 @@ export default function SubscriberRoute({
   }
 
   /* =========================================================
-     PLAN RESTRICTED
+     FEATURE / PLAN RESTRICTED
 
-     Monthly member attempted to directly open
-     Library or Scanner.
+     The current plan does not include this feature
+     according to Admin → Subscriber Access.
 
      Return safely to subscriber dashboard.
   ========================================================= */

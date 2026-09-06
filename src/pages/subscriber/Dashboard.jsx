@@ -2035,10 +2035,8 @@ export default function Dashboard() {
                           "Resource"
                         }`,
 
-                      url:
-                        getResourceUrl(
-                          item
-                        ),
+                      internalUrl:
+                        `/dashboard/library/${item.id}`,
                     })
                   )
                 }
@@ -2648,51 +2646,59 @@ function FeatureCard({
   items,
   emptyMessage,
 }) {
+  const openInternal = (path) => {
+    if (!path) return;
+    window.location.assign(path);
+  };
+
+  const openExternalSameTab = (url) => {
+    if (!url) return;
+    window.location.assign(url);
+  };
+
   return (
     <article className="subscriber-feature-card">
-
       <div className="subscriber-feature-header">
-
         <div>
-
-          <h2>
-            {title}
-          </h2>
-
-          <p>
-            {subtitle}
-          </p>
-
+          <h2>{title}</h2>
+          <p>{subtitle}</p>
         </div>
 
         <div className="subscriber-feature-actions">
-
           {dashboardLink && (
-            <a
-              href={
-                dashboardLink
+            <button
+              type="button"
+              onClick={() =>
+                openExternalSameTab(
+                  dashboardLink
+                )
               }
-              target="_blank"
-              rel="noreferrer"
               className="subscriber-dashboard-link"
+              style={{
+                cursor: "pointer",
+                font: "inherit",
+              }}
             >
-              {
-                dashboardLabel
-              }
-            </a>
+              {dashboardLabel}
+            </button>
           )}
 
           {link && (
-            <Link
-              to={link}
+            <button
+              type="button"
+              onClick={() =>
+                openInternal(link)
+              }
               className="subscriber-small-link"
+              style={{
+                cursor: "pointer",
+                font: "inherit",
+              }}
             >
               View All →
-            </Link>
+            </button>
           )}
-
         </div>
-
       </div>
 
       {items.length === 0 ? (
@@ -2700,56 +2706,65 @@ function FeatureCard({
           {emptyMessage}
         </div>
       ) : (
-        items.map(
-          (item) => (
-            <div
-              key={
-                item.id
-              }
-              className="subscriber-list-item"
-            >
-
-              <div>
-
-                <strong>
-                  {item.title}
-                </strong>
-
-                <p>
-                  {item.meta}
-                </p>
-
-              </div>
-
-              {item.internalUrl ? (
-                <Link
-                  to={
-                    item.internalUrl
-                  }
-                >
-                  Open →
-                </Link>
-              ) : item.url ? (
-                <a
-                  href={
-                    item.url
-                  }
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Open →
-                </a>
-              ) : (
-                <span>
-                  Unavailable
-                </span>
-              )}
-
+        items.map((item) => (
+          <div
+            key={item.id}
+            className="subscriber-list-item"
+          >
+            <div>
+              <strong>{item.title}</strong>
+              <p>{item.meta}</p>
             </div>
-          )
-        )
-      )}
 
+            {item.internalUrl ? (
+              <button
+                type="button"
+                onClick={() =>
+                  openInternal(
+                    item.internalUrl
+                  )
+                }
+                className="subscriber-inline-open-button"
+                style={{
+                  border: "none",
+                  background: "transparent",
+                  padding: 0,
+                  color: "#2563eb",
+                  fontWeight: 800,
+                  cursor: "pointer",
+                  font: "inherit",
+                }}
+              >
+                Open →
+              </button>
+            ) : item.url ? (
+              <button
+                type="button"
+                onClick={() =>
+                  openExternalSameTab(
+                    item.url
+                  )
+                }
+                className="subscriber-inline-open-button"
+                style={{
+                  border: "none",
+                  background: "transparent",
+                  padding: 0,
+                  color: "#2563eb",
+                  fontWeight: 800,
+                  cursor: "pointer",
+                  font: "inherit",
+                }}
+              >
+                Open →
+              </button>
+            ) : (
+              <span>Unavailable</span>
+            )}
+          </div>
+        ))
+      )}
     </article>
   );
 }
+

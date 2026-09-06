@@ -16,31 +16,18 @@ import {
 export default function ResourceViewer() {
   const { id } = useParams();
 
-  const [
-    resource,
-    setResource,
-  ] = useState(null);
+  const [resource, setResource] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const [
-    loading,
-    setLoading,
-  ] = useState(true);
-
-  const [
-    error,
-    setError,
-  ] = useState("");
-
-  /* =========================================================
+  /* =====================================================
      LOAD RESOURCE
-  ========================================================= */
+  ===================================================== */
 
   useEffect(() => {
-    loadResource();
-  }, [id]);
+    let active = true;
 
-  const loadResource =
-    async () => {
+    const loadResource = async () => {
       try {
         setLoading(true);
         setError("");
@@ -48,12 +35,10 @@ export default function ResourceViewer() {
         const rows =
           await getSubscriberLibrary();
 
-        const found =
-          (rows || []).find(
-            (item) =>
-              String(item.id) ===
-              String(id)
-          );
+        const found = (rows || []).find(
+          (item) =>
+            String(item.id) === String(id)
+        );
 
         if (!found) {
           throw new Error(
@@ -61,155 +46,152 @@ export default function ResourceViewer() {
           );
         }
 
-        setResource(found);
+        if (active) {
+          setResource(found);
+        }
       } catch (err) {
         console.error(
           "Resource viewer error:",
           err
         );
 
-        setError(
-          err?.message ||
-            "Unable to load resource."
-        );
+        if (active) {
+          setError(
+            err?.message ||
+              "Unable to load resource."
+          );
+        }
       } finally {
-        setLoading(false);
+        if (active) {
+          setLoading(false);
+        }
       }
     };
 
-  /* =========================================================
-     URL
-  ========================================================= */
+    loadResource();
 
-  const resourceUrl =
-    useMemo(() => {
-      if (!resource) {
-        return "";
-      }
+    return () => {
+      active = false;
+    };
+  }, [id]);
 
-      return (
-        resource.video_url ||
-        resource.file_url ||
-        resource.resource_url ||
-        resource.url ||
-        ""
-      );
-    }, [resource]);
+  /* =====================================================
+     RESOURCE URL
+  ===================================================== */
 
-  /* =========================================================
-     TYPE
-  ========================================================= */
+  const resourceUrl = useMemo(() => {
+    if (!resource) return "";
 
-  const resourceType =
-    String(
-      resource?.type || ""
-    )
-      .trim()
-      .toLowerCase();
+    return (
+      resource.video_url ||
+      resource.file_url ||
+      resource.resource_url ||
+      resource.url ||
+      ""
+    );
+  }, [resource]);
 
-  /* =========================================================
+  const resourceType = String(
+    resource?.type || ""
+  )
+    .trim()
+    .toLowerCase();
+
+  /* =====================================================
      YOUTUBE
-  ========================================================= */
+  ===================================================== */
 
-  const getYouTubeEmbedUrl = (
-    url
-  ) => {
-    if (!url) {
-      return "";
-    }
+  const getYouTubeEmbedUrl = (url) => {
+    if (!url) return "";
 
     try {
+      const parsed = new URL(url);
+
       let videoId = "";
 
       if (
-        url.includes(
-          "youtube.com/watch?v="
+        parsed.hostname.includes(
+          "youtu.be"
         )
       ) {
-        videoId = url
-          .split(
-            "youtube.com/watch?v="
-          )[1]
-          .split("&")[0];
+        videoId =
+          parsed.pathname
+            .replace("/", "")
+            .split("/")[0];
       } else if (
-        url.includes(
-          "youtu.be/"
+        parsed.pathname.includes(
+          "/watch"
         )
       ) {
-        videoId = url
-          .split("youtu.be/")[1]
-          .split("?")[0];
+        videoId =
+          parsed.searchParams.get("v") ||
+          "";
       } else if (
-        url.includes(
-          "youtube.com/embed/"
+        parsed.pathname.includes(
+          "/embed/"
         )
       ) {
-        videoId = url
-          .split(
-            "youtube.com/embed/"
-          )[1]
-          .split("?")[0];
+        videoId =
+          parsed.pathname
+            .split("/embed/")[1]
+            ?.split("/")[0] || "";
       } else if (
-        url.includes(
-          "youtube.com/shorts/"
+        parsed.pathname.includes(
+          "/shorts/"
         )
       ) {
-        videoId = url
-          .split(
-            "youtube.com/shorts/"
-          )[1]
-          .split("?")[0];
+        videoId =
+          parsed.pathname
+            .split("/shorts/")[1]
+            ?.split("/")[0] || "";
       }
 
-      return videoId
-        ? `https://www.youtube.com/embed/${videoId}`
-        : "";
+      if (!videoId) {
+        return "";
+      }
+
+      return `https://www.youtube-nocookie.com/embed/${videoId}`;
     } catch {
       return "";
     }
   };
 
   const youtubeEmbedUrl =
-    getYouTubeEmbedUrl(
-      resourceUrl
-    );
+    getYouTubeEmbedUrl(resourceUrl);
 
-  /* =========================================================
-     FILE HELPERS
-  ========================================================= */
+  /* =====================================================
+     TYPE DETECTION
+  ===================================================== */
 
   const lowerUrl =
-    resourceUrl.toLowerCase();
+    String(resourceUrl || "")
+      .toLowerCase();
+
+  const cleanUrl =
+    lowerUrl.split("?")[0];
 
   const isImage =
-    resourceType.includes(
-      "image"
-    ) ||
-    /\.(jpg|jpeg|png|webp|gif|svg)(\?.*)?$/.test(
-      lowerUrl
+    resourceType.includes("image") ||
+    /\.(jpg|jpeg|png|webp|gif|svg|avif)$/i.test(
+      cleanUrl
     );
 
   const isPdf =
-    resourceType.includes(
-      "pdf"
-    ) ||
-    /\.pdf(\?.*)?$/.test(
-      lowerUrl
-    );
+    resourceType.includes("pdf") ||
+    /\.pdf$/i.test(cleanUrl);
 
   const isDirectVideo =
-    resourceType.includes(
-      "video"
-    ) &&
+    !youtubeEmbedUrl &&
     (
-      lowerUrl.includes(".mp4") ||
-      lowerUrl.includes(".webm") ||
-      lowerUrl.includes(".ogg")
+      resourceType.includes("video") ||
+      /\.(mp4|webm|ogg|mov)$/i.test(
+        cleanUrl
+      )
     );
 
-  /* =========================================================
+  /* =====================================================
      LOADING
-  ========================================================= */
+  ===================================================== */
 
   if (loading) {
     return (
@@ -221,19 +203,14 @@ export default function ResourceViewer() {
     );
   }
 
-  /* =========================================================
+  /* =====================================================
      ERROR
-  ========================================================= */
+  ===================================================== */
 
-  if (
-    error ||
-    !resource
-  ) {
+  if (error || !resource) {
     return (
       <main style={pageStyle}>
-
         <div style={messageBox}>
-
           <h2>
             Resource unavailable
           </h2>
@@ -248,28 +225,25 @@ export default function ResourceViewer() {
           >
             ← Back to Library
           </Link>
-
         </div>
-
       </main>
     );
   }
 
-  /* =========================================================
+  /* =====================================================
      PAGE
-  ========================================================= */
+  ===================================================== */
 
   return (
     <main style={pageStyle}>
 
-      {/* =====================================================
+      {/* ===============================================
           HEADER
-      ===================================================== */}
+      =============================================== */}
 
       <section style={headerStyle}>
 
         <div>
-
           <span style={badgeStyle}>
             VTKS Knowledge Vault
           </span>
@@ -280,23 +254,18 @@ export default function ResourceViewer() {
           </h1>
 
           <div style={metaStyle}>
-
             <span>
               {resource.type ||
                 "Resource"}
             </span>
 
-            <span>
-              •
-            </span>
+            <span>•</span>
 
             <span>
               {resource.category ||
                 "General"}
             </span>
-
           </div>
-
         </div>
 
         <Link
@@ -308,71 +277,66 @@ export default function ResourceViewer() {
 
       </section>
 
-      {/* =====================================================
+      {/* ===============================================
           DESCRIPTION
-      ===================================================== */}
+      =============================================== */}
 
       {resource.description && (
-
-        <section
-          style={
-            descriptionCard
-          }
-        >
+        <section style={descriptionCard}>
 
           <h2
             style={{
               marginTop: 0,
+              color: "#0f172a",
             }}
           >
             About this resource
           </h2>
 
-          <p
-            style={
-              descriptionText
-            }
-          >
-            {
-              resource.description
-            }
+          <p style={descriptionText}>
+            {resource.description}
           </p>
 
         </section>
-
       )}
 
-      {/* =====================================================
+      {/* ===============================================
           VIEWER
-      ===================================================== */}
+      =============================================== */}
 
       <section style={viewerCard}>
 
         {!resourceUrl ? (
 
           <div style={emptyViewer}>
-            Resource URL is
-            unavailable.
+            Resource URL is unavailable.
           </div>
 
         ) : youtubeEmbedUrl ? (
 
-          <div
-            style={
-              videoContainer
-            }
-          >
+          /* ===============================
+             YOUTUBE
+          =============================== */
+
+          <div style={videoContainer}>
 
             <iframe
-              src={
-                youtubeEmbedUrl
-              }
+              src={youtubeEmbedUrl}
               title={
                 resource.title ||
                 "VTKS Video"
               }
               style={iframeStyle}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allow="
+                accelerometer;
+                autoplay;
+                clipboard-write;
+                encrypted-media;
+                gyroscope;
+                picture-in-picture;
+                web-share
+              "
+              referrerPolicy="strict-origin-when-cross-origin"
               allowFullScreen
             />
 
@@ -380,17 +344,17 @@ export default function ResourceViewer() {
 
         ) : isImage ? (
 
-          <div
-            style={
-              imageContainer
-            }
-          >
+          /* ===============================
+             IMAGE
+          =============================== */
+
+          <div style={imageContainer}>
 
             <img
               src={resourceUrl}
               alt={
                 resource.title ||
-                "VTKS Analysis"
+                "VTKS Resource"
               }
               style={imageStyle}
             />
@@ -399,8 +363,12 @@ export default function ResourceViewer() {
 
         ) : isPdf ? (
 
+          /* ===============================
+             PDF
+          =============================== */
+
           <iframe
-            src={resourceUrl}
+            src={`${resourceUrl}#toolbar=0&navpanes=0`}
             title={
               resource.title ||
               "VTKS PDF"
@@ -410,31 +378,36 @@ export default function ResourceViewer() {
 
         ) : isDirectVideo ? (
 
+          /* ===============================
+             DIRECT VIDEO
+          =============================== */
+
           <video
             src={resourceUrl}
             controls
+            controlsList="nodownload"
             style={videoStyle}
           >
-            Your browser does not
-            support this video.
+            Your browser does not support
+            this video.
           </video>
 
         ) : (
 
-          <>
+          /* ===============================
+             GENERIC EMBED
+          =============================== */
 
-            <div style={externalInfo}>
+          <div>
+            <div style={internalInfo}>
 
               <strong>
                 VTKS Resource Viewer
               </strong>
 
-              <p>
-                This resource is
-                displayed inside VTKS
-                whenever the source
-                website allows
-                embedding.
+              <p style={{ marginBottom: 0 }}>
+                This resource is being displayed
+                inside VTKS.
               </p>
 
             </div>
@@ -447,70 +420,40 @@ export default function ResourceViewer() {
               }
               style={documentFrame}
             />
-
-          </>
+          </div>
 
         )}
 
       </section>
 
-      {/* =====================================================
-          FALLBACK
-      ===================================================== */}
-
-      {resourceUrl && (
-
-        <section style={fallbackBox}>
-
-          <p>
-            If the resource does not
-            display above, the source
-            website may block
-            embedding.
-          </p>
-
-          <a
-            href={resourceUrl}
-            target="_blank"
-            rel="noreferrer"
-            style={
-              externalButton
-            }
-          >
-            Open Original Resource ↗
-          </a>
-
-        </section>
-
-      )}
-
     </main>
   );
 }
 
-/* =========================================================
+/* =====================================================
    STYLES
-========================================================= */
+===================================================== */
 
 const pageStyle = {
   minHeight: "100vh",
   background: "#f8fafc",
-  padding: "40px",
+  padding: "32px",
   boxSizing: "border-box",
 };
 
 const headerStyle = {
   display: "flex",
-  justifyContent:
-    "space-between",
+  justifyContent: "space-between",
   alignItems: "center",
   gap: "24px",
   flexWrap: "wrap",
+
   background:
     "linear-gradient(135deg, #0f172a, #1e3a8a)",
+
   color: "#ffffff",
-  borderRadius: "24px",
-  padding: "32px",
+  borderRadius: "22px",
+  padding: "28px 30px",
   marginBottom: "24px",
 };
 
@@ -519,10 +462,13 @@ const badgeStyle = {
   padding: "7px 12px",
   marginBottom: "12px",
   borderRadius: "999px",
+
   background:
     "rgba(255,255,255,.12)",
+
   border:
     "1px solid rgba(255,255,255,.18)",
+
   color: "#bfdbfe",
   fontSize: "13px",
   fontWeight: 800,
@@ -530,7 +476,7 @@ const badgeStyle = {
 
 const titleStyle = {
   margin: "0 0 10px",
-  fontSize: "34px",
+  fontSize: "32px",
 };
 
 const metaStyle = {
@@ -553,11 +499,14 @@ const backButton = {
 
 const descriptionCard = {
   background: "#ffffff",
+
   border:
     "1px solid #e2e8f0",
+
   borderRadius: "18px",
   padding: "24px",
   marginBottom: "24px",
+
   boxShadow:
     "0 8px 24px rgba(15,23,42,.05)",
 };
@@ -571,12 +520,17 @@ const descriptionText = {
 
 const viewerCard = {
   background: "#ffffff",
+
   border:
     "1px solid #e2e8f0",
+
   borderRadius: "20px",
-  padding: "20px",
+
+  padding: "18px",
+
   boxShadow:
     "0 12px 30px rgba(15,23,42,.06)",
+
   overflow: "hidden",
 };
 
@@ -602,8 +556,10 @@ const documentFrame = {
   width: "100%",
   height: "75vh",
   minHeight: "600px",
+
   border:
     "1px solid #e2e8f0",
+
   borderRadius: "14px",
   background: "#ffffff",
 };
@@ -611,12 +567,13 @@ const documentFrame = {
 const imageContainer = {
   width: "100%",
   textAlign: "center",
+  overflow: "hidden",
 };
 
 const imageStyle = {
   display: "block",
   maxWidth: "100%",
-  maxHeight: "80vh",
+  maxHeight: "82vh",
   margin: "0 auto",
   objectFit: "contain",
   borderRadius: "12px",
@@ -625,13 +582,20 @@ const imageStyle = {
 const videoStyle = {
   display: "block",
   width: "100%",
-  maxHeight: "80vh",
+  maxHeight: "82vh",
   background: "#000000",
   borderRadius: "14px",
 };
 
-const externalInfo = {
+const internalInfo = {
   marginBottom: "16px",
+  padding: "14px 16px",
+  background: "#eff6ff",
+
+  border:
+    "1px solid #bfdbfe",
+
+  borderRadius: "12px",
   color: "#475569",
 };
 
@@ -639,27 +603,6 @@ const emptyViewer = {
   padding: "60px 20px",
   textAlign: "center",
   color: "#64748b",
-};
-
-const fallbackBox = {
-  marginTop: "18px",
-  padding: "18px 20px",
-  background: "#eff6ff",
-  border:
-    "1px solid #bfdbfe",
-  borderRadius: "14px",
-  color: "#475569",
-};
-
-const externalButton = {
-  display: "inline-block",
-  marginTop: "8px",
-  textDecoration: "none",
-  background: "#2563eb",
-  color: "#ffffff",
-  padding: "10px 16px",
-  borderRadius: "10px",
-  fontWeight: 800,
 };
 
 const messageBox = {
