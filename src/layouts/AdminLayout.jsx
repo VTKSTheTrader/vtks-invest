@@ -67,7 +67,10 @@ export default function AdminLayout() {
     to: "/admin/members",
     label: "👥 Members",
   },
-
+  {
+  to: "/admin/subscriber-access",
+  label: "🔐 Subscriber Access",
+},
   {
     to: "/admin/registered-users",
     label: "🧑‍💻 Registered Users",

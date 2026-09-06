@@ -52,7 +52,9 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import AdminHoldings from "./pages/admin/Holdings";
 import AdminETF from "./pages/admin/ETF";
 import MembersV2Test from "./pages/admin/MembersV2Test";
+import SubscriberAccess from "./pages/admin/SubscriberAccess";
 import RegisteredUsers from "./pages/admin/RegisteredUsers";
+
 import AdminScanner from "./pages/admin/Scanner";
 import AdminLibrary from "./pages/admin/Library";
 import AdminSettings from "./pages/admin/Settings";
@@ -79,32 +81,46 @@ import {
   getSubscriberMembership,
 } from "./services/subscriberService";
 
+import {
+  loadSettings,
+  defaultSettings,
+} from "./services/settingsService";
+
 /* =====================================================
-   PREMIUM SUBSCRIBER ROUTE
-   Monthly: blocked
-   Quarterly / Annual: allowed
+   DYNAMIC SUBSCRIBER FEATURE ROUTE
+   Access is controlled from:
+   Admin → Subscriber Access → Supabase
 ===================================================== */
 
-function PremiumSubscriberRoute({ children }) {
-  const [checkingPlan, setCheckingPlan] = useState(true);
-  const [hasPremiumAccess, setHasPremiumAccess] = useState(false);
+const normalizePlan = (value) =>
+  String(value || "")
+    .trim()
+    .toLowerCase();
+
+const getPlanKey = (plan) => {
+  const value = normalizePlan(plan);
+
+  if (value.includes("annual")) return "annual";
+  if (value.includes("quarter")) return "quarterly";
+  if (value.includes("month")) return "monthly";
+
+  return "";
+};
+
+function SubscriberFeatureRoute({ feature, children }) {
+  const [checkingAccess, setCheckingAccess] = useState(true);
+  const [hasAccess, setHasAccess] = useState(false);
 
   useEffect(() => {
     let active = true;
 
-    const checkPlanAccess = async () => {
+    const checkFeatureAccess = async () => {
       try {
         const profile = await getSubscriberProfile();
 
         const membership = await getSubscriberMembership(
           profile?.email
         );
-
-        const plan = String(
-          membership?.plan || ""
-        )
-          .trim()
-          .toLowerCase();
 
         const status = String(
           membership?.status || ""
@@ -127,39 +143,63 @@ function PremiumSubscriberRoute({ children }) {
           (!expiryDate ||
             expiryDate.getTime() >= Date.now());
 
-        const premiumPlan =
-          plan === "quarterly" ||
-          plan === "annual";
+        if (!isActive) {
+          if (active) {
+            setHasAccess(false);
+          }
+
+          return;
+        }
+
+        const planKey = getPlanKey(
+          membership?.plan
+        );
+
+        if (!planKey) {
+          if (active) {
+            setHasAccess(false);
+          }
+
+          return;
+        }
+
+        const settings = await loadSettings();
+
+        const planAccess =
+          settings?.subscriberAccess?.[planKey] ||
+          defaultSettings.subscriberAccess?.[planKey] ||
+          {};
+
+        const allowed =
+          planAccess?.[feature] === true;
 
         if (active) {
-          setHasPremiumAccess(
-            isActive && premiumPlan
-          );
+          setHasAccess(allowed);
         }
       } catch (error) {
         console.error(
-          "Premium route access check failed:",
+          `Subscriber ${feature} route access check failed:`,
           error
         );
 
         if (active) {
-          setHasPremiumAccess(false);
+          setHasAccess(false);
         }
       } finally {
         if (active) {
-          setCheckingPlan(false);
+          setCheckingAccess(false);
         }
       }
     };
 
-    checkPlanAccess();
+    checkFeatureAccess();
 
     return () => {
       active = false;
     };
-  }, []);
+  }, [feature]);
 
-  if (checkingPlan) {
+  if (checkingAccess) {
     return (
       <div className="subscriber-dashboard-loading">
         Checking subscription access...
@@ -167,7 +207,7 @@ function PremiumSubscriberRoute({ children }) {
     );
   }
 
-  if (!hasPremiumAccess) {
+  if (!hasAccess) {
     return (
       <Navigate
         to="/dashboard"
@@ -374,6 +414,11 @@ function App() {
             path="members"
             element={<MembersV2Test />}
           />
+
+          <Route
+  path="subscriber-access"
+  element={<SubscriberAccess />}
+/>
 <Route
   path="registered-users"
   element={<RegisteredUsers />}
@@ -448,7 +493,9 @@ function App() {
           path="/dashboard/monthly-levels"
           element={
             <SubscriberRoute>
-              <SubscriberMonthlyLevels />
+              <SubscriberFeatureRoute feature="marketOutlook">
+                <SubscriberMonthlyLevels />
+              </SubscriberFeatureRoute>
             </SubscriberRoute>
           }
         />
@@ -456,9 +503,9 @@ function App() {
   path="/dashboard/library/:id"
   element={
     <SubscriberRoute>
-      <PremiumSubscriberRoute>
+      <SubscriberFeatureRoute feature="library">
         <SubscriberResourceViewer />
-      </PremiumSubscriberRoute>
+      </SubscriberFeatureRoute>
     </SubscriberRoute>
   }
 />
@@ -466,9 +513,9 @@ function App() {
           path="/dashboard/library"
           element={
             <SubscriberRoute>
-              <PremiumSubscriberRoute>
+              <SubscriberFeatureRoute feature="library">
                 <SubscriberLibrary />
-              </PremiumSubscriberRoute>
+              </SubscriberFeatureRoute>
             </SubscriberRoute>
           }
         />
@@ -477,9 +524,9 @@ function App() {
           path="/dashboard/scanner"
           element={
             <SubscriberRoute>
-              <PremiumSubscriberRoute>
+              <SubscriberFeatureRoute feature="scanner">
                 <SubscriberScanner />
-              </PremiumSubscriberRoute>
+              </SubscriberFeatureRoute>
             </SubscriberRoute>
           }
         />
@@ -502,9 +549,9 @@ function App() {
           path="/subscriber/feedback"
           element={
             <SubscriberRoute>
-              <PremiumSubscriberRoute>
+              <SubscriberFeatureRoute feature="feedback">
                 <Feedback />
-              </PremiumSubscriberRoute>
+              </SubscriberFeatureRoute>
             </SubscriberRoute>
           }
         />

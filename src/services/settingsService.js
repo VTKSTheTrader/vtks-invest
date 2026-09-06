@@ -10,7 +10,6 @@ export const defaultSettings = {
   id: null,
 
   platform: {
-    // FINAL BRAND - DO NOT LOAD FROM DATABASE
     websiteName: "VTKS INVEST",
 
     supportEmail: "support@vtks.in",
@@ -60,7 +59,6 @@ export const defaultSettings = {
     showMonthlyLevels: true,
     showTestimonial: true,
 
-    // Ask VTKS controls
     showAskVTKS: true,
     acceptAskQueries: true,
     showAnsweredQueries: true,
@@ -76,13 +74,45 @@ export const defaultSettings = {
   admin: {
     email: "",
   },
+
+  subscriberAccess: {
+    monthly: {
+      marketStudies: true,
+      marketOutlook: true,
+      scanner: false,
+      library: false,
+      community: false,
+      feedback: false,
+    },
+
+    quarterly: {
+      marketStudies: true,
+      marketOutlook: true,
+      scanner: true,
+      library: true,
+      community: true,
+      feedback: true,
+    },
+
+    annual: {
+      marketStudies: true,
+      marketOutlook: true,
+      scanner: true,
+      library: true,
+      community: true,
+      feedback: true,
+    },
+  },
 };
 
 /* =========================================================
    HELPERS
 ========================================================= */
 
-const toNumber = (value, fallback = 0) => {
+const toNumber = (
+  value,
+  fallback = 0
+) => {
   const number = Number(value);
 
   return Number.isFinite(number)
@@ -152,7 +182,6 @@ const mergeWithDefaults = (
     ...defaultSettings.platform,
     ...(settings.platform || {}),
 
-    // Brand is permanent for VTKS INVEST
     websiteName: "VTKS INVEST",
   },
 
@@ -180,6 +209,26 @@ const mergeWithDefaults = (
     ...defaultSettings.admin,
     ...(settings.admin || {}),
   },
+
+  subscriberAccess: {
+    monthly: {
+      ...defaultSettings.subscriberAccess.monthly,
+      ...(settings.subscriberAccess
+        ?.monthly || {}),
+    },
+
+    quarterly: {
+      ...defaultSettings.subscriberAccess.quarterly,
+      ...(settings.subscriberAccess
+        ?.quarterly || {}),
+    },
+
+    annual: {
+      ...defaultSettings.subscriberAccess.annual,
+      ...(settings.subscriberAccess
+        ?.annual || {}),
+    },
+  },
 });
 
 /* =========================================================
@@ -195,9 +244,6 @@ const mapFromDatabase = (row) => {
     id: row.id,
 
     platform: {
-      // IMPORTANT:
-      // Ignore Supabase website_name because the same
-      // database is currently shared with the old HUB site.
       websiteName: "VTKS INVEST",
 
       supportEmail:
@@ -238,26 +284,31 @@ const mapFromDatabase = (row) => {
 
       monthlyDescription:
         row.monthly_description ||
-        defaultSettings.plans.monthlyDescription,
+        defaultSettings.plans
+          .monthlyDescription,
 
       quarterlyPrice: toNumber(
         row.quarterly_price,
-        defaultSettings.plans.quarterlyPrice
+        defaultSettings.plans
+          .quarterlyPrice
       ),
 
       quarterlyDays: toNumber(
         row.quarterly_days,
-        defaultSettings.plans.quarterlyDays
+        defaultSettings.plans
+          .quarterlyDays
       ),
 
       quarterlyEnabled: toBoolean(
         row.quarterly_enabled,
-        defaultSettings.plans.quarterlyEnabled
+        defaultSettings.plans
+          .quarterlyEnabled
       ),
 
       quarterlyDescription:
         row.quarterly_description ||
-        defaultSettings.plans.quarterlyDescription,
+        defaultSettings.plans
+          .quarterlyDescription,
 
       annualPrice: toNumber(
         row.annual_price,
@@ -276,7 +327,8 @@ const mapFromDatabase = (row) => {
 
       annualDescription:
         row.annual_description ||
-        defaultSettings.plans.annualDescription,
+        defaultSettings.plans
+          .annualDescription,
 
       featuredPlan:
         row.featured_plan ||
@@ -303,7 +355,8 @@ const mapFromDatabase = (row) => {
     website: {
       showIndicators: toBoolean(
         row.show_indicators,
-        defaultSettings.website.showIndicators
+        defaultSettings.website
+          .showIndicators
       ),
 
       showFunds: toBoolean(
@@ -313,46 +366,55 @@ const mapFromDatabase = (row) => {
 
       showAccuracy: toBoolean(
         row.show_accuracy,
-        defaultSettings.website.showAccuracy
+        defaultSettings.website
+          .showAccuracy
       ),
 
       showScanner: toBoolean(
         row.show_scanner,
-        defaultSettings.website.showScanner
+        defaultSettings.website
+          .showScanner
       ),
+
       showETF: toBoolean(
-  row.show_etf,
-  defaultSettings.website.showETF
-),
+        row.show_etf,
+        defaultSettings.website.showETF
+      ),
 
       showTestimonial: toBoolean(
         row.show_testimonial,
-        defaultSettings.website.showTestimonial
+        defaultSettings.website
+          .showTestimonial
       ),
 
       showMonthlyLevels: toBoolean(
         row.show_monthly_levels,
-        defaultSettings.website.showMonthlyLevels
+        defaultSettings.website
+          .showMonthlyLevels
       ),
 
       showAskVTKS: toBoolean(
         row.show_ask_vtks,
-        defaultSettings.website.showAskVTKS
+        defaultSettings.website
+          .showAskVTKS
       ),
 
       acceptAskQueries: toBoolean(
         row.accept_ask_queries,
-        defaultSettings.website.acceptAskQueries
+        defaultSettings.website
+          .acceptAskQueries
       ),
 
       showAnsweredQueries: toBoolean(
         row.show_answered_queries,
-        defaultSettings.website.showAnsweredQueries
+        defaultSettings.website
+          .showAnsweredQueries
       ),
 
       maintenanceMode: toBoolean(
         row.maintenance_mode,
-        defaultSettings.website.maintenanceMode
+        defaultSettings.website
+          .maintenanceMode
       ),
     },
 
@@ -363,7 +425,8 @@ const mapFromDatabase = (row) => {
 
       enabled: toBoolean(
         row.announcement_enabled,
-        defaultSettings.announcement.enabled
+        defaultSettings.announcement
+          .enabled
       ),
     },
 
@@ -371,6 +434,10 @@ const mapFromDatabase = (row) => {
       email:
         row.admin_email || "",
     },
+
+    subscriberAccess:
+      row.subscriber_access ||
+      defaultSettings.subscriberAccess,
   });
 };
 
@@ -378,123 +445,116 @@ const mapFromDatabase = (row) => {
    MAP WEBSITE SETTINGS → DATABASE
 ========================================================= */
 
-const mapToDatabase = (settings) => {
+const mapToDatabase = (
+  settings
+) => {
   const mergedSettings =
     mergeWithDefaults(settings);
 
   return {
-    /*
-     IMPORTANT:
-     website_name is intentionally NOT written here.
-
-     Reason:
-     VTKS INVEST and the old VTKS HUB currently share
-     the same Supabase project.
-
-     This protects the old live HUB site from branding
-     changes made through the VTKS INVEST admin panel.
-    */
-
     support_email:
-      mergedSettings.platform.supportEmail ||
-      "",
+      mergedSettings.platform
+        .supportEmail || "",
 
     support_phone:
-      mergedSettings.platform.supportMobile ||
-      "",
+      mergedSettings.platform
+        .supportMobile || "",
 
     telegram_link:
-      mergedSettings.platform.telegramLink ||
-      "",
+      mergedSettings.platform
+        .telegramLink || "",
 
     twitter_link:
-      mergedSettings.platform.twitterLink ||
-      "",
+      mergedSettings.platform
+        .twitterLink || "",
 
     instagram_link:
-      mergedSettings.platform.instagramLink ||
-      "",
+      mergedSettings.platform
+        .instagramLink || "",
 
     youtube_link:
-      mergedSettings.platform.youtubeLink ||
-      "",
-
-    /* =========================
-       MONTHLY PLAN
-    ========================= */
+      mergedSettings.platform
+        .youtubeLink || "",
 
     monthly_price: toNumber(
-      mergedSettings.plans.monthlyPrice,
-      defaultSettings.plans.monthlyPrice
+      mergedSettings.plans
+        .monthlyPrice,
+      defaultSettings.plans
+        .monthlyPrice
     ),
 
     monthly_days: toNumber(
-      mergedSettings.plans.monthlyDays,
-      defaultSettings.plans.monthlyDays
+      mergedSettings.plans
+        .monthlyDays,
+      defaultSettings.plans
+        .monthlyDays
     ),
 
     monthly_enabled: toBoolean(
-      mergedSettings.plans.monthlyEnabled,
-      defaultSettings.plans.monthlyEnabled
+      mergedSettings.plans
+        .monthlyEnabled,
+      defaultSettings.plans
+        .monthlyEnabled
     ),
 
     monthly_description:
-      mergedSettings.plans.monthlyDescription ||
-      "",
-
-    /* =========================
-       QUARTERLY PLAN
-    ========================= */
+      mergedSettings.plans
+        .monthlyDescription || "",
 
     quarterly_price: toNumber(
-      mergedSettings.plans.quarterlyPrice,
-      defaultSettings.plans.quarterlyPrice
+      mergedSettings.plans
+        .quarterlyPrice,
+      defaultSettings.plans
+        .quarterlyPrice
     ),
 
     quarterly_days: toNumber(
-      mergedSettings.plans.quarterlyDays,
-      defaultSettings.plans.quarterlyDays
+      mergedSettings.plans
+        .quarterlyDays,
+      defaultSettings.plans
+        .quarterlyDays
     ),
 
     quarterly_enabled: toBoolean(
-      mergedSettings.plans.quarterlyEnabled,
-      defaultSettings.plans.quarterlyEnabled
+      mergedSettings.plans
+        .quarterlyEnabled,
+      defaultSettings.plans
+        .quarterlyEnabled
     ),
 
     quarterly_description:
-      mergedSettings.plans.quarterlyDescription ||
-      "",
-
-    /* =========================
-       ANNUAL PLAN
-    ========================= */
+      mergedSettings.plans
+        .quarterlyDescription || "",
 
     annual_price: toNumber(
-      mergedSettings.plans.annualPrice,
-      defaultSettings.plans.annualPrice
+      mergedSettings.plans
+        .annualPrice,
+      defaultSettings.plans
+        .annualPrice
     ),
 
     annual_days: toNumber(
-      mergedSettings.plans.annualDays,
-      defaultSettings.plans.annualDays
+      mergedSettings.plans
+        .annualDays,
+      defaultSettings.plans
+        .annualDays
     ),
 
     annual_enabled: toBoolean(
-      mergedSettings.plans.annualEnabled,
-      defaultSettings.plans.annualEnabled
+      mergedSettings.plans
+        .annualEnabled,
+      defaultSettings.plans
+        .annualEnabled
     ),
 
     annual_description:
-      mergedSettings.plans.annualDescription ||
-      "",
+      mergedSettings.plans
+        .annualDescription || "",
 
     featured_plan:
-      mergedSettings.plans.featuredPlan ||
+      mergedSettings.plans
+        .featuredPlan ||
       "Quarterly",
-
-    /* =========================
-       PAYMENT
-    ========================= */
 
     upi_id:
       mergedSettings.payment.upiId ||
@@ -505,8 +565,8 @@ const mapToDatabase = (settings) => {
       "",
 
     account_number:
-      mergedSettings.payment.accountNumber ||
-      "",
+      mergedSettings.payment
+        .accountNumber || "",
 
     ifsc_code:
       mergedSettings.payment.ifscCode ||
@@ -516,84 +576,89 @@ const mapToDatabase = (settings) => {
       mergedSettings.payment.qrUrl ||
       "",
 
-    /* =========================
-       WEBSITE CONTROLS
-    ========================= */
-
     show_indicators: toBoolean(
-      mergedSettings.website.showIndicators,
+      mergedSettings.website
+        .showIndicators,
       true
     ),
 
     show_funds: toBoolean(
-      mergedSettings.website.showFunds,
+      mergedSettings.website
+        .showFunds,
       true
     ),
 
     show_accuracy: toBoolean(
-      mergedSettings.website.showAccuracy,
+      mergedSettings.website
+        .showAccuracy,
       true
     ),
 
     show_scanner: toBoolean(
-      mergedSettings.website.showScanner,
+      mergedSettings.website
+        .showScanner,
       true
     ),
+
     show_etf: toBoolean(
-  mergedSettings.website.showETF,
-  true
-),
+      mergedSettings.website.showETF,
+      true
+    ),
 
     show_testimonial: toBoolean(
-      mergedSettings.website.showTestimonial,
+      mergedSettings.website
+        .showTestimonial,
       true
     ),
 
     show_monthly_levels: toBoolean(
-      mergedSettings.website.showMonthlyLevels,
+      mergedSettings.website
+        .showMonthlyLevels,
       true
     ),
 
     show_ask_vtks: toBoolean(
-      mergedSettings.website.showAskVTKS,
+      mergedSettings.website
+        .showAskVTKS,
       true
     ),
 
     accept_ask_queries: toBoolean(
-      mergedSettings.website.acceptAskQueries,
+      mergedSettings.website
+        .acceptAskQueries,
       true
     ),
 
     show_answered_queries: toBoolean(
-      mergedSettings.website.showAnsweredQueries,
+      mergedSettings.website
+        .showAnsweredQueries,
       true
     ),
 
     maintenance_mode: toBoolean(
-      mergedSettings.website.maintenanceMode,
+      mergedSettings.website
+        .maintenanceMode,
       false
     ),
 
-    /* =========================
-       ANNOUNCEMENT
-    ========================= */
-
     announcement:
-      mergedSettings.announcement.text ||
-      "",
+      mergedSettings.announcement
+        .text || "",
 
-    announcement_enabled: toBoolean(
-      mergedSettings.announcement.enabled,
-      true
-    ),
-
-    /* =========================
-       ADMIN
-    ========================= */
+    announcement_enabled:
+      toBoolean(
+        mergedSettings.announcement
+          .enabled,
+        true
+      ),
 
     admin_email:
       mergedSettings.admin.email ||
       "",
+
+    subscriber_access:
+      mergedSettings
+        .subscriberAccess,
 
     updated_at:
       new Date().toISOString(),
@@ -604,59 +669,23 @@ const mapToDatabase = (settings) => {
    LOAD SETTINGS
 ========================================================= */
 
-export const loadSettings = async () => {
-  const { data, error } = await supabase
-    .from(TABLE_NAME)
-    .select("*")
-    .order("id", {
-      ascending: true,
-    })
-    .limit(1)
-    .maybeSingle();
-
-  if (error) {
-    console.error(
-      "Load settings error:",
-      error
-    );
-
-    throw error;
-  }
-
-  return mapFromDatabase(data);
-};
-
-/* =========================================================
-   SAVE SETTINGS
-========================================================= */
-
-export const saveSettings = async (
-  settings
-) => {
-  const mergedSettings =
-    mergeWithDefaults(settings);
-
-  const payload =
-    mapToDatabase(mergedSettings);
-
-  /*
-   Existing settings row
-  */
-
-  if (mergedSettings.id) {
-    const { data, error } = await supabase
+export const loadSettings =
+  async () => {
+    const {
+      data,
+      error,
+    } = await supabase
       .from(TABLE_NAME)
-      .update(payload)
-      .eq(
-        "id",
-        mergedSettings.id
-      )
       .select("*")
-      .single();
+      .order("id", {
+        ascending: true,
+      })
+      .limit(1)
+      .maybeSingle();
 
     if (error) {
       console.error(
-        "Update settings error:",
+        "Load settings error:",
         error
       );
 
@@ -664,129 +693,184 @@ export const saveSettings = async (
     }
 
     return mapFromDatabase(data);
-  }
+  };
 
-  /*
-   No settings row yet
-  */
+/* =========================================================
+   SAVE SETTINGS
+========================================================= */
 
-  const { data, error } = await supabase
-    .from(TABLE_NAME)
-    .insert([
-      payload,
-    ])
-    .select("*")
-    .single();
+export const saveSettings =
+  async (
+    settings
+  ) => {
+    const mergedSettings =
+      mergeWithDefaults(settings);
 
-  if (error) {
-    console.error(
-      "Insert settings error:",
-      error
+    const payload =
+      mapToDatabase(
+        mergedSettings
+      );
+
+    if (mergedSettings.id) {
+      const {
+        data,
+        error,
+      } = await supabase
+        .from(TABLE_NAME)
+        .update(payload)
+        .eq(
+          "id",
+          mergedSettings.id
+        )
+        .select("*")
+        .single();
+
+      if (error) {
+        console.error(
+          "Update settings error:",
+          error
+        );
+
+        throw error;
+      }
+
+      return mapFromDatabase(
+        data
+      );
+    }
+
+    const {
+      data,
+      error,
+    } = await supabase
+      .from(TABLE_NAME)
+      .insert([
+        payload,
+      ])
+      .select("*")
+      .single();
+
+    if (error) {
+      console.error(
+        "Insert settings error:",
+        error
+      );
+
+      throw error;
+    }
+
+    return mapFromDatabase(
+      data
     );
-
-    throw error;
-  }
-
-  return mapFromDatabase(data);
-};
+  };
 
 /* =========================================================
    PLAN HELPERS
 ========================================================= */
 
-export const getAllPlans = async () => {
-  const settings =
-    await loadSettings();
+export const getAllPlans =
+  async () => {
+    const settings =
+      await loadSettings();
 
-  const plans =
-    settings.plans;
+    const plans =
+      settings.plans;
 
-  return [
-    {
-      name: "Monthly",
-      value: "Monthly",
+    return [
+      {
+        name: "Monthly",
+        value: "Monthly",
 
-      price: toNumber(
-        plans.monthlyPrice,
-        defaultSettings.plans.monthlyPrice
-      ),
+        price: toNumber(
+          plans.monthlyPrice,
+          defaultSettings.plans
+            .monthlyPrice
+        ),
 
-      days: toNumber(
-        plans.monthlyDays,
-        defaultSettings.plans.monthlyDays
-      ),
+        days: toNumber(
+          plans.monthlyDays,
+          defaultSettings.plans
+            .monthlyDays
+        ),
 
-      enabled: toBoolean(
-        plans.monthlyEnabled,
-        defaultSettings.plans.monthlyEnabled
-      ),
+        enabled: toBoolean(
+          plans.monthlyEnabled,
+          defaultSettings.plans
+            .monthlyEnabled
+        ),
 
-      description:
-        plans.monthlyDescription ||
-        "",
+        description:
+          plans.monthlyDescription ||
+          "",
 
-      featured:
-        plans.featuredPlan ===
-        "Monthly",
-    },
+        featured:
+          plans.featuredPlan ===
+          "Monthly",
+      },
 
-    {
-      name: "Quarterly",
-      value: "Quarterly",
+      {
+        name: "Quarterly",
+        value: "Quarterly",
 
-      price: toNumber(
-        plans.quarterlyPrice,
-        defaultSettings.plans.quarterlyPrice
-      ),
+        price: toNumber(
+          plans.quarterlyPrice,
+          defaultSettings.plans
+            .quarterlyPrice
+        ),
 
-      days: toNumber(
-        plans.quarterlyDays,
-        defaultSettings.plans.quarterlyDays
-      ),
+        days: toNumber(
+          plans.quarterlyDays,
+          defaultSettings.plans
+            .quarterlyDays
+        ),
 
-      enabled: toBoolean(
-        plans.quarterlyEnabled,
-        defaultSettings.plans.quarterlyEnabled
-      ),
+        enabled: toBoolean(
+          plans.quarterlyEnabled,
+          defaultSettings.plans
+            .quarterlyEnabled
+        ),
 
-      description:
-        plans.quarterlyDescription ||
-        "",
+        description:
+          plans.quarterlyDescription ||
+          "",
 
-      featured:
-        plans.featuredPlan ===
-        "Quarterly",
-    },
+        featured:
+          plans.featuredPlan ===
+          "Quarterly",
+      },
 
-    {
-      name: "Annual",
-      value: "Annual",
+      {
+        name: "Annual",
+        value: "Annual",
 
-      price: toNumber(
-        plans.annualPrice,
-        defaultSettings.plans.annualPrice
-      ),
+        price: toNumber(
+          plans.annualPrice,
+          defaultSettings.plans
+            .annualPrice
+        ),
 
-      days: toNumber(
-        plans.annualDays,
-        defaultSettings.plans.annualDays
-      ),
+        days: toNumber(
+          plans.annualDays,
+          defaultSettings.plans
+            .annualDays
+        ),
 
-      enabled: toBoolean(
-        plans.annualEnabled,
-        defaultSettings.plans.annualEnabled
-      ),
+        enabled: toBoolean(
+          plans.annualEnabled,
+          defaultSettings.plans
+            .annualEnabled
+        ),
 
-      description:
-        plans.annualDescription ||
-        "",
+        description:
+          plans.annualDescription ||
+          "",
 
-      featured:
-        plans.featuredPlan ===
-        "Annual",
-    },
-  ];
-};
+        featured:
+          plans.featuredPlan ===
+          "Annual",
+      },
+    ];
+  };
 
 /* =========================================================
    ENABLED PLANS
@@ -807,24 +891,26 @@ export const getEnabledPlans =
    GET PLAN BY NAME
 ========================================================= */
 
-export const getPlanByName = async (
-  planName
-) => {
-  const plans =
-    await getAllPlans();
+export const getPlanByName =
+  async (
+    planName
+  ) => {
+    const plans =
+      await getAllPlans();
 
-  const normalizedPlanName =
-    String(
-      planName || ""
-    )
-      .trim()
-      .toLowerCase();
+    const normalizedPlanName =
+      String(
+        planName || ""
+      )
+        .trim()
+        .toLowerCase();
 
-  return (
-    plans.find(
-      (plan) =>
-        plan.name.toLowerCase() ===
-        normalizedPlanName
-    ) || null
-  );
-};
+    return (
+      plans.find(
+        (plan) =>
+          plan.name
+            .toLowerCase() ===
+          normalizedPlanName
+      ) || null
+    );
+  };

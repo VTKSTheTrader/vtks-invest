@@ -1,41 +1,23 @@
-import { useCallback, useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
+
 import { Link } from "react-router-dom";
-import { loadSettings } from "../../services/settingsService";
+
+import {
+  loadSettings,
+  defaultSettings,
+} from "../../services/settingsService";
+
 import "./Pricing.css";
+
 import SEO from "../../components/common/SEO";
 
-const PLAN_FEATURES = {
-  Monthly: [
-    { label: "VTKS Market Studies", included: true },
-    { label: "Market Outlook access", included: true },
-    { label: "Subscriber dashboard", included: true },
-    { label: "Individual stock analysis", included: true },
-    { label: "Regular market updates", included: true },
-    { label: "Scanner access", included: false },
-    { label: "Knowledge library", included: false },
-    { label: "Community access", included: false },
-  ],
-
-  Quarterly: [
-    { label: "Everything included in Monthly", included: true },
-    { label: "Three-month platform access", included: true },
-    { label: "Premium scanner access", included: true },
-    { label: "Knowledge library", included: true },
-    { label: "Recorded learning sessions", included: true },
-    { label: "Community access", included: true },
-    { label: "Priority member support", included: true },
-  ],
-
-  Annual: [
-    { label: "Everything included in Quarterly", included: true },
-    { label: "Twelve-month platform access", included: true },
-    { label: "Complete VTKS Knowledge Vault", included: true },
-    { label: "All subscriber scanners", included: true },
-    { label: "Community access", included: true },
-    { label: "Priority member support", included: true },
-    { label: "Maximum long-term value", included: true },
-  ],
-};
+/* =========================================================
+   DEFAULT PLAN DESCRIPTIONS
+========================================================= */
 
 const DEFAULT_PLAN_DESCRIPTIONS = {
   Monthly:
@@ -48,13 +30,23 @@ const DEFAULT_PLAN_DESCRIPTIONS = {
     "Complete long-term access to the full VTKS subscriber ecosystem.",
 };
 
-const toBoolean = (value, fallback = false) => {
+/* =========================================================
+   BOOLEAN HELPER
+========================================================= */
+
+const toBoolean = (
+  value,
+  fallback = false
+) => {
   if (typeof value === "boolean") {
     return value;
   }
 
   if (typeof value === "string") {
-    const normalized = value.trim().toLowerCase();
+    const normalized =
+      value
+        .trim()
+        .toLowerCase();
 
     if (normalized === "true") return true;
     if (normalized === "false") return false;
@@ -69,15 +61,193 @@ const toBoolean = (value, fallback = false) => {
   return fallback;
 };
 
-const createPlans = (settings) => {
-  const plans = settings?.plans || {};
+/* =========================================================
+   FEATURE LABELS
+========================================================= */
+
+const buildMonthlyFeatures = (
+  access = {}
+) => [
+  {
+    label: "VTKS Market Studies",
+    included:
+      access.marketStudies === true,
+  },
+  {
+    label: "Market Outlook access",
+    included:
+      access.marketOutlook === true,
+  },
+  {
+    label: "Subscriber dashboard",
+    included: true,
+  },
+  {
+    label: "Individual stock analysis",
+    included:
+      access.marketStudies === true,
+  },
+  {
+    label: "Regular market updates",
+    included:
+      access.marketOutlook === true,
+  },
+  {
+    label: "Scanner access",
+    included:
+      access.scanner === true,
+  },
+  {
+    label: "Knowledge library",
+    included:
+      access.library === true,
+  },
+  {
+    label: "Community access",
+    included:
+      access.community === true,
+  },
+];
+
+const buildQuarterlyFeatures = (
+  access = {}
+) => [
+  {
+    label: "VTKS Market Studies",
+    included:
+      access.marketStudies === true,
+  },
+  {
+    label: "Market Outlook access",
+    included:
+      access.marketOutlook === true,
+  },
+  {
+    label: "Three-month platform access",
+    included: true,
+  },
+  {
+    label: "Premium scanner access",
+    included:
+      access.scanner === true,
+  },
+  {
+    label: "Knowledge library",
+    included:
+      access.library === true,
+  },
+  {
+    label: "Recorded learning sessions",
+    included:
+      access.library === true,
+  },
+  {
+    label: "Community access",
+    included:
+      access.community === true,
+  },
+  {
+    label: "Priority member support",
+    included: true,
+  },
+];
+
+const buildAnnualFeatures = (
+  access = {}
+) => [
+  {
+    label: "VTKS Market Studies",
+    included:
+      access.marketStudies === true,
+  },
+  {
+    label: "Market Outlook access",
+    included:
+      access.marketOutlook === true,
+  },
+  {
+    label: "Twelve-month platform access",
+    included: true,
+  },
+  {
+    label: "Complete VTKS Knowledge Vault",
+    included:
+      access.library === true,
+  },
+  {
+    label: "All subscriber scanners",
+    included:
+      access.scanner === true,
+  },
+  {
+    label: "Community access",
+    included:
+      access.community === true,
+  },
+  {
+    label: "Priority member support",
+    included: true,
+  },
+  {
+    label: "Maximum long-term value",
+    included: true,
+  },
+];
+
+/* =========================================================
+   CREATE PLANS
+========================================================= */
+
+const createPlans = (
+  settings
+) => {
+  const plans =
+    settings?.plans || {};
+
+  const subscriberAccess =
+    settings?.subscriberAccess ||
+    defaultSettings.subscriberAccess;
+
+  const monthlyAccess = {
+    ...defaultSettings
+      .subscriberAccess
+      .monthly,
+
+    ...(subscriberAccess
+      ?.monthly || {}),
+  };
+
+  const quarterlyAccess = {
+    ...defaultSettings
+      .subscriberAccess
+      .quarterly,
+
+    ...(subscriberAccess
+      ?.quarterly || {}),
+  };
+
+  const annualAccess = {
+    ...defaultSettings
+      .subscriberAccess
+      .annual,
+
+    ...(subscriberAccess
+      ?.annual || {}),
+  };
 
   const allPlans = [
     {
       name: "Monthly",
+
       value: "Monthly",
-      price: Number(plans.monthlyPrice || 0),
-      days: Number(plans.monthlyDays || 30),
+
+      price: Number(
+        plans.monthlyPrice || 0
+      ),
+
+      days: Number(
+        plans.monthlyDays || 30
+      ),
 
       enabled: toBoolean(
         plans.monthlyEnabled,
@@ -86,17 +256,31 @@ const createPlans = (settings) => {
 
       description:
         plans.monthlyDescription ||
-        DEFAULT_PLAN_DESCRIPTIONS.Monthly,
+        DEFAULT_PLAN_DESCRIPTIONS
+          .Monthly,
 
       featured:
-        plans.featuredPlan === "Monthly",
+        plans.featuredPlan ===
+        "Monthly",
+
+      features:
+        buildMonthlyFeatures(
+          monthlyAccess
+        ),
     },
 
     {
       name: "Quarterly",
+
       value: "Quarterly",
-      price: Number(plans.quarterlyPrice || 0),
-      days: Number(plans.quarterlyDays || 90),
+
+      price: Number(
+        plans.quarterlyPrice || 0
+      ),
+
+      days: Number(
+        plans.quarterlyDays || 90
+      ),
 
       enabled: toBoolean(
         plans.quarterlyEnabled,
@@ -105,17 +289,31 @@ const createPlans = (settings) => {
 
       description:
         plans.quarterlyDescription ||
-        DEFAULT_PLAN_DESCRIPTIONS.Quarterly,
+        DEFAULT_PLAN_DESCRIPTIONS
+          .Quarterly,
 
       featured:
-        plans.featuredPlan === "Quarterly",
+        plans.featuredPlan ===
+        "Quarterly",
+
+      features:
+        buildQuarterlyFeatures(
+          quarterlyAccess
+        ),
     },
 
     {
       name: "Annual",
+
       value: "Annual",
-      price: Number(plans.annualPrice || 0),
-      days: Number(plans.annualDays || 365),
+
+      price: Number(
+        plans.annualPrice || 0
+      ),
+
+      days: Number(
+        plans.annualDays || 365
+      ),
 
       enabled: toBoolean(
         plans.annualEnabled,
@@ -124,65 +322,109 @@ const createPlans = (settings) => {
 
       description:
         plans.annualDescription ||
-        DEFAULT_PLAN_DESCRIPTIONS.Annual,
+        DEFAULT_PLAN_DESCRIPTIONS
+          .Annual,
 
       featured:
-        plans.featuredPlan === "Annual",
+        plans.featuredPlan ===
+        "Annual",
+
+      features:
+        buildAnnualFeatures(
+          annualAccess
+        ),
     },
   ];
 
   return allPlans.filter(
-    (plan) => plan.enabled === true
+    (plan) =>
+      plan.enabled === true
   );
 };
 
+/* =========================================================
+   PRICING COMPONENT
+========================================================= */
+
 export default function Pricing() {
-  const [plans, setPlans] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [errorMessage, setErrorMessage] =
-    useState("");
+  const [
+    plans,
+    setPlans,
+  ] = useState([]);
 
-  const loadPlans = useCallback(async () => {
-    try {
-      setLoading(true);
-      setErrorMessage("");
+  const [
+    loading,
+    setLoading,
+  ] = useState(true);
 
-      const settings = await loadSettings();
-      const enabledPlans = createPlans(settings);
+  const [
+    errorMessage,
+    setErrorMessage,
+  ] = useState("");
 
-      setPlans(enabledPlans);
-    } catch (error) {
-      console.error("Pricing load error:", error);
+  /* =====================================================
+     LOAD PLANS
+  ===================================================== */
 
-      setErrorMessage(
-        error?.message ||
-          "Failed to load subscription plans."
-      );
+  const loadPlans =
+    useCallback(
+      async () => {
+        try {
+          setLoading(true);
+          setErrorMessage("");
 
-      setPlans([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+          const settings =
+            await loadSettings();
+
+          const enabledPlans =
+            createPlans(
+              settings
+            );
+
+          setPlans(
+            enabledPlans
+          );
+        } catch (error) {
+          console.error(
+            "Pricing load error:",
+            error
+          );
+
+          setErrorMessage(
+            error?.message ||
+              "Failed to load subscription plans."
+          );
+
+          setPlans([]);
+        } finally {
+          setLoading(false);
+        }
+      },
+      []
+    );
 
   useEffect(() => {
     loadPlans();
   }, [loadPlans]);
 
-  /*
-   * Reload pricing when the user returns to this tab.
-   * This helps when Admin Settings is updated in another tab.
-   */
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        loadPlans();
-      }
-    };
+  /* =====================================================
+     REFRESH WHEN TAB GETS FOCUS
+  ===================================================== */
 
-    const handleWindowFocus = () => {
-      loadPlans();
-    };
+  useEffect(() => {
+    const handleVisibilityChange =
+      () => {
+        if (
+          !document.hidden
+        ) {
+          loadPlans();
+        }
+      };
+
+    const handleWindowFocus =
+      () => {
+        loadPlans();
+      };
 
     document.addEventListener(
       "visibilitychange",
@@ -207,10 +449,22 @@ export default function Pricing() {
     };
   }, [loadPlans]);
 
-  const formatPrice = (price) =>
-    `₹${Number(price || 0).toLocaleString(
+  /* =====================================================
+     PRICE FORMAT
+  ===================================================== */
+
+  const formatPrice = (
+    price
+  ) =>
+    `₹${Number(
+      price || 0
+    ).toLocaleString(
       "en-IN"
     )}`;
+
+  /* =====================================================
+     LOADING
+  ===================================================== */
 
   if (loading) {
     return (
@@ -219,145 +473,246 @@ export default function Pricing() {
           minHeight: "60vh",
           display: "flex",
           alignItems: "center",
-          justifyContent: "center",
+          justifyContent:
+            "center",
           textAlign: "center",
           padding: "50px",
         }}
       >
-        Loading subscription plans...
+        Loading subscription
+        plans...
       </div>
     );
   }
 
+  /* =====================================================
+     PAGE
+  ===================================================== */
+
   return (
     <main className="pricing-page">
+
       <SEO
         title="VTKS Pricing | Membership Plans"
-        description="Choose the VTKS membership plan that fits your trading journey."
+        description="Choose the VTKS membership plan that fits your market study and learning journey."
         canonical="https://www.vtksinvest.com/pricing"
       />
 
+      {/* =================================================
+          HERO
+      ================================================= */}
+
       <section className="pricing-hero">
+
         <span className="pricing-badge">
-          💎 VTKS Subscription Plans
+          💎 VTKS Subscription
+          Plans
         </span>
 
-        <h1>Choose your VTKS plan</h1>
+        <h1>
+          Choose your VTKS plan
+        </h1>
 
         <p>
-          Select the subscription plan that best
-          matches your market study and learning needs.
+          Select the subscription
+          plan that best matches
+          your market study and
+          learning needs.
         </p>
+
       </section>
+
+      {/* =================================================
+          ERROR
+      ================================================= */}
 
       {errorMessage && (
         <section className="pricing-empty-state">
-          <h2>Unable to load pricing</h2>
 
-          <p>{errorMessage}</p>
+          <h2>
+            Unable to load pricing
+          </h2>
+
+          <p>
+            {errorMessage}
+          </p>
 
           <button
             type="button"
             className="pricing-button pricing-button-primary"
-            onClick={loadPlans}
+            onClick={
+              loadPlans
+            }
           >
             Try Again
           </button>
+
         </section>
       )}
 
-      {!errorMessage && plans.length === 0 && (
-        <section className="pricing-empty-state">
-          <h2>No active subscription plans</h2>
+      {/* =================================================
+          NO ACTIVE PLANS
+      ================================================= */}
 
-          <p>
-            Please contact the VTKS team for
-            subscription assistance.
-          </p>
+      {!errorMessage &&
+        plans.length === 0 && (
 
-          <Link
-            to="/contact"
-            className="pricing-button pricing-button-primary"
-          >
-            Contact VTKS
-          </Link>
-        </section>
-      )}
+          <section className="pricing-empty-state">
 
-      {!errorMessage && plans.length > 0 && (
-        <section
-          className={`pricing-grid pricing-grid-${plans.length}`}
-        >
-          {plans.map((plan) => (
-            <article
-              key={plan.name}
-              className={`pricing-card ${
-                plan.featured
-                  ? "pricing-card-highlighted"
-                  : ""
-              }`}
+            <h2>
+              No active
+              subscription plans
+            </h2>
+
+            <p>
+              Please contact the
+              VTKS team for
+              subscription
+              assistance.
+            </p>
+
+            <Link
+              to="/contact"
+              className="pricing-button pricing-button-primary"
             >
-              {plan.featured && (
-                <span className="pricing-plan-badge">
-                  Most Popular
-                </span>
-              )}
+              Contact VTKS
+            </Link>
 
-              <div className="pricing-card-header">
-                <h2>{plan.name}</h2>
+          </section>
 
-                <div className="pricing-price">
-                  <strong>
-                    {formatPrice(plan.price)}
-                  </strong>
+        )}
 
-                  <span>
-                    {plan.days} days access
-                  </span>
-                </div>
+      {/* =================================================
+          PLAN CARDS
+      ================================================= */}
 
-                <p>{plan.description}</p>
-              </div>
+      {!errorMessage &&
+        plans.length > 0 && (
 
-              <div className="pricing-divider" />
+          <section
+            className={`pricing-grid pricing-grid-${plans.length}`}
+          >
 
-              <ul className="pricing-feature-list">
-                {(PLAN_FEATURES[plan.name] || []).map(
-                  (feature) => (
-                    <li
-                      key={feature.label}
-                      className={
-                        feature.included
-                          ? ""
-                          : "pricing-feature-disabled"
-                      }
-                    >
+            {plans.map(
+              (plan) => (
+
+                <article
+                  key={
+                    plan.name
+                  }
+                  className={`pricing-card ${
+                    plan.featured
+                      ? "pricing-card-highlighted"
+                      : ""
+                  }`}
+                >
+
+                  {/* MOST POPULAR */}
+
+                  {plan.featured && (
+                    <span className="pricing-plan-badge">
+                      Most Popular
+                    </span>
+                  )}
+
+                  {/* HEADER */}
+
+                  <div className="pricing-card-header">
+
+                    <h2>
+                      {plan.name}
+                    </h2>
+
+                    <div className="pricing-price">
+
+                      <strong>
+                        {formatPrice(
+                          plan.price
+                        )}
+                      </strong>
+
                       <span>
-                        {feature.included ? "✓" : "✕"}
+                        {plan.days} days
+                        access
                       </span>
 
-                      {feature.label}
-                    </li>
-                  )
-                )}
-              </ul>
+                    </div>
 
-              <Link
-                to={`/payment?plan=${encodeURIComponent(
-                  plan.name
-                )}`}
-                className={
-                  plan.featured
-                    ? "pricing-button pricing-button-primary"
-                    : "pricing-button pricing-button-secondary"
-                }
-              >
-                Choose {plan.name}
-              </Link>
-            </article>
-          ))}
-        </section>
-      )}
+                    <p>
+                      {
+                        plan.description
+                      }
+                    </p>
+
+                  </div>
+
+                  <div className="pricing-divider" />
+
+                  {/* FEATURES */}
+
+                  <ul className="pricing-feature-list">
+
+                    {(
+                      plan.features ||
+                      []
+                    ).map(
+                      (
+                        feature
+                      ) => (
+
+                        <li
+                          key={
+                            feature.label
+                          }
+                          className={
+                            feature.included
+                              ? ""
+                              : "pricing-feature-disabled"
+                          }
+                        >
+
+                          <span>
+                            {feature.included
+                              ? "✓"
+                              : "✕"}
+                          </span>
+
+                          {
+                            feature.label
+                          }
+
+                        </li>
+
+                      )
+                    )}
+
+                  </ul>
+
+                  {/* BUTTON */}
+
+                  <Link
+                    to={`/payment?plan=${encodeURIComponent(
+                      plan.name
+                    )}`}
+                    className={
+                      plan.featured
+                        ? "pricing-button pricing-button-primary"
+                        : "pricing-button pricing-button-secondary"
+                    }
+                  >
+                    Choose{" "}
+                    {plan.name}
+                  </Link>
+
+                </article>
+
+              )
+            )}
+
+          </section>
+
+        )}
+
     </main>
   );
 }

@@ -33,6 +33,11 @@ import {
   getSubscriberMonthlyLevels,
 } from "../../services/monthlyLevelsService";
 
+import {
+  loadSettings,
+  defaultSettings,
+} from "../../services/settingsService";
+
 import "./Dashboard.css";
 
 const PORTFOLIO_ITEMS_PER_PAGE = 5;
@@ -43,12 +48,37 @@ const normalize = (value) =>
     .trim()
     .toLowerCase();
 
+const getPlanKey = (plan) => {
+  const normalizedPlan = normalize(plan);
+
+  if (normalizedPlan.includes("annual")) {
+    return "annual";
+  }
+
+  if (normalizedPlan.includes("quarter")) {
+    return "quarterly";
+  }
+
+  if (normalizedPlan.includes("month")) {
+    return "monthly";
+  }
+
+  return "";
+};
+
 export default function Dashboard() {
   const [profile, setProfile] =
     useState(null);
 
   const [membership, setMembership] =
     useState(null);
+
+  const [
+    subscriberAccess,
+    setSubscriberAccess,
+  ] = useState(
+    defaultSettings.subscriberAccess
+  );
 
   const [holdings, setHoldings] =
     useState([]);
@@ -167,34 +197,60 @@ export default function Dashboard() {
           );
         }
 
-        const isMonthlyMembership =
-          normalize(
+        const settingsData =
+          await loadSettings();
+
+        const planKey =
+          getPlanKey(
             membershipData?.plan
-          ).includes("monthly");
+          );
+
+        const currentPlanAccess =
+          settingsData
+            ?.subscriberAccess
+            ?.[planKey] ||
+          defaultSettings
+            .subscriberAccess
+            ?.[planKey] ||
+          {};
 
         const [
           holdingRows,
           monthlyRows,
+          libraryRows,
+          scannerRows,
+          communityRows,
         ] = await Promise.all([
-          getHoldings(),
-          getSubscriberMonthlyLevels(),
+          currentPlanAccess
+            .marketStudies === true
+            ? getHoldings()
+            : Promise.resolve([]),
+
+          currentPlanAccess
+            .marketOutlook === true
+            ? getSubscriberMonthlyLevels()
+            : Promise.resolve([]),
+
+          currentPlanAccess
+            .library === true
+            ? getSubscriberLibrary()
+            : Promise.resolve([]),
+
+          currentPlanAccess
+            .scanner === true
+            ? getSubscriberScanners()
+            : Promise.resolve([]),
+
+          currentPlanAccess
+            .community === true
+            ? getSubscriberCommunityLinks()
+            : Promise.resolve([]),
         ]);
 
-        let libraryRows = [];
-        let scannerRows = [];
-        let communityRows = [];
-
-        if (!isMonthlyMembership) {
-          [
-            libraryRows,
-            scannerRows,
-            communityRows,
-          ] = await Promise.all([
-            getSubscriberLibrary(),
-            getSubscriberScanners(),
-            getSubscriberCommunityLinks(),
-          ]);
-        }
+        setSubscriberAccess(
+          settingsData?.subscriberAccess ||
+            defaultSettings.subscriberAccess
+        );
 
         const visibleHoldings =
           (holdingRows || [])
@@ -328,18 +384,32 @@ export default function Dashboard() {
   ========================================================= */
 
   const membershipPlan =
-    normalize(
+    getPlanKey(
       membership?.plan
     );
 
-  const isMonthlyPlan =
-    membershipPlan.includes(
-      "monthly"
-    );
+  const planAccess =
+    subscriberAccess?.[
+      membershipPlan
+    ] || {};
 
-  const hasPremiumAccess =
-    membershipPlan === "quarterly" ||
-    membershipPlan === "annual";
+  const canAccessMarketStudies =
+    planAccess.marketStudies === true;
+
+  const canAccessMarketOutlook =
+    planAccess.marketOutlook === true;
+
+  const canAccessScanner =
+    planAccess.scanner === true;
+
+  const canAccessLibrary =
+    planAccess.library === true;
+
+  const canAccessCommunity =
+    planAccess.community === true;
+
+  const canAccessFeedback =
+    planAccess.feedback === true;
 
   const membershipStatus =
     normalize(
@@ -1399,6 +1469,7 @@ export default function Dashboard() {
               PORTFOLIO
           ================================================= */}
 
+          {canAccessMarketStudies ? (
           <section className="subscriber-section-card">
 
             <div className="subscriber-section-header">
@@ -1880,6 +1951,17 @@ export default function Dashboard() {
             )}
 
           </section>
+          ) : (
+            <LockedFeatureCard
+              title="📊 VTKS Market Studies"
+              subtitle="Market Studies are not included in your current subscription plan."
+              onUpgradeClick={() =>
+                openUpgradeModal(
+                  "VTKS Market Studies"
+                )
+              }
+            />
+          )}
 
           {/* =================================================
               FEATURE CARDS
@@ -1887,130 +1969,137 @@ export default function Dashboard() {
 
           <section className="subscriber-feature-grid">
 
-            <FeatureCard
-              title="📊 Market Outlook"
-              subtitle="Technical support, resistance, charts and technical outlook."
-              link="/dashboard/monthly-levels"
-              emptyMessage="No market outlook available."
-              items={
-                latestMonthlyLevels.map(
-                  (item) => ({
-                    id:
-                      item.id,
+            {canAccessMarketOutlook ? (
+              <FeatureCard
+                title="📊 Market Outlook"
+                subtitle="Technical support, resistance, charts and technical outlook."
+                link="/dashboard/monthly-levels"
+                emptyMessage="No market outlook available."
+                items={
+                  latestMonthlyLevels.map(
+                    (item) => ({
+                      id: item.id,
 
-                    title:
-                      item.instrument ||
-                      "Market Outlook",
+                      title:
+                        item.instrument ||
+                        "Market Outlook",
 
-                    meta:
-                      `${
-                        item.month ||
-                        "Current Month"
-                      } • ${
-                        item.bias ||
-                        "Neutral"
-                      }`,
+                      meta:
+                        `${
+                          item.month ||
+                          "Current Month"
+                        } • ${
+                          item.bias ||
+                          "Neutral"
+                        }`,
 
-                    internalUrl:
-                      "/dashboard/monthly-levels",
-                  })
-                )
-              }
-            />
-
-            {hasPremiumAccess ? (
-              <>
-                <FeatureCard
-                  title="📚 Knowledge Library"
-                  subtitle="Latest premium videos, PDFs and recorded sessions."
-                  link="/dashboard/library"
-                  emptyMessage="No library content uploaded yet."
-                  items={
-                    latestLibraryResources.map(
-                      (item) => ({
-                        id:
-                          item.id,
-
-                        title:
-                          item.title ||
-                          "VTKS Resource",
-
-                        meta:
-                          `${
-                            item.category ||
-                            "General"
-                          } • ${
-                            item.type ||
-                            "Resource"
-                          }`,
-
-                        url:
-                          getResourceUrl(
-                            item
-                          ),
-                      })
-                    )
-                  }
-                />
-
-                <FeatureCard
-                  title="⚡ Scanner Access"
-                  subtitle="Latest VTKS market scanners."
-                  link="/dashboard/scanner"
-                  dashboardLink="https://chartink.com/dashboard/324723"
-                  dashboardLabel="Dashboard"
-                  emptyMessage="No scanners uploaded yet."
-                  items={
-                    latestScanners.map(
-                      (scanner) => ({
-                        id:
-                          scanner.id,
-
-                        title:
-                          getScannerTitle(
-                            scanner
-                          ),
-
-                        meta:
-                          `${
-                            scanner.category ||
-                            "General"
-                          } • ${
-                            scanner.timeframe ||
-                            "Scanner"
-                          }`,
-
-                        url:
-                          getScannerUrl(
-                            scanner
-                          ),
-                      })
-                    )
-                  }
-                />
-              </>
+                      internalUrl:
+                        "/dashboard/monthly-levels",
+                    })
+                  )
+                }
+              />
             ) : (
-              <>
-                <LockedFeatureCard
-                  title="📚 Knowledge Library"
-                  subtitle="Premium videos, PDFs, recorded sessions and VTKS learning resources."
-                  onUpgradeClick={() =>
-                    openUpgradeModal(
-                      "Knowledge Library"
-                    )
-                  }
-                />
+              <LockedFeatureCard
+                title="📊 Market Outlook"
+                subtitle="Market Outlook is not included in your current subscription plan."
+                onUpgradeClick={() =>
+                  openUpgradeModal(
+                    "Market Outlook"
+                  )
+                }
+              />
+            )}
 
-                <LockedFeatureCard
-                  title="⚡ Scanner Access"
-                  subtitle="Access VTKS market scanners and the scanner dashboard."
-                  onUpgradeClick={() =>
-                    openUpgradeModal(
-                      "Scanner Access"
-                    )
-                  }
-                />
-              </>
+            {canAccessLibrary ? (
+              <FeatureCard
+                title="📚 Knowledge Library"
+                subtitle="Latest premium videos, PDFs and recorded sessions."
+                link="/dashboard/library"
+                emptyMessage="No library content uploaded yet."
+                items={
+                  latestLibraryResources.map(
+                    (item) => ({
+                      id: item.id,
+
+                      title:
+                        item.title ||
+                        "VTKS Resource",
+
+                      meta:
+                        `${
+                          item.category ||
+                          "General"
+                        } • ${
+                          item.type ||
+                          "Resource"
+                        }`,
+
+                      url:
+                        getResourceUrl(
+                          item
+                        ),
+                    })
+                  )
+                }
+              />
+            ) : (
+              <LockedFeatureCard
+                title="📚 Knowledge Library"
+                subtitle="This feature is not included in your current subscription plan."
+                onUpgradeClick={() =>
+                  openUpgradeModal(
+                    "Knowledge Library"
+                  )
+                }
+              />
+            )}
+
+            {canAccessScanner ? (
+              <FeatureCard
+                title="⚡ Scanner Access"
+                subtitle="Latest VTKS market scanners."
+                link="/dashboard/scanner"
+                dashboardLink="https://chartink.com/dashboard/324723"
+                dashboardLabel="Dashboard"
+                emptyMessage="No scanners uploaded yet."
+                items={
+                  latestScanners.map(
+                    (scanner) => ({
+                      id: scanner.id,
+
+                      title:
+                        getScannerTitle(
+                          scanner
+                        ),
+
+                      meta:
+                        `${
+                          scanner.category ||
+                          "General"
+                        } • ${
+                          scanner.timeframe ||
+                          "Scanner"
+                        }`,
+
+                      url:
+                        getScannerUrl(
+                          scanner
+                        ),
+                    })
+                  )
+                }
+              />
+            ) : (
+              <LockedFeatureCard
+                title="⚡ Scanner Access"
+                subtitle="This feature is not included in your current subscription plan."
+                onUpgradeClick={() =>
+                  openUpgradeModal(
+                    "Scanner Access"
+                  )
+                }
+              />
             )}
 
           </section>
@@ -2021,110 +2110,103 @@ export default function Dashboard() {
 
           <section className="subscriber-community-feedback-grid">
 
-            {hasPremiumAccess ? (
-              <>
-                <FeatureCard
-                  title="📢 Community Access"
-                  subtitle="Join active VTKS Telegram groups and subscriber channels."
-                  emptyMessage="No community links are currently available."
-                  items={
-                    latestCommunityLinks.map(
-                      (item) => ({
-                        id:
-                          item.id,
+            {canAccessCommunity ? (
+              <FeatureCard
+                title="📢 Community Access"
+                subtitle="Join active VTKS Telegram groups and subscriber channels."
+                emptyMessage="No community links are currently available."
+                items={
+                  latestCommunityLinks.map(
+                    (item) => ({
+                      id: item.id,
 
-                        title:
-                          item.title ||
-                          "VTKS Community",
+                      title:
+                        item.title ||
+                        "VTKS Community",
 
-                        meta:
-                          `${
-                            item.platform ||
-                            "Telegram"
-                          } • ${
-                            item.description ||
-                            "Subscriber Access"
-                          }`,
+                      meta:
+                        `${
+                          item.platform ||
+                          "Telegram"
+                        } • ${
+                          item.description ||
+                          "Subscriber Access"
+                        }`,
 
-                        url:
-                          item.url ||
-                          "",
-                      })
-                    )
-                  }
-                />
-
-                <article className="subscriber-feature-card subscriber-feedback-card">
-
-                  <div className="subscriber-feature-header">
-
-                    <div>
-
-                      <h2>
-                        ⭐ Share Your Experience
-                      </h2>
-
-                      <p>
-                        Help fellow traders by sharing
-                        your VTKS learning journey.
-                      </p>
-
-                    </div>
-
-                  </div>
-
-                  <div className="subscriber-feedback-content">
-
-                    <div
-                      className="subscriber-feedback-stars"
-                      aria-label="Five-star feedback"
-                    >
-                      ⭐⭐⭐⭐⭐
-                    </div>
-
-                    <p className="subscriber-feedback-description">
-                      Your feedback helps improve VTKS
-                      and inspires other traders to learn
-                      with confidence.
-                    </p>
-
-                    <div className="subscriber-feedback-badge">
-                      ✔ Verified Members Only
-                    </div>
-
-                    <Link
-                      to="/subscriber/feedback"
-                      className="subscriber-feedback-button"
-                    >
-                      Share Feedback →
-                    </Link>
-
-                  </div>
-
-                </article>
-              </>
+                      url:
+                        item.url ||
+                        "",
+                    })
+                  )
+                }
+              />
             ) : (
-              <>
-                <LockedFeatureCard
-                  title="📢 Community Access"
-                  subtitle="Join VTKS subscriber groups and premium community channels."
-                  onUpgradeClick={() =>
-                    openUpgradeModal(
-                      "Community Access"
-                    )
-                  }
-                />
+              <LockedFeatureCard
+                title="📢 Community Access"
+                subtitle="This feature is not included in your current subscription plan."
+                onUpgradeClick={() =>
+                  openUpgradeModal(
+                    "Community Access"
+                  )
+                }
+              />
+            )}
 
-                <LockedFeatureCard
-                  title="⭐ Member Feedback"
-                  subtitle="Premium member community features are available with higher plans."
-                  onUpgradeClick={() =>
-                    openUpgradeModal(
-                      "Member Feedback"
-                    )
-                  }
-                />
-              </>
+            {canAccessFeedback ? (
+              <article className="subscriber-feature-card subscriber-feedback-card">
+
+                <div className="subscriber-feature-header">
+                  <div>
+                    <h2>
+                      ⭐ Share Your Experience
+                    </h2>
+
+                    <p>
+                      Help fellow traders by sharing
+                      your VTKS learning journey.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="subscriber-feedback-content">
+
+                  <div
+                    className="subscriber-feedback-stars"
+                    aria-label="Five-star feedback"
+                  >
+                    ⭐⭐⭐⭐⭐
+                  </div>
+
+                  <p className="subscriber-feedback-description">
+                    Your feedback helps improve VTKS
+                    and inspires other traders to learn
+                    with confidence.
+                  </p>
+
+                  <div className="subscriber-feedback-badge">
+                    ✔ Verified Members Only
+                  </div>
+
+                  <Link
+                    to="/subscriber/feedback"
+                    className="subscriber-feedback-button"
+                  >
+                    Share Feedback →
+                  </Link>
+
+                </div>
+
+              </article>
+            ) : (
+              <LockedFeatureCard
+                title="⭐ Member Feedback"
+                subtitle="This feature is not included in your current subscription plan."
+                onUpgradeClick={() =>
+                  openUpgradeModal(
+                    "Member Feedback"
+                  )
+                }
+              />
             )}
 
           </section>
