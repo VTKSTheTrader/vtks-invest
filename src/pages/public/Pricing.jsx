@@ -4,38 +4,48 @@ import { loadSettings } from "../../services/settingsService";
 import "./Pricing.css";
 import SEO from "../../components/common/SEO";
 
-<SEO
-  title="VTKS Pricing | Membership Plans"
-  description="Choose the VTKS membership plan that fits your trading journey."
-  canonical="https://www.vtksinvest.com/pricing"
-/>
 const PLAN_FEATURES = {
   Monthly: [
-    "VTKS indicator access",
-    "Subscriber dashboard",
-    "Scanner access",
-    "Knowledge library",
-    "Community support",
-    "Regular updates",
+    { label: "VTKS Market Studies", included: true },
+    { label: "Market Outlook access", included: true },
+    { label: "Subscriber dashboard", included: true },
+    { label: "Individual stock analysis", included: true },
+    { label: "Regular market updates", included: true },
+    { label: "Scanner access", included: false },
+    { label: "Knowledge library", included: false },
+    { label: "Community access", included: false },
   ],
 
   Quarterly: [
-    "Everything included in Monthly",
-    "Three-month platform access",
-    "Premium scanner access",
-    "Recorded learning sessions",
-    "Subscriber-only trade access",
-    "Priority member support",
+    { label: "Everything included in Monthly", included: true },
+    { label: "Three-month platform access", included: true },
+    { label: "Premium scanner access", included: true },
+    { label: "Knowledge library", included: true },
+    { label: "Recorded learning sessions", included: true },
+    { label: "Community access", included: true },
+    { label: "Priority member support", included: true },
   ],
 
   Annual: [
-    "Everything included in Quarterly",
-    "Twelve-month platform access",
-    "Complete VTKS Knowledge Vault",
-    "All subscriber scanners",
-    "Premium trade access",
-    "Maximum long-term value",
+    { label: "Everything included in Quarterly", included: true },
+    { label: "Twelve-month platform access", included: true },
+    { label: "Complete VTKS Knowledge Vault", included: true },
+    { label: "All subscriber scanners", included: true },
+    { label: "Community access", included: true },
+    { label: "Priority member support", included: true },
+    { label: "Maximum long-term value", included: true },
   ],
+};
+
+const DEFAULT_PLAN_DESCRIPTIONS = {
+  Monthly:
+    "Essential access for members focused on VTKS Market Studies and Market Outlook.",
+
+  Quarterly:
+    "Expanded access with scanners, learning resources and premium subscriber features.",
+
+  Annual:
+    "Complete long-term access to the full VTKS subscriber ecosystem.",
 };
 
 const toBoolean = (value, fallback = false) => {
@@ -75,7 +85,8 @@ const createPlans = (settings) => {
       ),
 
       description:
-        plans.monthlyDescription || "",
+        plans.monthlyDescription ||
+        DEFAULT_PLAN_DESCRIPTIONS.Monthly,
 
       featured:
         plans.featuredPlan === "Monthly",
@@ -93,7 +104,8 @@ const createPlans = (settings) => {
       ),
 
       description:
-        plans.quarterlyDescription || "",
+        plans.quarterlyDescription ||
+        DEFAULT_PLAN_DESCRIPTIONS.Quarterly,
 
       featured:
         plans.featuredPlan === "Quarterly",
@@ -111,7 +123,8 @@ const createPlans = (settings) => {
       ),
 
       description:
-        plans.annualDescription || "",
+        plans.annualDescription ||
+        DEFAULT_PLAN_DESCRIPTIONS.Annual,
 
       featured:
         plans.featuredPlan === "Annual",
@@ -218,16 +231,22 @@ export default function Pricing() {
 
   return (
     <main className="pricing-page">
+      <SEO
+        title="VTKS Pricing | Membership Plans"
+        description="Choose the VTKS membership plan that fits your trading journey."
+        canonical="https://www.vtksinvest.com/pricing"
+      />
+
       <section className="pricing-hero">
         <span className="pricing-badge">
-          💎 VTKS Indicator Subscription
+          💎 VTKS Subscription Plans
         </span>
 
         <h1>Choose your VTKS plan</h1>
 
         <p>
           Select the subscription plan that best
-          matches your trading and learning journey.
+          matches your market study and learning needs.
         </p>
       </section>
 
@@ -297,10 +316,7 @@ export default function Pricing() {
                   </span>
                 </div>
 
-                <p>
-                  {plan.description ||
-                    `${plan.name} VTKS subscription plan.`}
-                </p>
+                <p>{plan.description}</p>
               </div>
 
               <div className="pricing-divider" />
@@ -308,9 +324,19 @@ export default function Pricing() {
               <ul className="pricing-feature-list">
                 {(PLAN_FEATURES[plan.name] || []).map(
                   (feature) => (
-                    <li key={feature}>
-                      <span>✓</span>
-                      {feature}
+                    <li
+                      key={feature.label}
+                      className={
+                        feature.included
+                          ? ""
+                          : "pricing-feature-disabled"
+                      }
+                    >
+                      <span>
+                        {feature.included ? "✓" : "✕"}
+                      </span>
+
+                      {feature.label}
                     </li>
                   )
                 )}

@@ -695,3 +695,19 @@
     width: 100%;
   }
 }
+/* =========================================
+   DISABLED / NOT INCLUDED PLAN FEATURES
+========================================= */
+
+.pricing-feature-disabled {
+  color: #dc2626;
+}
+
+.pricing-feature-disabled span {
+  background: #fee2e2 !important;
+  color: #dc2626 !important;
+}
+
+.pricing-feature-disabled {
+  opacity: 0.9;
+}

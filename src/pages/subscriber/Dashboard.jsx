@@ -80,6 +80,14 @@ export default function Dashboard() {
   const [loadError, setLoadError] =
     useState("");
 
+  const [
+    upgradeModal,
+    setUpgradeModal,
+  ] = useState({
+    open: false,
+    feature: "",
+  });
+
   /* =========================================================
      PORTFOLIO FILTERS
   ========================================================= */
@@ -159,19 +167,34 @@ export default function Dashboard() {
           );
         }
 
+        const isMonthlyMembership =
+          normalize(
+            membershipData?.plan
+          ).includes("monthly");
+
         const [
           holdingRows,
-          libraryRows,
-          scannerRows,
-          communityRows,
           monthlyRows,
         ] = await Promise.all([
           getHoldings(),
-          getSubscriberLibrary(),
-          getSubscriberScanners(),
-          getSubscriberCommunityLinks(),
           getSubscriberMonthlyLevels(),
         ]);
+
+        let libraryRows = [];
+        let scannerRows = [];
+        let communityRows = [];
+
+        if (!isMonthlyMembership) {
+          [
+            libraryRows,
+            scannerRows,
+            communityRows,
+          ] = await Promise.all([
+            getSubscriberLibrary(),
+            getSubscriberScanners(),
+            getSubscriberCommunityLinks(),
+          ]);
+        }
 
         const visibleHoldings =
           (holdingRows || [])
@@ -299,6 +322,24 @@ export default function Dashboard() {
         )
     );
   };
+
+  /* =========================================================
+     PLAN ACCESS
+  ========================================================= */
+
+  const membershipPlan =
+    normalize(
+      membership?.plan
+    );
+
+  const isMonthlyPlan =
+    membershipPlan.includes(
+      "monthly"
+    );
+
+  const hasPremiumAccess =
+    membershipPlan === "quarterly" ||
+    membershipPlan === "annual";
 
   const membershipStatus =
     normalize(
@@ -1150,6 +1191,27 @@ export default function Dashboard() {
     "";
 
   /* =========================================================
+     UPGRADE MODAL
+  ========================================================= */
+
+  const openUpgradeModal = (
+    feature
+  ) => {
+    setUpgradeModal({
+      open: true,
+      feature:
+        feature || "Premium Feature",
+    });
+  };
+
+  const closeUpgradeModal = () => {
+    setUpgradeModal({
+      open: false,
+      feature: "",
+    });
+  };
+
+  /* =========================================================
      LOGOUT
   ========================================================= */
 
@@ -1856,74 +1918,100 @@ export default function Dashboard() {
               }
             />
 
-            <FeatureCard
-              title="📚 Knowledge Library"
-              subtitle="Latest premium videos, PDFs and recorded sessions."
-              link="/dashboard/library"
-              emptyMessage="No library content uploaded yet."
-              items={
-                latestLibraryResources.map(
-                  (item) => ({
-                    id:
-                      item.id,
+            {hasPremiumAccess ? (
+              <>
+                <FeatureCard
+                  title="📚 Knowledge Library"
+                  subtitle="Latest premium videos, PDFs and recorded sessions."
+                  link="/dashboard/library"
+                  emptyMessage="No library content uploaded yet."
+                  items={
+                    latestLibraryResources.map(
+                      (item) => ({
+                        id:
+                          item.id,
 
-                    title:
-                      item.title ||
-                      "VTKS Resource",
+                        title:
+                          item.title ||
+                          "VTKS Resource",
 
-                    meta:
-                      `${
-                        item.category ||
-                        "General"
-                      } • ${
-                        item.type ||
-                        "Resource"
-                      }`,
+                        meta:
+                          `${
+                            item.category ||
+                            "General"
+                          } • ${
+                            item.type ||
+                            "Resource"
+                          }`,
 
-                    url:
-                      getResourceUrl(
-                        item
-                      ),
-                  })
-                )
-              }
-            />
+                        url:
+                          getResourceUrl(
+                            item
+                          ),
+                      })
+                    )
+                  }
+                />
 
-            <FeatureCard
-              title="⚡ Scanner Access"
-              subtitle="Latest VTKS market scanners."
-              link="/dashboard/scanner"
-              dashboardLink="https://chartink.com/dashboard/324723"
-              dashboardLabel="Dashboard"
-              emptyMessage="No scanners uploaded yet."
-              items={
-                latestScanners.map(
-                  (scanner) => ({
-                    id:
-                      scanner.id,
+                <FeatureCard
+                  title="⚡ Scanner Access"
+                  subtitle="Latest VTKS market scanners."
+                  link="/dashboard/scanner"
+                  dashboardLink="https://chartink.com/dashboard/324723"
+                  dashboardLabel="Dashboard"
+                  emptyMessage="No scanners uploaded yet."
+                  items={
+                    latestScanners.map(
+                      (scanner) => ({
+                        id:
+                          scanner.id,
 
-                    title:
-                      getScannerTitle(
-                        scanner
-                      ),
+                        title:
+                          getScannerTitle(
+                            scanner
+                          ),
 
-                    meta:
-                      `${
-                        scanner.category ||
-                        "General"
-                      } • ${
-                        scanner.timeframe ||
-                        "Scanner"
-                      }`,
+                        meta:
+                          `${
+                            scanner.category ||
+                            "General"
+                          } • ${
+                            scanner.timeframe ||
+                            "Scanner"
+                          }`,
 
-                    url:
-                      getScannerUrl(
-                        scanner
-                      ),
-                  })
-                )
-              }
-            />
+                        url:
+                          getScannerUrl(
+                            scanner
+                          ),
+                      })
+                    )
+                  }
+                />
+              </>
+            ) : (
+              <>
+                <LockedFeatureCard
+                  title="📚 Knowledge Library"
+                  subtitle="Premium videos, PDFs, recorded sessions and VTKS learning resources."
+                  onUpgradeClick={() =>
+                    openUpgradeModal(
+                      "Knowledge Library"
+                    )
+                  }
+                />
+
+                <LockedFeatureCard
+                  title="⚡ Scanner Access"
+                  subtitle="Access VTKS market scanners and the scanner dashboard."
+                  onUpgradeClick={() =>
+                    openUpgradeModal(
+                      "Scanner Access"
+                    )
+                  }
+                />
+              </>
+            )}
 
           </section>
 
@@ -1933,89 +2021,328 @@ export default function Dashboard() {
 
           <section className="subscriber-community-feedback-grid">
 
-            <FeatureCard
-              title="📢 Community Access"
-              subtitle="Join active VTKS Telegram groups and subscriber channels."
-              emptyMessage="No community links are currently available."
-              items={
-                latestCommunityLinks.map(
-                  (item) => ({
-                    id:
-                      item.id,
+            {hasPremiumAccess ? (
+              <>
+                <FeatureCard
+                  title="📢 Community Access"
+                  subtitle="Join active VTKS Telegram groups and subscriber channels."
+                  emptyMessage="No community links are currently available."
+                  items={
+                    latestCommunityLinks.map(
+                      (item) => ({
+                        id:
+                          item.id,
 
-                    title:
-                      item.title ||
-                      "VTKS Community",
+                        title:
+                          item.title ||
+                          "VTKS Community",
 
-                    meta:
-                      `${
-                        item.platform ||
-                        "Telegram"
-                      } • ${
-                        item.description ||
-                        "Subscriber Access"
-                      }`,
+                        meta:
+                          `${
+                            item.platform ||
+                            "Telegram"
+                          } • ${
+                            item.description ||
+                            "Subscriber Access"
+                          }`,
 
-                    url:
-                      item.url ||
-                      "",
-                  })
-                )
-              }
-            />
+                        url:
+                          item.url ||
+                          "",
+                      })
+                    )
+                  }
+                />
 
-            <article className="subscriber-feature-card subscriber-feedback-card">
+                <article className="subscriber-feature-card subscriber-feedback-card">
 
-              <div className="subscriber-feature-header">
+                  <div className="subscriber-feature-header">
 
-                <div>
+                    <div>
 
-                  <h2>
-                    ⭐ Share Your Experience
-                  </h2>
+                      <h2>
+                        ⭐ Share Your Experience
+                      </h2>
 
-                  <p>
-                    Help fellow traders by sharing
-                    your VTKS learning journey.
-                  </p>
+                      <p>
+                        Help fellow traders by sharing
+                        your VTKS learning journey.
+                      </p>
 
-                </div>
+                    </div>
 
-              </div>
+                  </div>
 
-              <div className="subscriber-feedback-content">
+                  <div className="subscriber-feedback-content">
 
-                <div
-                  className="subscriber-feedback-stars"
-                  aria-label="Five-star feedback"
-                >
-                  ⭐⭐⭐⭐⭐
-                </div>
+                    <div
+                      className="subscriber-feedback-stars"
+                      aria-label="Five-star feedback"
+                    >
+                      ⭐⭐⭐⭐⭐
+                    </div>
 
-                <p className="subscriber-feedback-description">
-                  Your feedback helps improve VTKS
-                  and inspires other traders to learn
-                  with confidence.
-                </p>
+                    <p className="subscriber-feedback-description">
+                      Your feedback helps improve VTKS
+                      and inspires other traders to learn
+                      with confidence.
+                    </p>
 
-                <div className="subscriber-feedback-badge">
-                  ✔ Verified Members Only
-                </div>
+                    <div className="subscriber-feedback-badge">
+                      ✔ Verified Members Only
+                    </div>
 
-                <Link
-                  to="/subscriber/feedback"
-                  className="subscriber-feedback-button"
-                >
-                  Share Feedback →
-                </Link>
+                    <Link
+                      to="/subscriber/feedback"
+                      className="subscriber-feedback-button"
+                    >
+                      Share Feedback →
+                    </Link>
 
-              </div>
+                  </div>
 
-            </article>
+                </article>
+              </>
+            ) : (
+              <>
+                <LockedFeatureCard
+                  title="📢 Community Access"
+                  subtitle="Join VTKS subscriber groups and premium community channels."
+                  onUpgradeClick={() =>
+                    openUpgradeModal(
+                      "Community Access"
+                    )
+                  }
+                />
+
+                <LockedFeatureCard
+                  title="⭐ Member Feedback"
+                  subtitle="Premium member community features are available with higher plans."
+                  onUpgradeClick={() =>
+                    openUpgradeModal(
+                      "Member Feedback"
+                    )
+                  }
+                />
+              </>
+            )}
 
           </section>
 
         </>
+      )}
+
+      {upgradeModal.open && (
+        <div
+          role="presentation"
+          onClick={closeUpgradeModal}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background:
+              "rgba(15, 23, 42, 0.58)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "20px",
+            zIndex: 9999,
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="vtks-upgrade-title"
+            onClick={(event) =>
+              event.stopPropagation()
+            }
+            style={{
+              width: "100%",
+              maxWidth: "520px",
+              background: "#ffffff",
+              borderRadius: "24px",
+              padding: "30px",
+              boxShadow:
+                "0 24px 70px rgba(15,23,42,0.25)",
+              position: "relative",
+            }}
+          >
+            <button
+              type="button"
+              onClick={
+                closeUpgradeModal
+              }
+              aria-label="Close upgrade popup"
+              style={{
+                position: "absolute",
+                top: "16px",
+                right: "16px",
+                width: "38px",
+                height: "38px",
+                borderRadius: "50%",
+                border:
+                  "1px solid #dbe3ef",
+                background: "#ffffff",
+                cursor: "pointer",
+                fontSize: "20px",
+                lineHeight: 1,
+              }}
+            >
+              ×
+            </button>
+
+            <div
+              style={{
+                fontSize: "42px",
+                marginBottom: "12px",
+              }}
+            >
+              🔐
+            </div>
+
+            <h2
+              id="vtks-upgrade-title"
+              style={{
+                margin:
+                  "0 45px 10px 0",
+                fontSize: "26px",
+                color: "#0f172a",
+              }}
+            >
+              Upgrade Required
+            </h2>
+
+            <p
+              style={{
+                margin:
+                  "0 0 20px 0",
+                color: "#64748b",
+                lineHeight: 1.65,
+                fontSize: "16px",
+              }}
+            >
+              <strong
+                style={{
+                  color: "#0f172a",
+                }}
+              >
+                {upgradeModal.feature}
+              </strong>{" "}
+              is not included in the
+              Monthly plan.
+            </p>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns:
+                  "repeat(2, minmax(0, 1fr))",
+                gap: "12px",
+                marginBottom: "20px",
+              }}
+            >
+              <div
+                style={{
+                  border:
+                    "1px solid #dbe3ef",
+                  borderRadius: "16px",
+                  padding: "18px",
+                  background: "#f8fafc",
+                }}
+              >
+                <strong
+                  style={{
+                    display: "block",
+                    marginBottom: "6px",
+                    color: "#0f172a",
+                  }}
+                >
+                  Quarterly
+                </strong>
+
+                <span
+                  style={{
+                    color: "#64748b",
+                    fontSize: "14px",
+                    lineHeight: 1.5,
+                  }}
+                >
+                  Unlock premium VTKS
+                  subscriber features.
+                </span>
+              </div>
+
+              <div
+                style={{
+                  border:
+                    "1px solid #dbe3ef",
+                  borderRadius: "16px",
+                  padding: "18px",
+                  background: "#f8fafc",
+                }}
+              >
+                <strong
+                  style={{
+                    display: "block",
+                    marginBottom: "6px",
+                    color: "#0f172a",
+                  }}
+                >
+                  Annual
+                </strong>
+
+                <span
+                  style={{
+                    color: "#64748b",
+                    fontSize: "14px",
+                    lineHeight: 1.5,
+                  }}
+                >
+                  Full premium access
+                  for the annual period.
+                </span>
+              </div>
+            </div>
+
+            <div
+              style={{
+                background: "#eff6ff",
+                border:
+                  "1px solid #bfdbfe",
+                borderRadius: "14px",
+                padding: "14px 16px",
+                color: "#1e40af",
+                fontSize: "14px",
+                lineHeight: 1.55,
+                marginBottom: "20px",
+              }}
+            >
+              Upgrade to Quarterly or
+              Annual to unlock this
+              feature. Your current login
+              will remain active.
+            </div>
+
+            <button
+              type="button"
+              onClick={
+                closeUpgradeModal
+              }
+              style={{
+                width: "100%",
+                border: "none",
+                borderRadius: "14px",
+                padding: "14px 18px",
+                background: "#2563eb",
+                color: "#ffffff",
+                fontWeight: 800,
+                fontSize: "16px",
+                cursor: "pointer",
+              }}
+            >
+              Continue on Dashboard
+            </button>
+          </div>
+        </div>
       )}
 
       {/* =====================================================
@@ -2102,6 +2429,127 @@ function ValueItem({
       </strong>
 
     </div>
+  );
+}
+
+/* =========================================================
+   LOCKED PREMIUM FEATURE CARD
+========================================================= */
+
+function LockedFeatureCard({
+  title,
+  subtitle,
+  onUpgradeClick,
+}) {
+  return (
+    <article
+      className="subscriber-feature-card"
+      style={{
+        color: "inherit",
+        position: "relative",
+        overflow: "hidden",
+        minHeight: "260px",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background:
+            "linear-gradient(135deg, rgba(15,23,42,0.02), rgba(37,99,235,0.06))",
+          pointerEvents: "none",
+        }}
+      />
+
+      <div
+        className="subscriber-feature-header"
+        style={{
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        <div>
+          <h2>
+            {title}
+          </h2>
+
+          <p>
+            {subtitle}
+          </p>
+        </div>
+
+        <span
+          style={{
+            fontSize: "24px",
+          }}
+          aria-hidden="true"
+        >
+          🔒
+        </span>
+      </div>
+
+      <div
+        style={{
+          position: "relative",
+          zIndex: 1,
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          textAlign: "center",
+          gap: "10px",
+          padding: "28px 18px",
+        }}
+      >
+        <div
+          style={{
+            fontSize: "38px",
+            lineHeight: 1,
+          }}
+        >
+          🔐
+        </div>
+
+        <strong
+          style={{
+            fontSize: "18px",
+          }}
+        >
+          Premium Access
+        </strong>
+
+        <p
+          style={{
+            margin: 0,
+            maxWidth: "300px",
+            opacity: 0.72,
+            lineHeight: 1.55,
+          }}
+        >
+          Upgrade to Quarterly or Annual
+          to unlock this feature.
+        </p>
+
+        <button
+          type="button"
+          onClick={
+            onUpgradeClick
+          }
+          className="subscriber-small-link"
+          style={{
+            marginTop: "6px",
+            border: "none",
+            cursor: "pointer",
+            font: "inherit",
+          }}
+        >
+          Upgrade Plan →
+        </button>
+      </div>
+    </article>
   );
 }
 

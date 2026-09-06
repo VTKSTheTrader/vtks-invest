@@ -5,6 +5,11 @@ import {
   Navigate,
 } from "react-router-dom";
 
+import {
+  useEffect,
+  useState,
+} from "react";
+
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import SubscriberRoute from "./components/auth/SubscriberRoute";
 import RouteSEO from "./components/common/RouteSEO";
@@ -67,6 +72,112 @@ import SubscriberLibrary from "./pages/subscriber/Library";
 import SubscriberScanner from "./pages/subscriber/Scanner";
 import Feedback from "./pages/subscriber/Feedback";
 import SubscriberMonthlyLevels from "./pages/subscriber/MonthlyLevels";
+import SubscriberResourceViewer from "./pages/subscriber/ResourceViewer";
+
+import {
+  getSubscriberProfile,
+  getSubscriberMembership,
+} from "./services/subscriberService";
+
+/* =====================================================
+   PREMIUM SUBSCRIBER ROUTE
+   Monthly: blocked
+   Quarterly / Annual: allowed
+===================================================== */
+
+function PremiumSubscriberRoute({ children }) {
+  const [checkingPlan, setCheckingPlan] = useState(true);
+  const [hasPremiumAccess, setHasPremiumAccess] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    const checkPlanAccess = async () => {
+      try {
+        const profile = await getSubscriberProfile();
+
+        const membership = await getSubscriberMembership(
+          profile?.email
+        );
+
+        const plan = String(
+          membership?.plan || ""
+        )
+          .trim()
+          .toLowerCase();
+
+        const status = String(
+          membership?.status || ""
+        )
+          .trim()
+          .toLowerCase();
+
+        const expiryDate = membership?.expiry_date
+          ? new Date(membership.expiry_date)
+          : null;
+
+        if (expiryDate) {
+          expiryDate.setHours(23, 59, 59, 999);
+        }
+
+        const isActive =
+          Boolean(membership) &&
+          status !== "expired" &&
+          status !== "inactive" &&
+          (!expiryDate ||
+            expiryDate.getTime() >= Date.now());
+
+        const premiumPlan =
+          plan === "quarterly" ||
+          plan === "annual";
+
+        if (active) {
+          setHasPremiumAccess(
+            isActive && premiumPlan
+          );
+        }
+      } catch (error) {
+        console.error(
+          "Premium route access check failed:",
+          error
+        );
+
+        if (active) {
+          setHasPremiumAccess(false);
+        }
+      } finally {
+        if (active) {
+          setCheckingPlan(false);
+        }
+      }
+    };
+
+    checkPlanAccess();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  if (checkingPlan) {
+    return (
+      <div className="subscriber-dashboard-loading">
+        Checking subscription access...
+      </div>
+    );
+  }
+
+  if (!hasPremiumAccess) {
+    return (
+      <Navigate
+        to="/dashboard"
+        replace
+      />
+    );
+  }
+
+  return children;
+}
 
 function App() {
   return (
@@ -341,12 +452,23 @@ function App() {
             </SubscriberRoute>
           }
         />
-
+<Route
+  path="/dashboard/library/:id"
+  element={
+    <SubscriberRoute>
+      <PremiumSubscriberRoute>
+        <SubscriberResourceViewer />
+      </PremiumSubscriberRoute>
+    </SubscriberRoute>
+  }
+/>
         <Route
           path="/dashboard/library"
           element={
             <SubscriberRoute>
-              <SubscriberLibrary />
+              <PremiumSubscriberRoute>
+                <SubscriberLibrary />
+              </PremiumSubscriberRoute>
             </SubscriberRoute>
           }
         />
@@ -355,7 +477,9 @@ function App() {
           path="/dashboard/scanner"
           element={
             <SubscriberRoute>
-              <SubscriberScanner />
+              <PremiumSubscriberRoute>
+                <SubscriberScanner />
+              </PremiumSubscriberRoute>
             </SubscriberRoute>
           }
         />
@@ -378,7 +502,9 @@ function App() {
           path="/subscriber/feedback"
           element={
             <SubscriberRoute>
-              <Feedback />
+              <PremiumSubscriberRoute>
+                <Feedback />
+              </PremiumSubscriberRoute>
             </SubscriberRoute>
           }
         />
