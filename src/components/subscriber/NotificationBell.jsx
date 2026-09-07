@@ -337,6 +337,15 @@ export default function NotificationBell() {
   const wrapperRef =
     useRef(null);
 
+  const livePopupTimerRef =
+    useRef(null);
+
+  const notificationAudioRef =
+    useRef(null);
+
+  const audioUnlockedRef =
+    useRef(false);
+
   /*
     Keeps track of notifications
     already known by this browser.
@@ -398,6 +407,162 @@ export default function NotificationBell() {
     clearingAll,
     setClearingAll,
   ] = useState(false);
+
+  const [
+    livePopup,
+    setLivePopup,
+  ] = useState(null);
+
+  /* =====================================================
+     UNLOCK NOTIFICATION AUDIO
+
+     Chrome/Edge can block later audio unless the sound
+     has first been started from a real user interaction.
+
+     We initialise one persistent Audio object and briefly
+     start it at near-zero volume on the first click/tap/key.
+     This is more reliable than muted autoplay unlocking.
+  ===================================================== */
+
+  const unlockNotificationAudio =
+    async () => {
+      if (
+        typeof window === "undefined"
+      ) {
+        return false;
+      }
+
+      let audio =
+        notificationAudioRef.current;
+
+      if (!audio) {
+        audio =
+          new Audio(
+            "/notification.mp3"
+          );
+
+        audio.preload =
+          "auto";
+
+        notificationAudioRef.current =
+          audio;
+      }
+
+      if (
+        audioUnlockedRef.current
+      ) {
+        return true;
+      }
+
+      try {
+        audio.pause();
+
+        audio.currentTime =
+          0;
+
+        audio.muted =
+          false;
+
+        /*
+          Keep this technically audible but effectively
+          silent. Because it starts during a user gesture,
+          Chrome treats the audio element as unlocked.
+        */
+        audio.volume =
+          0.001;
+
+        await audio.play();
+
+        audio.pause();
+
+        audio.currentTime =
+          0;
+
+        audio.volume =
+          0.6;
+
+        audioUnlockedRef.current =
+          true;
+
+        console.log(
+          "VTKS notification sound: READY"
+        );
+
+        return true;
+      } catch (error) {
+        console.log(
+          "VTKS notification sound unlock waiting for user interaction:",
+          error
+        );
+
+        return false;
+      }
+    };
+
+  useEffect(() => {
+    if (
+      typeof window === "undefined"
+    ) {
+      return undefined;
+    }
+
+    if (
+      !notificationAudioRef.current
+    ) {
+      const audio =
+        new Audio(
+          "/notification.mp3"
+        );
+
+      audio.preload =
+        "auto";
+
+      audio.volume =
+        0.6;
+
+      notificationAudioRef.current =
+        audio;
+    }
+
+    const handleFirstInteraction =
+      () => {
+        unlockNotificationAudio();
+      };
+
+    window.addEventListener(
+      "pointerdown",
+      handleFirstInteraction,
+      {
+        passive: true,
+      }
+    );
+
+    window.addEventListener(
+      "keydown",
+      handleFirstInteraction
+    );
+
+    return () => {
+      window.removeEventListener(
+        "pointerdown",
+        handleFirstInteraction
+      );
+
+      window.removeEventListener(
+        "keydown",
+        handleFirstInteraction
+      );
+
+      if (
+        notificationAudioRef.current
+      ) {
+        notificationAudioRef.current.pause();
+
+        notificationAudioRef.current =
+          null;
+      }
+    };
+  }, []);
 
   /* =====================================================
      UNREAD COUNT
@@ -468,6 +633,8 @@ export default function NotificationBell() {
             .reverse()
             .forEach(
               (item) => {
+                showLivePopup(item);
+
                 showBrowserNotification(
                   item,
                   navigate
@@ -514,6 +681,68 @@ export default function NotificationBell() {
   useEffect(() => {
     loadNotifications();
   }, [navigate]);
+
+  /* =====================================================
+     SHOW IN-WEBSITE LIVE POPUP
+  ===================================================== */
+
+  const showLivePopup =
+    (notification) => {
+      if (!notification) {
+        return;
+      }
+
+      setLivePopup(notification);
+
+      try {
+        const audio =
+          notificationAudioRef.current;
+
+        if (audio) {
+          audio.currentTime =
+            0;
+
+          audio.volume =
+            0.6;
+
+          audio
+            .play()
+            .then(() => {
+              console.log(
+                "VTKS notification sound: PLAYED"
+              );
+            })
+            .catch(
+              (error) => {
+                console.log(
+                  "VTKS notification sound blocked:",
+                  error
+                );
+              }
+            );
+        }
+      } catch (error) {
+        console.log(
+          "VTKS notification sound error:",
+          error
+        );
+      }
+
+      if (livePopupTimerRef.current) {
+        window.clearTimeout(
+          livePopupTimerRef.current
+        );
+      }
+
+      livePopupTimerRef.current =
+        window.setTimeout(
+          () => {
+            setLivePopup(null);
+            livePopupTimerRef.current = null;
+          },
+          60000
+        );
+    };
 
   /* =====================================================
      REALTIME
@@ -862,6 +1091,8 @@ export default function NotificationBell() {
                     item
                   );
 
+                  showLivePopup(item);
+
                   showBrowserNotification(
                     item,
                     navigate
@@ -928,6 +1159,16 @@ export default function NotificationBell() {
       window.clearInterval(
         pollingTimer
       );
+
+      if (
+        livePopupTimerRef.current
+      ) {
+        window.clearTimeout(
+          livePopupTimerRef.current
+        );
+
+        livePopupTimerRef.current = null;
+      }
 
       if (
         channel
@@ -1220,6 +1461,13 @@ export default function NotificationBell() {
         className="subscriber-notification-bell"
         onClick={
           async () => {
+            /*
+              Bell click is an explicit user gesture,
+              so use it as an additional guaranteed
+              opportunity to unlock notification audio.
+            */
+            await unlockNotificationAudio();
+
             await requestBrowserNotificationPermission();
 
             setIsOpen(
@@ -1477,6 +1725,90 @@ export default function NotificationBell() {
 
           </div>
 
+        </div>
+      )}
+
+      {/* =================================================
+          LIVE IN-WEBSITE POPUP
+      ================================================= */}
+
+      {livePopup && (
+        <div
+          className="vtks-live-notification-popup"
+          role="status"
+          aria-live="polite"
+          onClick={() => {
+            const popup =
+              livePopup;
+
+            setLivePopup(
+              null
+            );
+
+            if (
+              livePopupTimerRef.current
+            ) {
+              window.clearTimeout(
+                livePopupTimerRef.current
+              );
+
+              livePopupTimerRef.current =
+                null;
+            }
+
+            handleNotificationClick(
+              popup
+            );
+          }}
+        >
+          <button
+            type="button"
+            className="vtks-live-notification-close"
+            aria-label="Close notification"
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+
+              setLivePopup(
+                null
+              );
+
+              if (
+                livePopupTimerRef.current
+              ) {
+                window.clearTimeout(
+                  livePopupTimerRef.current
+                );
+
+                livePopupTimerRef.current =
+                  null;
+              }
+            }}
+          >
+            ×
+          </button>
+
+          <div className="vtks-live-notification-icon">
+            {getNotificationIcon(
+              livePopup.notification_type
+            )}
+          </div>
+
+          <div className="vtks-live-notification-content">
+            <strong>
+              {livePopup.title}
+            </strong>
+
+            {livePopup.message && (
+              <p>
+                {livePopup.message}
+              </p>
+            )}
+
+            <small>
+              Just now
+            </small>
+          </div>
         </div>
       )}
 

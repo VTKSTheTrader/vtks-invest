@@ -538,7 +538,55 @@ const ETF = () => {
       if (editingETF) {
         await updateETF(editingETF.id, etfForm);
       } else {
-        await addETF(etfForm);
+        const createdETF = await addETF(etfForm);
+
+        /*
+          Notify subscribers only when a NEW ETF is
+          created as Published.
+
+          Draft ETFs do not generate an alert.
+          Editing an existing ETF does not generate
+          another alert.
+        */
+        if (
+          String(etfForm.publishStatus || "")
+            .trim()
+            .toLowerCase() === "published"
+        ) {
+          try {
+            const createdETFId =
+              createdETF?.id || null;
+
+            const etfName =
+              createdETF?.name ||
+              etfForm.name ||
+              etfForm.symbol ||
+              "VTKS ETF";
+
+            await createNotification({
+              title: `New ETF Added: ${etfName}`,
+              message:
+                "A new ETF has been added to the VTKS ETF Portfolio. Tap to view the details.",
+              notificationType: "etf",
+              link: createdETFId
+                ? `/etf/${createdETFId}`
+                : "/etf",
+              referenceId: createdETFId,
+              audience: "subscriber",
+              targetUserId: null,
+            });
+          } catch (notificationError) {
+            /*
+              ETF is already saved successfully.
+              Notification failure must not make
+              the ETF save appear to have failed.
+            */
+            console.error(
+              "ETF notification error:",
+              notificationError
+            );
+          }
+        }
       }
 
       setShowETFModal(false);

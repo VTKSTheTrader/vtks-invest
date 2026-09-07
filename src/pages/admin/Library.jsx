@@ -20,6 +20,7 @@ import {
   mapResourceFromDB,
 } from "../../services/libraryService";
 
+
 import "./Library.css";
 
 const ITEMS_PER_PAGE = 5;
@@ -262,6 +263,7 @@ export default function Library() {
       ]);
 
       setCurrentPage(1);
+
     } catch (error) {
       console.error(
         "Library save error:",

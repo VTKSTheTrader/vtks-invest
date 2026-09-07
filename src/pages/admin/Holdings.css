@@ -1227,3 +1227,166 @@
     padding-inline: 4px;
   }
 }
+/* =========================================================
+   HOLDINGS TABLE FINAL COMPACT FIX
+========================================================= */
+
+.holdings-table-shell {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.holdings-table-shell > * {
+  min-width: 1500px;
+}
+
+.holdings-table-shell table {
+  width: 100%;
+  min-width: 1500px;
+  table-layout: auto;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.holdings-table-shell th,
+.holdings-table-shell td {
+  white-space: nowrap;
+  vertical-align: middle;
+  box-sizing: border-box;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+/* Reduce excessive spacing on common numeric columns */
+.holdings-table-shell th:nth-child(2),
+.holdings-table-shell td:nth-child(2),
+.holdings-table-shell th:nth-child(3),
+.holdings-table-shell td:nth-child(3),
+.holdings-table-shell th:nth-child(5),
+.holdings-table-shell td:nth-child(5),
+.holdings-table-shell th:nth-child(6),
+.holdings-table-shell td:nth-child(6),
+.holdings-table-shell th:nth-child(7),
+.holdings-table-shell td:nth-child(7) {
+  width: 85px;
+  min-width: 85px;
+}
+
+/* CMP / ROI */
+.holdings-table-shell th:nth-child(4),
+.holdings-table-shell td:nth-child(4) {
+  width: 150px;
+  min-width: 150px;
+}
+
+/* Trade Status */
+.holdings-table-shell th:nth-last-child(4),
+.holdings-table-shell td:nth-last-child(4) {
+  width: 150px;
+  min-width: 150px;
+}
+
+/* Visibility */
+.holdings-table-shell th:nth-last-child(3),
+.holdings-table-shell td:nth-last-child(3) {
+  width: 135px;
+  min-width: 135px;
+}
+
+/* Accuracy */
+.holdings-table-shell th:nth-last-child(2),
+.holdings-table-shell td:nth-last-child(2) {
+  width: 150px;
+  min-width: 150px;
+  max-width: 150px;
+  overflow: visible;
+}
+
+.holdings-table-shell td:nth-last-child(2) > div {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 4px !important;
+  min-width: 120px;
+  width: max-content;
+  overflow: visible;
+}
+
+.holdings-table-shell td:nth-last-child(2) span {
+  display: block;
+  white-space: nowrap;
+  overflow: visible;
+}
+
+/* Action */
+.holdings-table-shell th:last-child,
+.holdings-table-shell td:last-child {
+  width: 125px;
+  min-width: 125px;
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+.holdings-table-shell td:last-child > div {
+  min-width: 90px;
+  width: max-content;
+}
+
+/* Header text */
+.holdings-table-shell thead th {
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: unset;
+}
+
+/* Slightly tighter row spacing */
+.holdings-table-shell tbody td {
+  padding-top: 14px;
+  padding-bottom: 14px;
+}s.holdings-table-shell > * {
+  min-width: 1460px;
+}
+
+.holdings-table-shell table {
+  width: 100%;
+  min-width: 1460px;
+}
+
+/* CMP / ROI */
+.holdings-table-shell th:nth-child(4),
+.holdings-table-shell td:nth-child(4) {
+  width: 140px;
+  min-width: 140px;
+}
+
+/* Trade Status */
+.holdings-table-shell th:nth-last-child(4),
+.holdings-table-shell td:nth-last-child(4) {
+  width: 140px;
+  min-width: 140px;
+}
+
+/* Visibility */
+.holdings-table-shell th:nth-last-child(3),
+.holdings-table-shell td:nth-last-child(3) {
+  width: 125px;
+  min-width: 125px;
+}
+
+/* Accuracy */
+.holdings-table-shell th:nth-last-child(2),
+.holdings-table-shell td:nth-last-child(2) {
+  width: 165px;
+  min-width: 165px;
+  max-width: 165px;
+  overflow: visible;
+}
+
+/* Action */
+.holdings-table-shell th:last-child,
+.holdings-table-shell td:last-child {
+  width: 115px;
+  min-width: 115px;
+}

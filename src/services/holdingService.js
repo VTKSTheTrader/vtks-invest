@@ -192,19 +192,21 @@ export const buildHoldingPayload = (
   cmp: Number(
     form.cmp || 0
   ),
-highest_price: nullableNumber(
-  form.highestPrice ??
-    form.highest_price ??
-    form.cmp ??
-    form.entry
-),
 
-lowest_price: nullableNumber(
-  form.lowestPrice ??
-    form.lowest_price ??
-    form.cmp ??
-    form.entry
-),
+  highest_price: nullableNumber(
+    form.highestPrice ??
+      form.highest_price ??
+      form.cmp ??
+      form.entry
+  ),
+
+  lowest_price: nullableNumber(
+    form.lowestPrice ??
+      form.lowest_price ??
+      form.cmp ??
+      form.entry
+  ),
+
   stop_loss: Number(
     form.stopLoss || 0
   ),
@@ -406,13 +408,9 @@ const prepareHoldingFiles = async (
    ADD HOLDING
 ========================================================= */
 
-export const addHolding = async (
-  holding
-) => {
+export const addHolding = async (holding) => {
   const preparedFiles =
-    await prepareHoldingFiles(
-      holding
-    );
+    await prepareHoldingFiles(holding);
 
   const payload =
     buildHoldingPayload({
@@ -435,6 +433,21 @@ export const addHolding = async (
 
     throw error;
   }
+
+  /*
+    IMPORTANT:
+
+    Do NOT create a subscriber notification here.
+
+    Holdings.jsx already creates the Market Study
+    notification after a new published holding is saved.
+
+    Creating another notification here caused:
+    2 database rows
+    2 bell entries
+    2 popups
+    2 notification events.
+  */
 
   return data;
 };
@@ -518,12 +531,20 @@ export const deleteHolding = async (
 
   return true;
 };
+
+/* =========================================================
+   REMOVE HOLDING RESEARCH PDF
+========================================================= */
+
 export async function removeHoldingResearchPdf({
   holdingId,
   pdfUrl,
 }) {
   if (pdfUrl) {
-    const filePath = pdfUrl.split("/library-files/")[1];
+    const filePath =
+      pdfUrl.split(
+        "/library-files/"
+      )[1];
 
     if (filePath) {
       await supabase.storage
@@ -532,27 +553,35 @@ export async function removeHoldingResearchPdf({
     }
   }
 
-  const { error } = await supabase
-    .from("holdings")
-    .update({
-      research_pdf_url: null,
-    })
-    .eq("id", holdingId);
+  const { error } =
+    await supabase
+      .from("holdings")
+      .update({
+        research_pdf_url: null,
+      })
+      .eq("id", holdingId);
 
   if (error) throw error;
 }
+
 /* =========================================================
    REMOVE HOLDING CHART
 ========================================================= */
 
-const getStoragePathFromPublicUrl = (publicUrl) => {
+const getStoragePathFromPublicUrl = (
+  publicUrl
+) => {
   if (!publicUrl) return "";
 
   try {
-    const url = new URL(publicUrl);
+    const url =
+      new URL(publicUrl);
 
-    const marker = `/storage/v1/object/public/${BUCKET}/`;
-    const markerIndex = url.pathname.indexOf(marker);
+    const marker =
+      `/storage/v1/object/public/${BUCKET}/`;
+
+    const markerIndex =
+      url.pathname.indexOf(marker);
 
     if (markerIndex === -1) {
       return "";
@@ -560,7 +589,8 @@ const getStoragePathFromPublicUrl = (publicUrl) => {
 
     return decodeURIComponent(
       url.pathname.slice(
-        markerIndex + marker.length
+        markerIndex +
+          marker.length
       )
     );
   } catch {
@@ -594,7 +624,10 @@ export const removeHoldingChart = async ({
           before_chart_url: null,
           before_chart_caption: null,
 
-          // Important: remove legacy fallback too.
+          /*
+            Important:
+            remove legacy fallback too.
+          */
           chart_image_url: null,
 
           updated_at:
@@ -612,12 +645,13 @@ export const removeHoldingChart = async ({
     First clear the database so the wrong image
     immediately disappears from the live website.
   */
-  const { data, error } = await supabase
-    .from("holdings")
-    .update(payload)
-    .eq("id", holdingId)
-    .select("*")
-    .single();
+  const { data, error } =
+    await supabase
+      .from("holdings")
+      .update(payload)
+      .eq("id", holdingId)
+      .select("*")
+      .single();
 
   if (error) {
     console.error(
@@ -638,10 +672,14 @@ export const removeHoldingChart = async ({
     hidden from the website.
   */
   const storagePath =
-    getStoragePathFromPublicUrl(chartUrl);
+    getStoragePathFromPublicUrl(
+      chartUrl
+    );
 
   if (storagePath) {
-    const { error: storageError } =
+    const {
+      error: storageError,
+    } =
       await supabase.storage
         .from(BUCKET)
         .remove([storagePath]);
@@ -656,6 +694,7 @@ export const removeHoldingChart = async ({
 
   return data;
 };
+
 /* =========================================================
    FETCH CMP FOR SELECTED INSTRUMENT
 ========================================================= */
@@ -730,7 +769,9 @@ export const fetchSelectedInstrumentCMP =
 
     if (
       data?.success !== true ||
-      !Number.isFinite(liveCMP) ||
+      !Number.isFinite(
+        liveCMP
+      ) ||
       liveCMP <= 0
     ) {
       console.error(
@@ -805,7 +846,9 @@ export const refreshCMP = async () => {
       );
     }
 
-    if (data.success !== true) {
+    if (
+      data.success !== true
+    ) {
       console.error(
         "CMP refresh unsuccessful response:",
         data
@@ -921,21 +964,22 @@ export const mapHoldingFromDB = (
     cmp: Number(
       holding.cmp || 0
     ),
-    highestPrice: Number(
-  holding.highest_price ??
-    holding.highestPrice ??
-    holding.cmp ??
-    holding.entry ??
-    0
-),
 
-lowestPrice: Number(
-  holding.lowest_price ??
-    holding.lowestPrice ??
-    holding.cmp ??
-    holding.entry ??
-    0
-),
+    highestPrice: Number(
+      holding.highest_price ??
+        holding.highestPrice ??
+        holding.cmp ??
+        holding.entry ??
+        0
+    ),
+
+    lowestPrice: Number(
+      holding.lowest_price ??
+        holding.lowestPrice ??
+        holding.cmp ??
+        holding.entry ??
+        0
+    ),
 
     stopLoss: Number(
       holding.stop_loss ??
@@ -1099,7 +1143,8 @@ lowestPrice: Number(
           ),
 
     exchange:
-      holding.exchange || "NSE",
+      holding.exchange ||
+      "NSE",
 
     segment:
       holding.segment ||
