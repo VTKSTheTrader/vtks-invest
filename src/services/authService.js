@@ -238,17 +238,23 @@ export async function loginUser(
    LOGOUT
 ========================================================= */
 
+/* =========================================================
+   LOGOUT
+========================================================= */
+
 export async function logoutUser() {
   const { error } =
-    await supabase.auth.signOut();
+    await supabase.auth.signOut({
+      scope: "local",
+    });
 
   if (error) {
     throw error;
   }
 
   /*
-   * Clear old VTKS browser state.
-   * Supabase session itself is handled by signOut().
+   * Clear VTKS browser state.
+   * Only this device/browser session is logged out.
    */
   localStorage.removeItem(
     "vtks_user_role"

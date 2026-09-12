@@ -16,11 +16,13 @@ import { supabase } from "../../lib/supabase";
 import "./ETF.css";
 
 const ETF_TYPES = [
-  "Commodity",
+  
+ "Commodity",
   "BEES",
   "Index ETF",
   "Sector ETF",
   "Stock SIP",
+  
 ];
 
 const ETF_STATUSES = [
