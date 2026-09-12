@@ -43,6 +43,109 @@ import "./Dashboard.css";
 const PORTFOLIO_ITEMS_PER_PAGE = 5;
 const DASHBOARD_PREVIEW_ITEMS = 3;
 
+/* =========================================================
+   WATERMARK
+========================================================= */
+
+const maskSubscriberEmail = (email = "") => {
+  const value = String(email || "").trim();
+
+  if (!value.includes("@")) {
+    return "VTKS MEMBER";
+  }
+
+  const [name, domain] = value.split("@");
+  const visibleName = name.slice(0, Math.min(3, name.length));
+
+  return `${visibleName}***@${domain}`;
+};
+
+function SubscriberWatermark({ email }) {
+  const maskedEmail = maskSubscriberEmail(email);
+
+  const watermarkStyle = {
+    position: "absolute",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    whiteSpace: "nowrap",
+    textAlign: "center",
+    color: "rgba(51, 65, 85, 0.11)",
+    textTransform: "uppercase",
+  };
+
+  return (
+    <div
+      aria-hidden="true"
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 50,
+        pointerEvents: "none",
+        userSelect: "none",
+        overflow: "hidden",
+      }}
+    >
+      <div
+        style={{
+          ...watermarkStyle,
+          top: "14%",
+        }}
+      >
+        <div
+          style={{
+            fontSize: "clamp(26px, 3vw, 44px)",
+            fontWeight: 900,
+            letterSpacing: "4px",
+            lineHeight: 1.1,
+          }}
+        >
+          VTKS INVEST
+        </div>
+
+        <div
+          style={{
+            marginTop: "8px",
+            fontSize: "clamp(11px, 1.2vw, 15px)",
+            fontWeight: 700,
+            letterSpacing: "1.5px",
+          }}
+        >
+          {maskedEmail}
+        </div>
+      </div>
+
+      <div
+        style={{
+          ...watermarkStyle,
+          top: "68%",
+        }}
+      >
+        <div
+          style={{
+            fontSize: "clamp(26px, 3vw, 44px)",
+            fontWeight: 900,
+            letterSpacing: "4px",
+            lineHeight: 1.1,
+          }}
+        >
+          VTKS INVEST
+        </div>
+
+        <div
+          style={{
+            marginTop: "8px",
+            fontSize: "clamp(11px, 1.2vw, 15px)",
+            fontWeight: 700,
+            letterSpacing: "1.5px",
+          }}
+        >
+          {maskedEmail}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const normalize = (value) =>
   String(value || "")
     .trim()
@@ -1350,6 +1453,8 @@ export default function Dashboard() {
 
   return (
     <main className="subscriber-dashboard-page">
+
+      <SubscriberWatermark email={profile?.email} />
 
       {/* =====================================================
           HERO

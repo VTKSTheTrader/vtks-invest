@@ -1,0 +1,42 @@
+.vtks-watermark-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+
+  pointer-events: none;
+  user-select: none;
+
+  overflow: hidden;
+
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: 190px;
+
+  align-items: center;
+  justify-items: center;
+
+  opacity: 0.06;
+}
+
+.vtks-watermark-text {
+  color: currentColor;
+
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.7px;
+
+  white-space: nowrap;
+
+  transform: rotate(-25deg);
+}
+
+@media (max-width: 768px) {
+  .vtks-watermark-layer {
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: 160px;
+  }
+
+  .vtks-watermark-text {
+    font-size: 12px;
+  }
+}

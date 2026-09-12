@@ -823,6 +823,30 @@ export default function TradeDetails() {
       ? "/dashboard"
       : "/funds";
 
+
+  /* =========================================================
+     SUBSCRIBER WATERMARK
+  ========================================================= */
+
+  const maskEmail = (email = "") => {
+    if (!email || !email.includes("@")) {
+      return "VTKS MEMBER";
+    }
+
+    const [name, domain] = email.split("@");
+
+    const visibleName =
+      name.length <= 3
+        ? name.slice(0, 1)
+        : name.slice(0, 3);
+
+    return `${visibleName}***@${domain}`;
+  };
+
+  const watermarkEmail = maskEmail(
+    localStorage.getItem("vtks_user_email") || ""
+  );
+
   /* =========================================================
      TARGET ACHIEVEMENTS
   ========================================================= */
@@ -1059,6 +1083,98 @@ export default function TradeDetails() {
 
   return (
     <main className="trade-details-page">
+
+      {isSubscriberView && (
+        <div
+          aria-hidden="true"
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 50,
+            pointerEvents: "none",
+            userSelect: "none",
+            overflow: "hidden",
+          }}
+        >
+          {/* TOP WATERMARK */}
+          <div
+            style={{
+              position: "absolute",
+              top: "11%",
+              left: "50%",
+              transform: "translateX(-50%)",
+              textAlign: "center",
+              whiteSpace: "nowrap",
+            }}
+          >
+            <div
+              style={{
+                fontSize: "48px",
+                fontWeight: 900,
+                letterSpacing: "3px",
+                color: "#475569",
+                opacity: 0.18,
+                lineHeight: 1,
+              }}
+            >
+              VTKS INVEST
+            </div>
+
+            <div
+              style={{
+                marginTop: "8px",
+                fontSize: "17px",
+                fontWeight: 800,
+                letterSpacing: "1.5px",
+                textTransform: "uppercase",
+                color: "#475569",
+                opacity: 0.20,
+              }}
+            >
+              {watermarkEmail}
+            </div>
+          </div>
+
+          {/* MIDDLE WATERMARK */}
+          <div
+            style={{
+              position: "absolute",
+              top: "62%",
+              left: "50%",
+              transform: "translateX(-50%)",
+              textAlign: "center",
+              whiteSpace: "nowrap",
+            }}
+          >
+            <div
+              style={{
+                fontSize: "48px",
+                fontWeight: 900,
+                letterSpacing: "3px",
+                color: "#475569",
+                opacity: 0.18,
+                lineHeight: 1,
+              }}
+            >
+              VTKS INVEST
+            </div>
+
+            <div
+              style={{
+                marginTop: "8px",
+                fontSize: "17px",
+                fontWeight: 800,
+                letterSpacing: "1.5px",
+                textTransform: "uppercase",
+                color: "#475569",
+                opacity: 0.20,
+              }}
+            >
+              {watermarkEmail}
+            </div>
+          </div>
+        </div>
+      )}
       <div className="trade-details-container">
 
         {/* BACK */}
